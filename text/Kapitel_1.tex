@@ -1,0 +1,37 @@
+%---------------------------------------------------------------
+% Kapitel 1
+%---------------------------------------------------------------
+
+\chapter{Einleitung} \label{sec:einleitung}
+
+\textcolor{red}{TODO} Kurze Einleitung dazu, was in dem Kapitel beschrieben wird.
+
+\section{Motivation} \label{sec:motivation}
+Im Kontext des Klimawandels, insbesondere im Industriesektor, erfährt der $CO_2$ Fußabdruck eine zunehmend zentralere Bedeutung. In diesem Kontext ist die Zementindustrie derzeit für rund 7 \% der globalen $CO_2$ Emissionen verantwortlich \cite{iea.2018}. Angesichts der Tatsache, dass die globale Nachfrage nach Zement weiterhin wächst, besteht ein großes Interesse an einer Reduktion der Emissionen in diesem Sektor. Wie in Abbildung \ref{fig:thg_zement_industrie} am Beispiel von Deutschland dargestellt, können die Emissionen in der Zementindustrie in prozessbedingt und energiebedingt unterteilt werden. Ein signifikanter Anteil der prozessbedingten Emissionen ist auf die Freisetzung des $CO_2$ zurückzuführen, welches im Hauptbestandteil Kalkstein gebunden ist und während des Kalzinierungsprozesses freigesetzt wird. Eine Optimierung kann hier durch die Substitution des Kalksteins und des Klinkeranteils, beispielsweise durch das Beimischen von Recyclingmaterial, erzielt werden. Neben der Menge an $CO_2$, die durch den Kalzinierungsprozess für die Klinkerproduktion und durch die Wärmeerzeugung im Drehrohrofen emittiert wird, wird eine erhebliche Menge an elektrischer Energie benötigt, die dem energiebedingten Anteil zugeordnet wird \cite{sousa.2021}. Dabei werden etwa 60 \% der elektrischen Energie für die Rohmaterialaufbereitung und die Klinkervermahlung benötigt \cite{afkhami.2015}. So übersteigt die Leistung einer großen Vertikalrollenmühle 10 Megawatt. Dies verdeutlicht das große Optimierungspotenzial innerhalb des Mahlprozesses.
+%
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../graphics/KEI-THG_Emissionen_Zementindustrie.png}
+    \caption{Treibhausgase (THG) der deutschen Industrie 2022. Grafik entnommen aus \cite{klimaschutz-industrie.2026}}
+    \label{fig:thg_zement_industrie}
+\end{figure}
+%
+Ein vielversprechendes Optimierungspotenzial bietet die Betriebspunktoptimierung. Dabei ist das Ziel die Parameter des Mahlbetriebs so zu wählen, dass die Vermahlung mit reduziertem Energieverbrauch erfolgt, ohne jedoch den Durchsatz oder die Qualität des Produkts zu beeinflussen. Konkret geht es dabei um die Verbesserung der spezifischen Energie, also der Energie pro Tonne Material. Diese Art der Optimierung gelingt mithilfe eines Modells, welches die Grundlage der Arbeit bildet und dessen Entwicklung einen essenziellen Teil der Untersuchung darstellt. 
+Zur Bewertung des Modells kann der Modellfehler herangezogen werden, der die Differenz von Modellsimulation und Realwert beschreibt. Bei der Betrachtung des Modellfehlers der spezifischen Energie wie dargestellt in Abbildung \ref{fig:modellfehler} fällt auf, dass die Performance des Modells im zeitlichen Verlauf variiert. Dieses Phänomen lässt sich durch \ac{CD} erklären und ist Motivation der Arbeit.
+%
+\begin{figure}[hbt!]
+    \centering
+    \includegraphics[width=1.0\linewidth]{../graphics/Modellfehler.png}
+    \caption{Scatterplot des absoluten Modellfehlers der spezifischen Energie über zwei Jahre}
+    \label{fig:modellfehler}
+\end{figure}
+%
+\section{Zielsetzung} \label{sec:zielsetzung}
+
+Motiviert durch die Problemstellung aus soll die Dissertation durch die folgenden Forschungsleitfragen strukturiert werden:
+
+\begin{enumerate}
+    \item Wie kann eine effektive Adaption gegen Concept Drift entwickelt und in industriellen Mahlanlagen implementiert werden, um die Genauigkeit von Prognose- und Klassifikationsmodellen trotz sich verändernder Datenbedingungen langfristig zu gewährleisten? Welche spezifischen Methoden und Techniken sind dabei geeignet, um robuste maschinelle Lernmodelle in diesem Anwendungsbereich zu schaffen?
+    \item Wie kann der entwickelte Ansatz zur Bekämpfung von Concept Drift so generalisiert werden, dass er auf eine breite Palette industrieller Anwendungen anwendbar ist, während gleichzeitig die spezifischen Anforderungen und Herausforderungen von Mahlanlagen berücksichtigt werden? Welche Schritte und Validierungsmethoden sind erforderlich, um die Verallgemeinerbarkeit des Ansatzes systematisch anhand dieses Beispiels zu überprüfen?
+    \item Welche messbaren Vorteile und Verbesserungen lassen sich durch die Implementierung eines adaptiven Ansatzes gegen Concept Drift in industriellen Mahlanlagen nachweisen, und wie können diese Ergebnisse genutzt werden, um Empfehlungen für die Optimierung vergleichbarer industrieller Prozesse abzuleiten?
+\end{enumerate}

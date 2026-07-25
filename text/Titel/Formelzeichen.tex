@@ -1,0 +1,68 @@
+%---------------------------------------------------------------
+% Formelverzeichnis mit Definition der Abkürzungen
+%---------------------------------------------------------------
+\header{Formelzeichen}
+
+% Ein paar Vereinfachungen für Abkürzungen und so weiter
+\newcommand{\zB}{z.\,B.} % sieht mit kleinem Abstand einfach besser aus
+\newcommand{\uA}{u.\,A.} % Anwendung dann mit \zB\ etc.
+\newcommand{\uU}{u.\,U.}
+\newcommand{\dH}{d.\,h.} % \dh gibts leider schon, deshalb \dH
+
+% Eigennamen als SmallCaps
+\newcommand{\Matlab}{\textsc{Matlab}}
+\newcommand{\Jacobi}{\textsc{Jacobi}}
+\newcommand{\Kalman}{\textsc{Kalman}}
+\newcommand{\Riccati}{\textsc{Riccati}}
+\newcommand{\Pearl}{\textsc{Pearl}}
+
+\newcommand{\abb}[1]{Abb.~\ref{fig:#1}}
+\newcommand{\tab}[1]{Tab.~\ref{tab:#1}}
+\newcommand{\gl}[1]{Gl.~(\ref{eq:#1})}
+\newcommand{\vgl}[1]{vgl. Abschnitt \ref{sec:#1}}
+
+% Anmerkungen am Seitenrand während des Schreibens (für fehlende Literatur etc.)
+\newcommand{\anmerkung}[1]{\marginpar{\framebox[14mm][c]{\tiny #1}}}
+\newcommand{\suchen}{\anmerkung{Lit. suchen!}}
+\newcommand{\kommentar}[1]{\texttt{[#1]}}
+
+% Häufige benötigte Formelelemente
+\newcommand{\inv}{^{-1}}
+\newcommand{\Matrix}[2]{\left[\!\!\begin{array}{#1} #2 \end{array}\!\!\right]}
+\newcommand{\Vektor}[1]{\Matrix{c}{#1}}
+
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\ul}{\underline}
+\newcommand{\mgl}{$\,=\,$}
+\newcommand{\mapp}{$\,$\approx$\,$}
+\newcommand{\einh}[1]{\,\mathrm{#1}}
+\newcommand{\komma}{,\!}
+
+\newcommand\declare[2]{
+ \begin{tabular}{p{15mm}l}
+  $#1$ & #2\\
+ \end{tabular}
+}
+\newcommand\define[3]{
+ \newcommand{#1}{#2}
+ \declare{#2}{#3}
+}
+\newcommand\redefine[3]{
+ \renewcommand{#1}{#2}
+ \declare{#2}{#3}
+}
+
+\textit{Selten benutzte Formelzeichen und Begriffe sowie abweichende
+Bedeutungen werden ausschließlich in Text erläutert.}
+
+\subsection*{Lateinische Notation}
+ \define   {\D}   {D}              {Dämpfungsgrad}\\
+ \define   {\M}   {\ul{\bs{M}}}    {Massenmatrix}\\
+ \define   {\q}   {\bs{q}}         {generalisierte Auslenkung}\\
+ \redefine {\dq}  {\bs{\dot q}}    {generalisierte Geschwindigkeit}\\
+ \define   {\ddq} {\bs{\ddot q}}   {generalisierte Beschleunigung}\\
+ \define   {\Q}   {\bs{Q}}
+
+\subsection*{Griechische Notation}
+ \declare   {\alpha}   {Ein Winkel} \\
+ \declare   {\Phi}     {Was Anderes}

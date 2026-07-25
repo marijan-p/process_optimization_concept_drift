@@ -1,0 +1,90 @@
+% Benötigt in der Präambel: \usepackage{longtable}  \usepackage{array}
+% Einbindung im Frontmatter z. B. per \input{Symbolverzeichnis}
+% Bei article-Klasse \chapter* durch \section* ersetzen.
+% Untergrößen (Sub-/Superskripte) stehen als Inline-Kommentar hinter der jeweiligen Zeile.
+
+\chapter*{Symbolverzeichnis}
+\addcontentsline{toc}{chapter}{Symbolverzeichnis}
+
+\renewcommand{\arraystretch}{1.3}
+
+\noindent\textit{Lateinische Buchstaben}
+\begin{longtable}{@{}p{0.20\textwidth}p{0.74\textwidth}@{}}
+    $c[k]$        & Driftsignal \\                                       % Setpoint-Variante $c_w[k]$; Niveaus $c_{\min}, c_{\max}, c_i^{\pm}$
+    $\bar{d}$     & mittlerer Detektionsverzug \\
+    $\mathcal{D}$ & Datensatz bzw.\ Datenfenster \\
+    $e$           & Simulationsfehler (Residuum) \\                      % Mittelwert $\bar{e}$ als Bias
+    $f$           & Dynamikteil: Zustandsübergang bzw.\ LTI-Impulsantwort \\
+    $g$           & Ausgangsabbildung des Modells \\                     % Wiener-Kennlinie; identifiziert als $\hat{g}$
+    $h$           & Beobachtungsmodell des KF/EKF \\
+    $J$           & Zielfunktion der Hyperparameter-Optimierung \\       % $J_d$ Detektion, $J_{\mathrm{a}}$ Adaption
+    $K$           & Zeithorizont des Datenstroms \\
+    $K_p$         & statische Verstärkung des $\mathrm{PT}_1$-Gliedes \\
+    $m$           & harmonisches Mittel der Fensterlängen \\
+    $p(\cdot)$    & Wahrscheinlichkeitsdichte \\                         % Rauschdichte $p(\eta)$
+    $T$           & Zeitkonstante des $\mathrm{PT}_1$-Gliedes \\         % Abtastzeit $T_s$, Adaptionsintervall $T_{\mathrm{a}}$
+    $u$           & Systemeingang \\                                     % Kanäle $u_i$
+    $v$           & Zwischensignal des Wiener-Modells \\
+    $w$           & Setpoint-Zeitreihe \\                                % Stellgrößen $w_i$
+    $W$           & ADWIN-Datenfenster \\                                % Teilfenster $W_0, W_1$
+    $x$           & Systemzustand \\
+    $y$           & Systemausgang \\                                     % Modellprädiktion $\hat{y}$
+\end{longtable}
+
+\noindent\textit{Griechische Buchstaben}
+\begin{longtable}{@{}p{0.20\textwidth}p{0.74\textwidth}@{}}
+    $\alpha_i$                                 & Gewichtungskoeffizienten des Wiener-Modells \\
+    $\gamma_{\tau}$                            & Verschiebungsanteil der Segmentgrenzen \\
+    $\delta,\ \delta'$                         & globales bzw.\ angepasstes Signifikanzniveau \\
+    $\eta_u,\ \eta_y$                          & injiziertes Rauschen am Ein- bzw.\ Ausgang \\
+    $\zeta_{\mathrm{p}},\ \zeta_{\mathrm{m}}$  & Prozess- bzw.\ Messrauschen des KF/EKF \\
+    $\theta$                                   & Modellparameter \\                       % Initialisierung $\theta_0$
+    $\kappa,\ \kappa_w$                        & Driftkoeffizient am Ausgang bzw.\ Setpoint \\
+    $\lambda$                                  & Schwellenwert \\                         % $\lambda_{\mathrm{bin}}$ Binarisierung, $\lambda_{\mathrm{ret}}$ Nachtraining, $\lambda$ KSWIN
+    $\hat{\mu}_W$                              & empirischer Fenstermittelwert (ADWIN) \\
+    $\nu_j$                                    & normiertes Gewicht der Rauschkomponente \\
+    $\rho$                                     & Recall der Sudden Drifts \\
+    $\sigma$                                   & Standardabweichung (Streuung) \\         % $\sigma_j$ der $j$-ten Rauschkomponente
+    $\tau_i$                                   & innere Segmentgrenzen \\
+    $\varphi$                                  & Regressionsvektor des KF/EKF \\
+    $\omega_{\ast}$                            & Gewichte der Zielfunktion \\
+\end{longtable}
+
+\noindent\textit{Indizes und Zählgrößen}
+\begin{longtable}{@{}p{0.20\textwidth}p{0.74\textwidth}@{}}
+    $n_{\ast}$ & Dimension, Ordnung oder Länge
+    %: $n_x, n_y, n_u$ (Signaldimensionen), $n_\theta$ (Parameterdimension), $n_a, n_b$ (Modellordnung), $n, n_0, n_1$ (ADWIN-Fenster), $n_{\mathrm{w}}$ (Adaptionsfenster), $n_{\mathrm{tol}}$ (Toleranzfenster), $n_{-}, n_{+}$ (Nachtrainingsfenster)
+    \\
+    $N_{\ast}$ & Anzahl
+    %: $N$ (Stichproben), $N_{\mathrm{in}}$ (Eingangskanäle), $N_{\mathrm{q}}$ (Rauschquellen), $N_c$ (Änderungsindizes), $N_{\mathrm{seg}}$ (Segmente), $N_{\mathrm{sd}}$ (Sudden Drifts), $N_{\mathrm{fa}}$ (Fehlalarme), $N_{\mathrm{train}}$ (Nachtrainings), $N_{\mathrm{chunk}}$ (Chunks) 
+    \\
+    weitere    & $k$ (Zeitschritt), $i, j$ (Laufindizes), $_d$ (Detektion), $_w$ (Setpoint), $_{\mathrm{p}}/_{\mathrm{m}}$ (Prozess/Messung), $_s$ (Abtastung), $_{\mathrm{a}}$ (Adaption), $_{\min}/_{\max}$ (Extrema) \\
+\end{longtable}
+
+\noindent\textit{Operatoren, Akzente und Superskripte}
+\begin{longtable}{@{}p{0.20\textwidth}p{0.74\textwidth}@{}}
+    $\hat{(\cdot)}$         & Schätzwert bzw.\ identifiziertes Modell \\
+    $\bar{(\cdot)}$         & zeitlicher Mittelwert \\
+    $\tilde{(\cdot)}$       & drift-behaftete Größe \\
+    $(\cdot)^o$            & rauschfreie Größe \\
+    $(\cdot)^{\mathrm{f}}$ & gefilterte (geglättete) Größe \\
+    $(\cdot)^{T}$          & Transponierte \\
+    $|\cdot|$              & Betrag \\
+\end{longtable}
+
+% Detektor- und filterinterne Größen (bei Bedarf einkommentieren)
+% \noindent\textit{Detektor- und filterinterne Größen}
+% \begin{longtable}{@{}p{0.20\textwidth}p{0.74\textwidth}@{}}
+%     $\varepsilon_{\mathrm{cut}}$   & Hoeffding-Schranke (ADWIN) \\
+%     $p_i,\ \sigma_i$               & Fehlerrate und deren Standardabweichung (DDM) \\
+%     $p_{\min},\ \sigma_{\min}$     & minimale Referenz-Fehlerrate und -Standardabweichung (DDM) \\
+%     $r_i$                          & Fehlerabstands-Verhältnis (EDDM) \\
+%     $\alpha,\ \beta$               & Warn- bzw.\ Driftschwelle (EDDM) \\
+%     $D$                            & KSWIN-Teststatistik (Kolmogorov-Smirnov-Distanz) \\
+%     $\mathcal{D}_t,\ \mathcal{D}_{t+w}$ & Referenz- bzw.\ aktuelles Datenfenster (KSWIN) \\
+%     $P_t,\ P_{t+w}$                & zugehörige Verteilungen der Fenster (KSWIN) \\
+%     $H_0,\ H_1$                    & Null- bzw.\ Alternativhypothese \\
+%     $Q$                            & Prozessrauschkovarianz (KF/EKF) \\
+%     $P_0$                          & Startkovarianz (KF/EKF) \\
+%     $I_2,\ I_3$                    & Einheitsmatrizen \\
+% \end{longtable}

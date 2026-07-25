@@ -1,0 +1,257 @@
+%---------------------------------------------------------------
+% Dissertation von Pascal Marijan
+%---------------------------------------------------------------
+% Hauptdokument
+%---------------------------------------------------------------
+% $Id$
+%---------------------------------------------------------------
+
+%---------------------------------------------------------------
+% Personenangaben
+%---------------------------------------------------------------
+\newcommand{\AkGrad}{M.sc.}
+\newcommand{\Geschlecht}{Herrn}
+\newcommand{\Name}{Pascal Marijan}
+\newcommand{\Wohnort}{Mannheim}
+\newcommand{\Geburtsort}{Trier}
+%---------------------------------------------------------------
+
+
+%---------------------------------------------------------------
+% Eigene Dokumentenklasse (aus Report abgeleitet) WSKL
+%---------------------------------------------------------------
+% !TEX program = xelatex
+\documentclass[twoside,final]{Styles/diss}
+
+%---------------------------------------------------------------
+% Schriftcodierung WSKL (LuaLaTex)
+%---------------------------------------------------------------
+\usepackage{polyglossia}
+\setdefaultlanguage[spelling=new, babelshorthands=true]{german}
+\setotherlanguage{english}
+
+\usepackage{fontspec}
+\usepackage[pdfencoding=auto]{hyperref}% Umlaute in Lesezeichen korrekt
+\usepackage{unicode-math}
+\urlstyle{same}
+\usepackage{nicefrac}
+\usepackage{siunitx}
+\sisetup{locale = DE}
+
+%\setromanfont{Calibri}
+%\setsansfont{Calibri}
+%\setmonofont{Consolas}
+%\setmathfont{Cambria Math}
+\renewcommand{\familydefault}{\sfdefault}
+
+\huge
+
+\usepackage[singlespacing]{setspace}
+
+
+%---------------------------------------------------------------
+% Schriftcodierung Erweiterungen
+%---------------------------------------------------------------
+%\usepackage{color} % Farbliche Textformatierung (Colorboxen, Hintergrundfarben, ..)
+%\usepackage{ulem} % Textformatierung (Durchstreichen, Unterstreichen, ...)
+\usepackage{csquotes} % Anführungszeichen für versch. Sprachen / Situationen
+\usepackage{ifthen}
+
+%---------------------------------------------------------------
+% Literatur
+%---------------------------------------------------------------
+\usepackage[
+  backend=biber,
+  style=LNI
+]{biblatex}
+\addbibresource{Literatur/diss.bib}
+
+%---------------------------------------------------------------
+% Grafik-Paket für eps bzw. pdf
+%---------------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{pgf}
+\graphicspath{{../plots/}{../results/}{results/}}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{subcaption}
+\usepackage{svg}
+\newcommand{\plotdir}{../plots/}
+\newcommand{\resultsdir}{../results/}
+
+%---------------------------------------------------------------
+% Eindbinden von pdf-Dokumenten
+%---------------------------------------------------------------
+\usepackage{pdfpages}
+
+%---------------------------------------------------------------
+% Wasserzeichen mit DRAFT auf erster Seite
+%---------------------------------------------------------------
+%[firstpage] nur erste Seite 
+%[final] blendet Wasserzeichen aus
+\usepackage[firstpage,final]{draftwatermark} 
+\SetWatermarkColor{red}
+\SetWatermarkHorCenter{0.6\paperwidth}
+
+%---------------------------------------------------------------
+% Paket und Definitionen für Quellcode
+%---------------------------------------------------------------
+\usepackage{listings}
+\definecolor{bluekeywords}{rgb}{0,0,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.64,0.08,0.08}
+\definecolor{xmlcomments}{rgb}{0.5,0.5,0.5}
+\definecolor{types}{rgb}{0.17,0.57,0.68}
+\lstset{language=[Sharp]C,
+captionpos=b,
+%numbers=left, %Nummerierung
+%numberstyle=\tiny, % kleine Zeilennummern
+frame=lines, % Oberhalb und unterhalb des Listings ist eine Linie
+showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+escapeinside={(*@}{@*)},
+commentstyle=\color{greencomments},
+morekeywords={partial, var, value, get, set},
+keywordstyle=\color{bluekeywords},
+stringstyle=\color{redstrings},
+basicstyle=\linespread{0.8}\ttfamily\footnotesize,
+tabsize=4,
+}
+\renewcommand{\lstlistingname}{Codeausschnitt} %Umbenennung von Listing zu Codeausschnitt
+
+%---------------------------------------------------------------
+% AMSTeX für boldsymbol
+%---------------------------------------------------------------
+%\usepackage{amssymb}
+\usepackage{amsbsy}
+
+%---------------------------------------------------------------
+% Hyperlinks für pdfTeX
+%---------------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{
+ pdftitle    = {Hier könnte dein Titel stehen},
+ pdfsubject  = {},
+ pdfauthor   = {John Doe},
+ pdfkeywords = {Nach Bedarf},
+ pdfborder   = 0 0 0,
+ plainpages  = false,
+ bookmarksnumbered = true
+}
+%---------------------------------------------------------------
+% amsthm für \newtheorem (z.B. für Definitionen)
+%---------------------------------------------------------------
+\usepackage{amsthm}
+\theoremstyle{definition} % Style festelgen
+\newtheorem{definition}{Definition} % Neues Theorem mit Caption Definition erstellen
+\usepackage{xpatch}
+\makeatletter
+\AtBeginDocument{\xpatchcmd{\@thm}{\thm@headpunct{.}}{\thm@headpunct{}}{}{}}
+\makeatother
+
+%---------------------------------------------------------------
+% Booktabs table style
+%---------------------------------------------------------------
+\usepackage{booktabs}
+\setlength\heavyrulewidth{0.08ex}
+\setlength\lightrulewidth{0.08ex}
+\usepackage{multirow}
+
+%---------------------------------------------------------------
+% Longtable for multiple pages
+%---------------------------------------------------------------
+\usepackage{longtable}
+
+%---------------------------------------------------------------
+% EnumItem für Verschiebung der Enumeration-Liste
+%---------------------------------------------------------------
+\usepackage{enumitem}
+
+%---------------------------------------------------------------
+% Eigene Kurzbefehle und Hilfsmittel
+%---------------------------------------------------------------
+\newcommand{\SF}{\mbox{\textit{SmartFactory}\textsuperscript{KL}}}
+\newcommand{\ExtraAbstand}{\vspace{0.2cm}}
+\newcounter{Fuss}
+\setcounter{Fuss}{1}
+
+%---------------------------------------------------------------
+% Debug-Ausgabe der Labels und References
+%---------------------------------------------------------------
+%\usepackage{showkeys}
+
+%---------------------------------------------------------------
+% acronym for abbreviations
+%---------------------------------------------------------------
+\usepackage{acronym}
+\renewcommand*{\acsfont}[1]{\texttt{#1}}
+% \input{Abkuerzungsverzeichnis/acronym-format}
+\usepackage{array}
+
+%---------------------------------------------------------------
+% Beginn der Titelseite
+%---------------------------------------------------------------
+\begin{document}
+ 
+ % Titelblatt: Einmal für die Einreichung und einmal für die genehmigte Dissertation 
+ \includefile{Titel}{Titelseite_Diss}
+ %\includefile{Titel}{Titelseite_Diss_genehmigt}
+ 
+ \pagenumbering{gobble}
+ \includefile{Titel}{Selbstaendigkeit}
+ 
+ % VDI-Vorgaben: Vorwort / Danksagung auf Seite III und IV
+ \pagenumbering{Roman}
+ \setcounter{page}{3}
+ \includefile{Titel}{Vorwort} 
+
+ \tableofcontents
+ % VDI-Vorgaben: Nur Kurzfassung oder Abstract (je nach Sprache)
+ \includefile{Titel}{Kurzfassung}
+ % \includefile{Titel}{Abstract}
+ \includefile{Abkuerzungsverzeichnis}{Abkuerzungsverzeichnis}
+ \includefile{Abkuerzungsverzeichnis}{Symbolverzeichnis}
+ \cleardoublepage
+%---------------------------------------------------------------
+% Beginn des Inhaltes 
+%---------------------------------------------------------------
+
+ % VDI-Vorgaben: Arabische Nummerierung für den Inhalt
+ \pagenumbering{arabic}
+ \includefile{Kapitel_1}
+ \includefile{Kapitel_2}
+ \includefile{Kapitel_3}
+ \includefile{Kapitel_4}
+ \includefile{Kapitel_5}
+
+%---------------------------------------------------------------
+% Beginn des Anhangs 
+%---------------------------------------------------------------
+ \appendix
+ \includefile{Anhang}{Anhang} 
+ 
+%---------------------------------------------------------------
+% Literaturverzeichnis
+%---------------------------------------------------------------
+
+\printbibheading
+% Wichtig: Die Titel in der .bib-Datenbank dürfen alle nur ein einziges Keyword (entsp. der Kategorie) haben. Hat ein Titel mehr als ein Keyword wird er nicht im Literaturverzeichniss angezeigt.
+\printbibliography[heading=subbibliography,keyword=article,title={Monografien und Artikel}]
+\printbibliography[heading=subbibliography,keyword=norm, title={Normen und Richtlinien}]
+\printbibliography[heading=subbibliography,keyword=nichtbetreut,title={Hochschulschriften}]
+\printbibliography[heading=subbibliography,keyword=betreut,title={Betreute studentische Arbeiten}]
+\printbibliography[type=online, heading=subbibliography, title={Webseiten und Internetreferenzen}]
+\clearpage
+
+%---------------------------------------------------------------
+% Lebenslauf
+%---------------------------------------------------------------
+%Keine Seitenzahl für Lebenslauf
+\includefile{Anhang}{Lebenslauf}
+ 
+\end{document}

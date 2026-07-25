@@ -1,0 +1,76 @@
+# ─── Python ───────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+venv_*/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Test / Coverage / Linting
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ─── Simulink / MATLAB (aus ipynb/tep) ────
+# Build-Cache, gehört nie ins Repo:
+slprj/
+*.slxc
+*.autosave
+*.asv
+
+# ─── LaTeX (text/) ────────────────────────
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*.nav
+*.snm
+*.vrb
+*.xdv
+# Kompiliertes PDF – auskommentieren, wenn du es versionieren willst:
+# *.pdf
+
+# ─── Generierte Artefakte ─────────────────
+# Archiv-Ordner mit alten Ständen – meist nicht ins Repo:
+plots/archive/
+results/archive/
+models/
+
+# Falls plots/ und results/ komplett reproduzierbar sind und NICHT
+# ins Repo sollen, stattdessen einkommentieren (überschreibt oben):
+graphics/
+plots/
+results/
+
+# Große / rohe Datensätze – je nach Größe ausschließen:
+data/mill_data/
+data/tep/
+data/synthetic_data/
+data/syn/
+
+# ─── IDE / OS ─────────────────────────────
+.vscode/*
+!.vscode/settings.json
+.idea/
+Thumbs.db
+Desktop.ini
+*.swp

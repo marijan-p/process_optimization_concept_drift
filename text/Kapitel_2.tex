@@ -1,0 +1,510 @@
+%---------------------------------------------------------------
+% Kapitel: Zweites Kapitel 
+%---------------------------------------------------------------
+
+\chapter{Grundlagen} \label{cap:grundlagen}
+Die modellbasierte Betriebspunktoptimierung einer Vertikalrollenmühle erfordert ein grundlegendes Verständnis des zu optimierenden Prozesses, der eingesetzten Modellierungsverfahren sowie der Herausforderungen, die sich aus dem zeitvarianten Charakter des Prozesses ergeben. Dieses Kapitel legt die dafür notwendigen theoretischen Grundlagen und stellt den Stand der Technik dar. In Abschnitt \ref{sec:muehle} wird zunächst die Vertikalrollenmühle in ihrer technischen und systemischen Beschreibung eingeführt. Darauf aufbauend behandelt Abschnitt \ref{sec:modellierung} die datengetriebene Prozessmodellierung, von der Systemidentifikation über relevante Modellarchitekturen bis hin zur Modellauswahl für die Betriebspunktoptimierung. Abschließend werden in Abschnitt \ref{sec:concept_drift} die Grundlagen zu \ac{CD} erarbeitet, der als zentrales Phänomen die langfristige Modellgüte im realen Betrieb beeinflusst.
+%
+\section{Vertikalrollenmühlen} \label{sec:muehle}
+Zunächst werden Aufbau und Funktionsweise der Vertikalrollenmühle erläutert sowie Stellgrößen und Betriebspunkte formal beschrieben. Ergänzend wird GPlink/GPpro als Erweiterung der Mühle zu einem cyberphysischen System dargestellt.
+%
+\subsection{Funktionsweise} \label{sec:funktionsweise}
+Vereinfacht gesprochen setzt sich Zement aus Kalkstein und Ton zusammen. Zur Zementherstellung erfolgt nach dem Abtragen der Gesteine zunächst eine Zerkleinerung mit Brecheranlagen, bevor das Gemisch zu Rohmehl vermahlen wird. Beim Brennen des Rohmehls im Drehrohrofen entsteht so genannter Zementklinker, der erneut vermahlen wird. Bei dem dabei entstehenden Produkt handelt es sich um das Endprodukt, Zement. 
+In Abbildung \ref{fig:zementindustrie} sind die beschriebenen Prozessschritte der Zementherstellung schematisch dargestellt. Die Mühlen sind dabei farblich in Gelb zu erkennen. Neben der Rohmehlmühle (a) und der Zementmühle (c) ist auch eine Kohlemühle (b) dargestellt, die oftmals bei kohlebefeuertem Drehrohrofen eingesetzt wird.
+%
+\begin{figure}[htb!]
+    \vspace{5mm}
+    \centering
+    \includesvg[width=\linewidth]{../graphics/Mühlen_in_Zementindustrie.svg}
+    \caption{Schematische Abbildung der konsekutiven Prozessschritte in der Zementherstellung, Abbildung von Gebr. Pfeiffer SE}
+    \label{fig:zementindustrie}
+\end{figure}
+%
+Im Laufe der Zeit haben sich zur Vermahlung mehrere Verfahren etabliert. Neben Kugelmühlen werden hauptsächlich Vertikalrollenmühlen (VRM) eingesetzt, die aufgrund ihres hohen Wirkungsgrads als Stand der Technik gelten \cite{schaefer.2001}. Dennoch gibt es auch bei VRM ein erhebliches Potenzial zur Energieoptimierung. So kann beispielsweise eine modulare Bauweise der Mühle den Prozess durch eine Reduzierung der Stillstandzeiten optimieren \cite{woywadt.2017}. Neben der Zementindustrie kommen VRM auch in der Kohleindustrie zum Einsatz. Zu den gängigen Mahlgütern zählen Kalkstein, Kohle, Ton, Gips und Schlacke.
+Das Hauptziel des Mahlvorgangs besteht darin, das Eingangsmaterial auf ein gewünschtes Maß zu zerkleinern. Während die Größe des Produkts erst nach dem Prozess gemessen werden kann, werden mehrere Sensoren eingesetzt, um den Zustand des Systems zu überwachen, sodass die resultierende Partikelgröße geschätzt werden kann.
+Der prinzipielle Aufbau einer VRM ist in Abbildung \ref{fig:muehle} schematisch dargestellt. Grundsätzlich besteht eine VRM aus einem rotierenden Mahlteller, auf dem die Walzen durch ihr Eigengewicht nach unten gedrückt werden. Häufig wird die Kraft in Richtung Mahlteller durch ein hydraulisches System unterstützt. Die Verschleißteile, einschließlich der Walzen und der Oberfläche des Mahltellers, bestehen in der Regel aus austauschbaren Teilen aus Hartgusslegierungen wie NiHard, die für ihre extreme Härte bekannt sind.
+%
+\begin{figure}[hbt!]
+    \centering
+    \hspace*{-4cm}
+    \includesvg[width=0.8\linewidth]{Grafiken/MVR-C_6.svg}
+    \caption{Schematische Abbildung einer VRM vom Typ MVR der Firma Gebr. Pfeiffer SE}
+    \label{fig:muehle}
+\end{figure}
+%
+Das Aufgabematerial wird von oben durch die Schurre über einen Trichter in die Mitte des Mahltellers eingeführt. Durch die Zentrifugalkräfte wird das Material auf dem Mahlteller zum Rand bewegt, wo es von den Walzen erfasst und zerkleinert wird. So entsteht ein Gemisch aus grobem und feinem Mahlgut. Dieses Gemisch bildet ein so genanntes „Mahlbett“ auf dem Mahlteller, das einen direkten Kontakt zwischen den Walzen und dem Tisch verhindert.
+Ein durch einen Ventilator erzeugter Luftstrom tritt oberhalb des Antriebs am äußeren Rand des Mahltellers ein und transportiert das feine Material nach oben durch die Mahlkammer. Der Sichter oberhalb der Schurre trennt dann das Grobgut vom Feingut. Das feine Material verlässt die Mühle, während das grobe Material über den Trichter zurück auf den Mahlteller fällt. Material, das über den Rand des Mahltellers fällt, wird über ein externes Zirkulationssystem wieder in die Mühle zurückgeführt. \par
+Bei der in dieser Arbeit betrachteten Mühle handelt es sich um eine VRM vom Typ MVR 2500 C-4 der Firma Gebr. Pfeiffer SE. Diese MVR wird für die Zerkleinerung von Hochofenschlacke verwendet, einem Nebenprodukt der Stahlindustrie, mit dem ein Anteil des Klinkers im Zement substituiert werden kann. Mit vier gleich großen Mahlwalzen und einem Mahltellerdurchmesser von $\SI{2,5}{\meter}$ ist die MVR 2500 C-4 für Durchsatzleistungen von bis zu 30 t/h ausgelegt und wird von einem 750-kW-Elektromotor angetrieben. 
+%
+\subsection{Stellgrößen und Betriebspunkte} \label{sec:stellgroessen}
+Zum Betrieb der Mühle stehen dem Betreiber, im Folgenden als Operator bezeichnet, mehrere Stellgrößen zur Verfügung, mit denen der Prozess gezielt beeinflusst werden kann. Dabei legen die Operatoren die Sollwerte, die so genannten Setpoints, der jeweiligen Aggregate fest, die anschließend durch eine speicherprogrammierbare Steuerung (SPS) geregelt werden.
+Eine konkrete Kombination aller eingestellten Stellgrößen zu einem bestimmten Zeitpunkt wird als Betriebspunkt bezeichnet. Jeder Betriebspunkt beschreibt somit eine eindeutig definierte Konfiguration der Anlage, die sich durch die Werte aller relevanten Stellgrößen charakterisieren lässt. Formal lässt sich ein Betriebspunkt als Vektor
+%
+\begin{equation}
+    w = [w_1, w_2, \ldots, w_n]^T \in \mathbb{R}^n
+    \label{eq:betriebspunkt}
+\end{equation}
+%
+auffassen, wobei die einzelnen Komponenten $w_i$ die jeweiligen Stellgrößen der Mühle repräsentieren. Zu diesen Stellgrößen zählen unter anderem: 
+%
+\begin{itemize}
+    \item \textbf{Die Aufgabemenge} \newline
+    Abhängig von Mühlengröße und Produkt können die Mengen des Edukts oder der Edukte über mehrere Förderbänder variiert werden. Die Messung erfolgt mittels Bandwagen.
+    \item \textbf{Die Mahltellergeschwindigkeit} \newline
+    Sofern der Hauptantrieb mit einem Frequenzumrichter ausgestattet ist, kann die Drehzahl des Mahltellers variiert werden. Aus wirtschaftlichen Gründen wird bei einigen Anlagen jedoch auf den Einsatz eines Frequenzumrichters verzichtet.
+    \item \textbf{Die Sichtergeschwindigkeit} \newline
+    Über die Sichtergeschwindigkeit wird die Drehzahl des Sichterrades geregelt. Mit zunehmender Drehzahl wird der Abscheidegrad erhöht, sodass weniger grobes Material mit dem Luftstrom zu den Filtern transportiert wird.
+    \item \textbf{Die Ventilatorgeschwindigkeit} \newline
+    Die Ventilatorgeschwindigkeit beeinflusst den Luftvolumenstrom innerhalb der Anlage. In manchen Anlagen wird der Luftvolumenstrom direkt als Stellgröße durch den Operator vorgegeben.
+    \item \textbf{Der Spanndruck} \newline
+    Der Spanndruck bezeichnet den hydraulischen Druck, mit dem die Walzen auf den Mahlteller wirken. 
+    % In der Regel gibt es pro sich gegenüberliegendem Walzenpaar einen Spanndruckkreislauf.
+    Aufgrund von Leckagen im Hydrauliksystem weist der Spanndruck eine charakteristische Hysterese auf, wobei das Hydraulikaggregat bei Unterschreiten definierter Grenzwerte automatisch nachregelt.
+    \item \textbf{Die Heißgastemperatur} \newline
+    Der in der Regel mit fossilen Brennstoffen betriebene Heißgaserzeuger ist für die Einstellung der Temperatur des Luftvolumenstroms verantwortlich.
+    \item \textbf{Die Klappenstellungen} \newline
+    Die Frischluft- und Rezirkulationsklappen dienen insbesondere der Abführung von Feuchtigkeit und Wärme aus dem System und beeinflussen damit sowohl den thermischen als auch den strömungstechnischen Zustand der Mühle.
+\end{itemize}
+%
+Da jede Stellgröße innerhalb eines definierten Wertebereichs variiert werden kann, spannt die Gesamtheit aller Stellgrößen einen hochdimensionalen Stellgrößenraum $\mathcal{W}=\{w \in \mathbb{R}^n\}$ auf. Entsprechend existiert eine sehr große Anzahl möglicher Betriebspunkte, in denen die Mühle betrieben werden kann. Die Identifikation geeigneter Betriebspunkte innerhalb dieses hochdimensionalen Raums stellt eine zentrale Herausforderung für den effizienten Betrieb der Mühle dar und soll durch modellbasierte Betriebspunktoptimierung adressiert werden.
+%
+\subsection{GPpro} \label{sec:GPpro}
+%
+\begin{figure}[hbt!]
+    \centering
+    \includesvg[width=0.9\linewidth]{Grafiken/GPlink.svg}
+    \caption{Schematische Abbildung der Datenverarbeitung mit GPlink/GPpro}
+    \label{fig:gplink}
+\end{figure}
+%
+GPlink/GPpro bezeichnet das Digitalisierungsprogramm der Firma Gebr. Pfeiffer SE, mit dem die Mahlanlagen zu cyberphysischen Systemen erweitert werden. Cyberphysische Systeme zeichnen sich dadurch aus, dass sie physikalische Prozesse eng mit rechnergestützten Verfahren zur Datenerfassung, -verarbeitung und -visualisierung koppeln und diese über Kommunikationsnetze verfügbar machen \cite{lee.2008}. %Folglich verbindet GPlink/GPpro den realen Mahlprozess mit digitalen Analyse- und Assistenzfunktionen.
+Die Architektur von GPlink/GPpro umfasst Hardware- und Softwarekomponenten; die verwendeten Bezeichnungen sind historisch gewachsen und daher nicht ganz trennscharf.
+In dieser Arbeit wird vereinfachend die Hardware-Infrastruktur als GPlink und die darauf aufbauenden Software- und Webdienste als GPpro bezeichnet. 
+Die prinzipielle Funktionsweise des Systems ist in Abbildung \ref{fig:gplink} schematisch dargestellt. Die Sensordaten der Mahlanlage werden zunächst konventionell über SPS des Kunden erfasst. Ergänzend hierzu ist eine zusätzliche SPS installiert, die so genannte GPlink-SPS. Diese übernimmt zwei zentrale Aufgaben: Zum einen empfängt sie ausgewählte Prozesssignale aus der Kunden-SPS mit einer Frequenz von $\SI{1}{\hertz}$, zum anderen stellt sie zusätzliche Messdaten aus einer erweiterten Sensorik bereit, die Bestandteil von GPlink ist, und überträgt diese an die Kunden-SPS zurück. Auf diese Weise wird die bestehende Automatisierungsstruktur erweitert, ohne sie grundlegend zu verändern.
+Die von der GPlink-SPS erfassten Daten werden über eine OPC-UA-Schnittstelle an einen Industrie-PC (IPC) übertragen. Der IPC wiederum fungiert als Bindeglied zwischen der lokalen Automatisierungsebene und der Cloud-Infrastruktur. Die Daten werden so an cloudbasierte Dienste weitergeleitet, wo sie gespeichert und weiterverarbeitet werden.
+In der Cloud sind mehrere, mittels Docker containerisierte Dienste implementiert. Dazu zählen unter anderem \emph{Kafka} zur Datenübertragung, \emph{InfluxDB} zur Speicherung der Zeitreihendaten, \emph{PostgreSQL} zur Ablage verarbeiteter Daten, \emph{Grafana} zur Visualisierung sowie \emph{Python}-basierte Dienste zur Datenanalyse. Die vom IPC gesendeten Prozessdaten werden über Kafka in die Cloud übertragen und in einer Influx-Datenbank gespeichert. Auf dieser Datenbasis werden mit Python Berechnungen, Analysen und Auswertungen durchgeführt, deren Ergebnisse anschließend in einer PostgreSQL-Datenbank gespeichert werden. 
+Sowohl Roh- als auch verarbeitete Daten werden über ein webbasiertes Frontend bereitgestellt und mit Grafana visualisiert. Über die Cloud-Infrastruktur ist ein weltweiter Zugriff möglich. Die Operatoren und weitere Stakeholder erhalten dadurch ortsunabhängig Einblick in relevante Prozessgrößen, Kennzahlen und Auswertungen.
+Für die Operatoren im \ac{CCR} stehen die Prozessdaten somit auf zwei Wegen zur Verfügung: Zum einen weiterhin direkt über die Visualisierung der Kunden-SPS, zum anderen ergänzend über GPpro mit erweiterten Analyse-, Historisierungs- und Visualisierungsfunktionen. GPlink/GPpro erweitert damit die klassische Automatisierungsebene um eine digitale Service- und Analyseplattform und bildet eine Grundlage für datengetriebene Prozessüberwachung und -optimierung.
+%
+\section{Prozessmodellierung} \label{sec:modellierung}
+Aufbauend auf der Beschreibung der Mühle wird im Folgenden die Prozessmodellierung eingeführt, beginnend mit grundlegenden Aspekten der Systemidentifikation, einer kompakten Einführung in neuronale Netze und abschließend der Modellauswahl zur Betriebspunktoptimierung.
+%
+\subsection{Systemidentifikation} \label{sec:systemidentifikation}
+%
+Der Vermahlungsprozess lässt sich, wie viele ingenieurwissenschaftliche Prozesse, als dynamisches System beschreiben. Obwohl reale Systeme ihrem Kern nach zeitkontinuierlich sind, wird für deren Systemidentifikation auf zeitdiskrete Modelle zurückgegriffen. Der Grund dafür ist der zeitdiskrete Charakter der Sensoren, die zur Datenerfassung verwendet werden. In der Systemidentifikation können Systeme anhand verschiedener Eigenschaften klassifiziert werden \cite{keesman.2011}. Dazu zählen:
+%
+\begin{itemize}
+    \item die Kausalität,
+    \item der Prozesscharakter (deterministisch oder stochastisch),
+    \item die Zeit(in)varianz,
+    \item die (Nicht-)Linearität,
+    \item die Dynamik.
+\end{itemize}
+%
+Grundsätzlich kann ein System entweder durch ein Zustandsraummodell oder ein Input-Output-Modell beschrieben werden.
+Ausgehend von einem Datensatz $\mathcal{D} = \{(u[k],\, y[k])\}_{k=0}^{N-1}$ aus $N$ gemessenen Input-Output-Paaren kann das System $S$ durch folgende Zustandsraumdarstellung beschrieben werden:
+%
+% Quelle: Keesman (2011), Kap. 1 (zeitdiskrete nichtlineare Zustandsraumdarstellung, hier ohne Durchgriff)
+\begin{equation}
+    \begin{aligned}
+        x[k+1] &= f(x[k], u[k]) \\
+        y^o[k] &= g(x[k]) \ \text{,}
+    \end{aligned}
+    \label{eq:zustandsraum}
+\end{equation}
+%
+wobei $x[k] \in \mathbb{R}^{n_x}$ der Zustand des Systems, $y^o[k] \in \mathbb{R}^{n_y}$ der rauschfreie Output und $u[k] \in \mathbb{R}^{n_u}$ der Input jeweils zum Zeitschritt $k$ ist. Weiterhin sind $f(\cdot)$ und $g(\cdot)$ die Zustands- bzw. Output-Mappings \cite{keesman.2011}. Der gemessene Output $y[k]$ wird durch ein mittelwertfreies, farbiges oder weißes Rauschen $\eta[k]$ verfälscht, d.\,h. $y[k]=y^o[k]+\eta[k]$. Dieses Zustandsraummodell kann entweder „klassisch“ nach Linearisierung in den Frequenzbereich überführt oder in der „modernen“ Identifikation direkt im Zeitbereich betrachtet werden.
+\newline
+Alternativ kann statt des Zustandsraumansatzes eine Input-Output-Modellstruktur verwendet werden. Der durch ein Modell geschätzte Output sei dabei mit $\hat{y}[k]$ bezeichnet. Modelle, die sowohl die gemessenen Inputs als auch die gemessenen Outputs zur Vorhersage verwenden, werden als Prädiktionsmodelle bezeichnet:
+%
+% Quelle: Prädiktionsmodell (NARX-Struktur) mit gemessenen Outputs im Regressor:
+% Forgione & Piga (2020); ebenso Nelles (2020), External-Dynamics-Ansatz
+\begin{equation}
+    \hat{y}[k] = g(y[k-1], \dots ,y[k-n_a],\,u[k-1], \dots ,u[k-n_b];\,\theta) \ \text{,}
+    \label{eq:io_model}
+\end{equation}
+%
+wobei $n_a$ bzw. $n_b$ die Länge der jeweils berücksichtigten Historien festlegen und $g(\cdot)$ das durch $\theta \in \mathbb{R}^{n_\theta}$ parametrisierte Output-Mapping ist \cite{forgione.2020}. Im Gegensatz dazu werden Modelle, bei denen ausschließlich die gemessenen Inputs auf den Output gemappt werden, Simulationsmodelle genannt \cite{forgione.2020}. Ein solcher Fall liegt vor, wenn der Output aus einer endlichen Historie vergangener Inputs berechnet wird:
+%
+% Quelle: Simulationsmodell (nur Inputs): Forgione & Piga (2020); die Form mit
+% endlicher Input-Historie entspricht einer (N)FIR-Struktur, vgl. Nelles (2020)
+\begin{equation} \label{eq:io_dynamic}
+    \hat{y}[k] = g(u[k-1], \ldots, u[k-n_b];\,\theta)
+\end{equation}
+%
+Wird darüber hinaus die Dynamik des Systems im Modell vernachlässigt, spricht man von einem statischen Modell. Der Zustand $x$ - und damit das Gedächtnis des Systems, über das vergangene Inputs nachwirken - wird dabei vernachlässigt, sodass der Output ausschließlich vom aktuellen Input abhängt:
+%
+% Quelle: statische (nichtlineare) Regression als Grenzfall ohne Dynamik:
+% Nelles (2020), Static Models; Bishop (2006)
+\begin{equation} \label{eq:io_static}
+    \hat{y}[k] = g(u[k];\,\theta)\ \text{,}
+\end{equation}
+%
+wobei $u[k]$ den System-Input zum Zeitpunkt $k$ darstellt. Die Abweichung $e[k] = y[k] - \hat{y}[k]$ zwischen Messung und Modelloutput beschreibt den (Simulations-)Fehler. Ist $g(\cdot)$ linear in den Parametern $\theta$, spricht man von linearer Regression; andernfalls ist $g(\cdot)$ ein nichtlineares Mapping, das den Input mit dem Output in Beziehung setzt. \par
+Zur Identifikation des in Abschnitt~\ref{sec:muehle} beschriebenen Vermahlungsprozesses kann zunächst festgehalten werden, dass es sich um einen kausalen Prozess handelt, da alle relevanten Ausgangsgrößen ausschließlich von aktuellen und vergangenen Eingangsgrößen abhängen und keine zukünftigen Informationen benötigen. Obwohl die zugrunde liegenden physikalischen Gesetzmäßigkeiten prinzipiell deterministisch sind, wird das reale Anlagenverhalten durch zufällige Einflüsse wie schwankende Materialeigenschaften, Umwelteinflüsse sowie Prozess- und Messrauschen geprägt, sodass der Prozess praktisch stochastischen Charakter besitzt. Zudem ist der Prozess zeitvariant, da sich die Systemdynamik infolge von Verschleiß, Materialwechseln, Wartungsmaßnahmen und veränderten Betriebsbedingungen kontinuierlich verändert. Weiterhin weist die Vermahlung eine ausgeprägte Nichtlinearität auf, die sich unter anderem in betriebspunktabhängigem Verhalten und Wechselwirkungen zwischen Materialfluss, Druck, Temperatur und Energieeintrag äußert. Schließlich handelt es sich um einen dynamischen Prozess, da interne Speicher- und Verzögerungseffekte, insbesondere durch das Mahlbett und thermische Trägheiten, dazu führen, dass der aktuelle Prozesszustand wesentlich von der Systemhistorie abhängt. Der Vermahlungsprozess ist folglich als kausaler, stochastischer, zeitvarianter, nichtlinearer und dynamischer Prozess zu klassifizieren. \par
+Eine physikalisch motivierte Zustandsraumbeschreibung dieses Systems würde eine detaillierte Abbildung der zugrunde liegenden mechanischen, thermischen und materialabhängigen Wechselwirkungen erfordern. Aufgrund der hohen Prozesskomplexität sowie der Vielzahl nur schwer oder gar nicht messbarer Zustandsgrößen ist die Herleitung eines hinreichend genauen physikalischen Modells jedoch mit erheblichem Aufwand und Unsicherheiten verbunden. Bisherige Versuche, ein solches Modell zu entwickeln, führten zu keinem Erfolg.
+Ein datenbasierter Input-Output-Modellierungsansatz hingegen ermöglicht es, das dynamische Prozessverhalten direkt aus gemessenen Ein- und Ausgangsdaten zu identifizieren. Dieser Ansatz eignet sich insbesondere für komplexe industrielle Prozesse mit zeitvarianten stochastischen Einflüssen und erlaubt eine Modellierung des Systems ohne Kenntnis der internen Zustände. Als Modellstruktur dieses Ansatzes wurde das neuronale Netz gewählt, welches eine flexible Approximation komplexer, nichtlinearer Zusammenhänge erlaubt.
+%
+\subsection{Modellarchitekturen} \label{sec:modellarchitekturen}
+Durch die prominente Präsenz großer Sprachmodelle (Large Language Models, LLMs) im öffentlichen Diskurs finden die Begriffe „Künstliche Intelligenz“, „Machine Learning“ und „neuronale Netze“ zunehmend Verwendung im allgemeinen Sprachgebrauch. Diese Begriffe bezeichnen jedoch eine Vielzahl unterschiedlicher Modellklassen, deren inhaltliche Breite durch eine Reduktion auf LLMs nicht angemessen abgebildet wird. Gleichzeitig ist im industriellen Kontext zu beobachten, dass zum Teil auch vergleichsweise einfache oder etablierte algorithmische Ansätze unter diesen Begriffen subsumiert werden, was zu einer begrifflichen Verwässerung beiträgt und die fachliche Trennschärfe weiter reduziert. 
+Um dieser Unschärfe entgegenzuwirken, sollen im Folgenden die für diese Arbeit relevanten Modellstrukturen eingeführt und voneinander abgegrenzt werden. \par
+Zunächst werden dazu Verfahren betrachtet, die nicht in die Kategorie der \ac{NN} fallen, aber durch ihre Einfachheit auszeichnen und häufig als Baseline dienen. \newline
+Dabei sei als erstes die Lineare Regression (LR) aufgeführt, die den Zusammenhang zwischen einer abhängigen Zielgröße und einer oder mehreren unabhängigen Inputvariablen durch eine lineare Gleichung beschreibt. Sie ist leicht interpretierbar, bei komplexeren, nicht-linearen Zusammenhängen stößt sie jedoch an ihre Grenzen und kann hier lediglich zur Approximation dienen. \newline
+Die Lasso-Regression erweitert dieses Konzept der LR um einen Regularisierungsterm \cite{tibshirani.1996}. Dieser bestraft große Modellgewichte und kann diese auf Null setzen, was nicht nur Overfitting entgegenwirkt, sondern auch zu einer automatischen Feature-Auswahl führt. \par
+Ein weiteres Verfahren mit linearer Modellannahme ist der der \ac{KF}, ein rekursives Zustandsschätzverfahren auf Basis eines Zustandsraummodells gemäß \eqref{eq:zustandsraum} \cite{kalman.1960}. Der \ac{KF} ist ein rekursives Schätzverfahren, das den verborgenen internen Zustand eines linearen dynamischen Systems aus einer Reihe von verrauschten Messungen ermittelt. Der Algorithmus arbeitet dabei in zwei iterativen Schritten: 
+%
+\begin{itemize}
+    \item \textbf{Prädiktionsschritt} \\
+    Schätzung des Systemzustands für den folgenden Zeitschritt basierend auf einer Zustandsgleichung des mathematischen Systemmodells
+    \item \textbf{Korrekturschritt} \\
+    Abgleichen der Schätzung mit der tatsächlichen Messung über die Messgleichung
+\end{itemize}
+%
+Unter der Annahme, dass das System linear ist und das Rauschen einer Normalverteilung unterliegt, liefert der Kalman-Filter so theoretisch die mathematisch optimale Zustandsschätzung.\par
+Beim \ac{EKF} handelt es sich um eine Erweiterung des \ac{KF}, der das Konzept in nicht-lineare Zustandsraum-Modelle überführt. Dazu werden System- und Messgleichungen im jeweiligen Arbeitspunkt linearisiert \cite{welch.1995}. Dies geschieht durch eine Taylor-Reihenentwicklung erster Ordnung. Durch die lokale Linearisierung kann die Prädiktions- und Korrekturlogik des \ac{KF} durch den \ac{EKF} auf komplexere, nicht-lineare Problemstellungen angewendet werden. \par
+Während die zuvor genannten Verfahren entweder auf linearen Annahmen beruhen oder explizite mathematische Systemmodelle erfordern, bieten \ac{NN} einen rein datengetriebenen Ansatz zur Modellierung komplexer, nicht-linearer Zusammenhänge. 
+Grundsätzlich lassen sich maschinelle Lernverfahren auf verschiedene Art und Weise kategorisieren. Eine fundamentale Unterscheidung beschreibt die zwischen überwachtem Lernen (engl. Supervised Learning) und unüberwachtem Lernen (engl. Unsupervised Learning) \cite{bishop.2006}.
+Beim unüberwachten Lernen erhält das Modell ausschließlich Input-Daten (engl. \emph{Features}), ohne dass eine zugehörige Zielgröße (engl. \emph{Label}) vorgegeben ist. Durch das Modell können so intrinsische Strukturen in den Daten analysiert oder Muster und Korrelationen identifiziert werden. \par
+Demgegenüber basiert das Modelltraining beim überwachten Lernen auf einem Datensatz, der aus Features und den dazugehörigen, bekannten Labels besteht. Man spricht auch von gelabelten Daten. Das Ziel ist es, eine Funktion zu erlernen, die den Fehler zwischen der Modellvorhersage und dem tatsächlichen Zielwert minimiert, um präzise Vorhersagen für neue, ungesehene Daten treffen zu können. Die vorliegende Arbeit beschränkt sich auf überwachtes Lernen, da die betrachtete Problemstellung eine Regressionsaufgabe darstellt und die betrachteten Systemgrößen sensorisch gemessen und somit als gelabelte Daten für das Modelltraining verfügbar sind. \par
+Die grundlegendste Form eines künstlichen neuronalen Netzes ist das Multi-Layer Perceptron (MLP), welches zur Klasse der Feedforward Neural Networks gehört \cite{goodfellow.2016}. Der Informationsfluss in einem MLP ist streng gerichtet und verläuft von der Eingabe zur Ausgabe, ohne Rückkopplungen.
+Die Architektur gliedert sich in drei Hauptkomponenten, die jeweils aus einem oder mehreren so genannten Neuronen bestehen:
+%
+\begin{itemize}
+    \item \textbf{Input Layer} (Eingabeschicht) \\ Erfasst die Input-Daten $u$
+    \item \textbf{Hidden Layers} (Verborgene Schichten) \\
+    Jedes Neuron dieser Schichten ist mit allen Neuronen der vorherigen Schicht verbunden, berechnet eine gewichtete Summe von deren Outputs und transformiert diese mit einer vorgegebenen Aktivierungsfunktion.
+    \item \textbf{Output Layer} (Ausgabeschicht) \\
+    Gibt die Prädiktion des Outputs $\hat{y}$ zurück. Bei Regressionsaufgaben besteht sie typischerweise aus einem einzelnen Neuron mit linearer Aktivierungsfunktion.
+\end{itemize}
+%
+Sowohl die Anzahl der Neuronen in den Layern als auch die Wahl der Aktivierungsfunktionen sind variabel und können als Hyperparameter des Modells spezifiziert werden. 
+Das Training erfolgt durch den Backpropagation-Algorithmus \cite{rumelhart.1986}. Dabei wird nach einer Vorhersage über eine Verlustfunktion der Unterschied zwischen dem tatsächlichen Output $y$ und dem prädizierten Output $\hat{y}$ berechnet. Anschließend wird der Fehler rückwärts durch das Netz propagiert. Mithilfe von gradientenbasierten Optimierungsverfahren (engl. gradient descent) werden die Gewichte iterativ angepasst, um so den Gesamtfehler zu minimieren \cite{goodfellow.2016}.
+Klassischerweise ist das MLP ein statisches Modell. Um es für die Regression von Zeitreihendaten nutzbar zu machen und Dynamiken zu erfassen, kann ein Sliding-Window-Ansatz verwendet werden \cite{bontempi.2012}. Dabei wird ein Datenfenster festgelegter Breite aus vergangenen Zeitschritten zu einem Vektor transformiert und dem MLP als statische Eingabe übergeben. So kann das Modell historische Abhängigkeiten in seine Vorhersage einbeziehen. \par
+Dem MLP gegenüber stehen neuronale Architekturen, die zeitliche Abhängigkeiten nicht ausschließlich über die Eingangsrepräsentation, sondern auch über ihre interne Struktur erfassen.
+Convolutional Neural Networks (CNN) wurden ursprünglich für die Bilderkennung entwickelt \cite{lecun.2002}. Sie nutzen Faltungsschichten (engl. Convolutional Layers), in denen Filter über die Eingabedaten gleiten, um lokale Features zu extrahieren, wobei die Gewichte geteilt werden.
+Obwohl ursprünglich für 2-dimensionale Bilddaten konzipiert, lassen sich CNNs auf Zeitreihendaten anwenden. Dabei werden 1D-CNNs eingesetzt, bei denen ein Filter entlang der Zeitachse gleitet \cite{kiranyaz.2021}. Dadurch erkennt und extrahiert das Modell automatisch lokale zeitliche Muster und Trends innerhalb der Zeitreihe. \par
+Für die Modellierung komplexer, langfristiger zeitlicher Abhängigkeiten finden typischerweise rekurrente neuronale Netze Anwendung. Eine besonders leistungsfähige Form ist das \ac{LSTM} \cite{hochreiter.1997}. Im Gegensatz zu Feedforward-Netzen besitzen \ac{LSTM}s Rückkopplungsschleifen, die einen internen Zustand über die Zeit aufrechterhalten. Durch eine Zellstruktur von so genannten Input-, Output- und Forget-Gates steuert das \ac{LSTM} gezielt, welche Informationen behalten und welche vergessen werden. Dadurch sind \ac{LSTM}s prädestiniert für Zeitreihendaten, da sie die Dynamik der Zeitreihen nativ abbilden.
+%
+\subsection{Datenselektion} \label{sec:datenselektion}
+Bei der Modellierung realer industrieller Prozesse spielen die erfassten experimentellen Daten eine essenzielle Rolle, da sie in datengetriebenen Ansätzen die primäre Informationsquelle darstellen. Gleichzeitig ist die Datenerhebung in Produktionsumgebungen typischerweise durch technische Randbedingungen erschwert, sodass eines der zentralen Ziele darin besteht, die Datengrundlage so zu gestalten, dass der Informationsgehalt maximiert wird. Für den vorliegenden Anwendungsfall der Mühle ist zudem zu berücksichtigen, dass der eigentliche Materialzerkleinerungsprozess nicht direkt messbar ist. Stattdessen müssen indirekte Indikatoren herangezogen werden, die das Prozessverhalten über messbare Betriebsparameter beschreiben. \par
+Die in dieser Arbeit betrachtete Zielgröße ist der spezifische Energiebedarf, also der Gesamtenergiebedarf pro Tonne produzierten Produkts, der hier auf die drei größten Hauptaggregate: Hauptantrieb, Ventilator und Sichter beschränkt ist. Um aus der Vielzahl verfügbarer Sensorsignale diejenigen Größen zu bestimmen, die einen signifikanten Einfluss auf diese Zielgröße besitzen, stützt sich die Sensorauswahl auf eine Kombination aus ingenieurwissenschaftlichem Fachwissen sowie datengetriebenen Analyseverfahren wie Principal Component Analysis und Mutual-Information-Analyse. Die resultierende Menge relevanter Stell- und Messgrößen entspricht den in Abschnitt \ref{sec:stellgroessen} eingeführten Parametern. Dabei werden die Stellgrößen als exogene Setpoints durch die Operatoren vorgegeben, während die resultierenden Prozesssignale sensorisch erfasst und als Messgrößen in das Modell eingehen. Mit der Identifikation der für die Zielgröße relevanten Stellgrößen stellt sich die Frage nach der geeigneten Modellstruktur zur Beschreibung des Prozesses.\par
+Wie bereits einleitend in Abschnitt \ref{sec:motivation} beschrieben, liegt das Ziel der Modellierung des Mahlprozesses darin, den Prozess durch Betriebspunktoptimierung zu verbessern. Dazu sollen in einem gegebenen Betriebspunkt die partiellen Ableitungen der Zielgröße nach den Eingangsgrößen bestimmt werden, um diejenigen Stellgrößen zu identifizieren, die lokal den größten Einfluss auf die Zielgröße ausüben. Auf Basis dieser Information kann anschließend eine Anpassung der entsprechenden Stellgrößen im realen Prozess erfolgen. Vor diesem Hintergrund stellt sich die Frage, welche Modellarchitektur mit Blick auf den Informationsgehalt der verfügbaren Daten für diese Aufgabe am geeignetsten ist. Einerseits liegen Zeitreihendaten vor, deren sequenzieller Charakter prinzipiell dynamische Information enthält. Andererseits ist die Betriebspunktoptimierung in erster Linie an eingeschwungenen, quasi-stationären Zuständen interessiert, sodass eine Reduktion auf stationäre Betriebspunkte denkbar ist. Die Modellkomplexität soll daher empirisch überprüft werden. \par
+In Abschnitt \ref{sec:systemidentifikation} wurde der Mahlprozess als dynamischer Prozess identifiziert. Außerdem wurde das \ac{NN} als datenbasierter Input-Output-Modellierungsansatz des Prozesses gewählt. Die Entscheidung für ein \ac{NN} als Modellstruktur lässt jedoch offen, ob zur Abbildung des Prozesses ein dynamisches Modell gemäß \eqref{eq:io_dynamic} oder ein statisches Modell gemäß \eqref{eq:io_static} verwendet werden soll. Während statische Input-Output-Modelle den Systemausgang ausschließlich als Funktion der aktuellen Eingangsgrößen beschreiben, berücksichtigen dynamische Input-Output-Modelle zusätzlich die zeitliche Abhängigkeit vergangener Ein- und Ausgangswerte. Damit weisen statische Modelle aufgrund der fehlenden zeitlichen Rekursion grundsätzlich eine geringere strukturelle Komplexität auf als dynamische Modelle \cite{nelles.2020}.
+Vor diesem Hintergrund stellt sich die zentrale Frage, welche Modellkomplexität für den vorliegenden Prozess unter den gegebenen Informationsbedingungen adäquat ist. Die verfügbaren Messdaten mit einer Abtastrate von $\SI{1}{\hertz}$ bilden sowohl eingeschwungene, quasi-stationäre Betriebszustände als auch Übergänge zwischen diesen ab, die als transient bezeichnet werden.
+Die Daten im quasi-stationären Zustand schwanken, bedingt durch Messrauschen und stochastische Prozesseinflüsse, um einen Mittelwert. In diesem Fall liegt ein klassisches Regressionsproblem vor, bei dem die zeitliche Reihenfolge der Datenpunkte vernachlässigt wird. Demgegenüber besteht bei transienten Zuständen die Erwartung, dass sich zusätzliche Information aus der zeitlichen Abfolge der Messwerte ergibt, da das dynamische Verhalten des Systems infolge einer Stellgrößenänderung sichtbar wird. Daraus ergibt sich eine Aufteilung der Datengrundlage in zwei Datensätze. \par
+Für den Datensatz der quasi-stationären Zustände ist es essenziell, einen möglichst breiten und gleichmäßig verteilten Datenraum abzudecken, um robuste Aussagen über den stationären Zusammenhang zwischen Ein- und Ausgangsgrößen zu ermöglichen. Zu diesem Zweck kann statistische Versuchsplanung (Design Of Experiment, DOE) herangezogen werden. Konkret findet dazu der so genannte Latin-Hypercube-Ansatz Anwendung, bei dem Stichproben aus einem Parameterraum so gezogen werden, dass jeder Parameter über seinen definierten Wertebereich gleichmäßig verteilt ist \cite{mckay.2000}.
+Innerhalb der minimalen und maximalen Grenzen aller betrachteten Stellgrößen wird so ein zufällig verteilter Datenraum mit einer vorgegebenen Anzahl von Stichproben erzeugt. Die resultierenden Betriebspunkte werden anschließend hinsichtlich ihrer technischen Umsetzbarkeit geprüft und gefiltert. Im Rahmen eines Feldexperiments an der in Abschnitt \ref{sec:funktionsweise} beschriebenen Mühle konnten auf diese Weise insgesamt $18$ Betriebspunkte realisiert werden, welche den Datenraum des regulären Produktionsbetriebs signifikant erweitern. Die Anforderung an einen stationären Prozesszustand bestand bei dem Experiment darin, dass nach der letzten Änderung einer Stellgröße alle Regelgrößen für einen Zeitraum von mindestens zehn Minuten unverändert bleiben mussten. \par
+Für den zweiten Datensatz, der die transienten Prozesszustände abbilden soll, reicht die Anzahl der im Experiment erzeugten Übergänge zwischen stationären Betriebspunkten nicht aus. Daher ist eine Ergänzung des Datensatzes durch Ereignisse aus dem laufenden Produktionsbetrieb erforderlich. Um sicherzustellen, dass der Prozess während dieser Zeiträume keinen grundlegenden Veränderungen unterliegt, ist die Datenauswahl auf einen Zeitraum weniger Wochen um das Experiment zu beschränken, in dem die Modellperformance des statischen Modells als konstant beobachtet wird (vgl. Abbildung \ref{fig:modellfehler}).
+Die Identifikation der transienten Bereiche erfolgt in diesem Kontext anhand der Setpoint-Änderungen ausgewählter Stellgrößen, die durch die Operatoren initiiert werden. Hinsichtlich der zeitlichen Länge der betrachteten Intervalle ist a priori jedoch unklar, über welchen Zeitraum der zeitliche Verlauf der Daten einen relevanten Einfluss auf die Zielgröße ausübt. Um diesen Einfluss zu untersuchen, werden für jeden Übergang vor und nach der Setpoint-Änderung Zeitfenster mit den Längen $30$, $60$ und $120$ Sekunden betrachtet. Die Auswertung zeigt, dass die Intervalllänge innerhalb dieser Grenzen lediglich einen marginalen Einfluss auf die Modellgüte besitzt. Vor diesem Hintergrund wurden für alle weiteren Untersuchungen Zeiträume von $\SI{60}{\second}$ verwendet. \newline
+Da einige Stellgrößen im Produktionsbetrieb deutlich häufiger verändert werden als andere, ist es darüber hinaus notwendig, die Anzahl dieser häufig wechselnden Signale zu reduzieren. Auf diese Weise wird eine möglichst uniforme Verteilung der betrachteten transienten Zustände über alle relevanten Stellgrößen angestrebt, um eine Verzerrung des Datensatzes zu vermeiden.
+%
+\subsection{Modellvergleich} \label{sec:modellvergleich}
+Aufbauend auf der Trennung der beiden Datensätze soll nun die Leistungsfähigkeit verschiedener statischer und dynamischer Modellansätze systematisch miteinander verglichen werden. Als Grundlage dazu dient eine umfassende Grid-Search-basierte Hyperparameter-Optimierung, die es erlaubt, sowohl unterschiedliche Modelltypen als auch relevante Vorverarbeitungsschritte zu evaluieren \cite{marijan.2026}.
+Vor dem eigentlichen Modelltraining ist eine einheitliche Vorverarbeitung beider Datensätze erforderlich. Dazu werden die Daten zunächst in Trainings-, Validierungs- und Testdatensätze im prozentualen Verhältnis 70 : 20 : 10 aufgeteilt. Anschließend werden Ausreißer identifiziert und aus den Daten entfernt. Um den Einfluss hochfrequenter Störungen zu reduzieren, werden verrauschte Signale außerdem je nach Hyperparameter-Konfiguration entweder mithilfe eines digitalen Butterworth-Filters oder durch einen gleitenden Mittelwert geglättet \cite{oppenheim.2010}. Abschließend erfolgt eine Normalisierung der Daten auf Basis manuell festgelegter Minima und Maxima, um eine vergleichbare Skalierung sicherzustellen. \par 
+Im Rahmen der Hyperparameter-Optimierung werden neben den unterschiedlichen Varianten zur Datenglättung für die zeitabhängigen Modellansätze verschiedene Fensterbreiten berücksichtigt. Der Modellvergleich und dessen Bewertung erfolgt innerhalb des Hyperparameter-Tuning-Prozesses, indem mehrere Modelltypen auf beiden Datensätzen trainiert und bewertet werden. Eine konsistente und vergleichbare Bewertung der Modelle wird gewährleistet, da beide Datensätze dieselben Features und dasselbe Label enthalten. Zur Sicherstellung der Reproduzierbarkeit sämtlicher Experimente für alle Trainingsläufe wird ein fester Zufallsstartwert (\emph{Seed}) verwendet. Insgesamt umfasst der Vergleich sechs unterschiedliche Modellklassen, die entweder statischen oder dynamischen Charakter besitzen und in Tabelle \ref{tab:models} zusammengefasst sind. 
+%
+\begin{table}[tbp] 
+\centering
+\caption{Übersicht der verwendeten Modelltypen}
+\label{tab:models}
+\begin{tabular}{lll}
+\toprule
+\textbf{Modellname} & \textbf{Dynamik-Charakter} & \textbf{Aktivierungsfunktion} \\
+\midrule
+Lineare Regression & statisch & -- \\
+Lasso-Regression & statisch & -- \\
+MLP & statisch & Tanh \\
+MLP & dynamisch & Tanh \\
+CNN & dynamisch & ReLU \\
+\ac{LSTM} & dynamisch & Tanh \\
+\bottomrule
+\end{tabular}
+\end{table}
+%
+Zusammenfassend werden bei der Hyperparameter-Optimierung mittels Grid-Search-Strategie folgende Parameter variiert:
+%
+\begin{itemize}
+    \item der Modelltyp (siehe Tabelle \ref{tab:models})
+    \item die Art der Datenglättung (keine Glättung, digitale Filterung, gleitender Mittelwert)
+    \item die Anzahl der Neuronen in den Hidden-Layern ($8$, $16$ und $64$), sofern für den Modelltyp anwendbar
+    \item die Fensterbreite mit den Werten $\SI{5}{\second}$, $\SI{10}{\second}$, $\SI{20}{\second}$, $\SI{30}{\second}$ und $\SI{60}{\second}$
+\end{itemize}
+%
+Durch die Kombination dieser Parameter ergeben sich insgesamt über $500$ unterschiedliche Modell- und Hyperparameterkonfigurationen. Die Bewertung der Modelle erfolgt anhand des mittleren quadratischen Fehlers (Mean Squared Error, MSE) und des mittleren absoluten Fehlers (Mean Absolute Error, MAE). Unabhängig davon, auf welchem der beiden Datensätze ein Modell trainiert ist, werden beide Metriken stets auf den Testdaten beider Datensätze berechnet. Diese wechselseitige Evaluation ermöglicht eine robuste Einschätzung der Generalisierungsfähigkeit der Modelle sowohl für stationäre als auch für transiente Prozesszustände.
+Alle Trainings- und Evaluationsläufe wurden auf einem vom Deutschen Forschungszentrum für Künstliche Intelligenz (DFKI) bereitgestellten Linux-Hochleistungsrechner durchgeführt. \par
+%
+\begin{table}[tbp]
+    \centering
+    \caption{Vergleich der besten Modellarchitekturen auf stationären und transienten Daten}
+    \label{tab:model_performance}
+        \begin{tabular}{l cc cc}
+        \toprule
+    & \multicolumn{2}{c}{\textbf{Stationäre Daten}} & \multicolumn{2}{c}{\textbf{Transiente Daten}} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+    \textbf{Modelltyp} & \textbf{Bester MAE} & \textbf{$\Delta$ Best} & \textbf{Bester MAE} &  \textbf{$\Delta$ Best} \\
+        \midrule
+        Lineare Regression & 0,01400 & +87,7\% & 0,01410 & +43,7\% \\
+        Lasso-Regression & 0,02783 & +273,3\% & 0,03205 & +226,6\% \\
+        MLP (statisch) & 0,00745 & \textbf{0,0\%} & 0,01140 & +16,2\% \\
+        MLP (dynamisch) & 0,01017 & +36,5\% & 0.01226 & +25,0\% \\
+        CNN & 0,00822 & +10,3\% & 0,01278 & +30,3\% \\
+        \ac{LSTM} & 0,01084 & +45,4\% & 0,00981 & \textbf{0,0\%} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+%
+\begin{figure}[tbp]
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \input{../plots/model_comparison_stationary.pgf}
+        \caption{Quasi-stationäre Testdaten}
+        \label{fig:violin_stationary}
+    \end{subfigure}
+    
+    % \vspace{20pt}
+    
+    \begin{subfigure}[b]{\textwidth}
+        \centering
+        \input{../plots/model_comparison_transient.pgf}
+        \caption{Transiente Testdaten}
+        \label{fig:violin_transient}
+    \end{subfigure}
+    \caption{Kombinierte Violin- und Boxplots der MAE-Verteilung aller Modelle auf quasi-stationären und transienten Testdaten}
+    \label{fig:violin}
+\end{figure}
+%
+Zur Bewertung der im Rahmen der Hyperparameter-Grid-Search untersuchten Modelle werden alle Konfigurationen auf trainingsdisjunkten Testdaten beider Datensätze evaluiert. Zunächst ist festzuhalten, dass sich der eingesetzte Butterworth-Filter als die effektivste Glättungstechnik erweist, da er die Vorhersageleistung sämtlicher Modellarchitekturen konsistent verbessert. 
+In Bezug auf die Performance der jeweiligen Modellarchitekturen lässt sich grundsätzlich festhalten, dass die erzielten Performances aller Modellarchitekturen sehr dicht beieinander liegen. Die Unterschiede im mittleren absoluten Fehler (MAE) manifestieren sich häufig erst in der dritten oder vierten Nachkommastelle. So wurden geringfügig abweichende Ergebnisse in einem anderen Durchgang der gleichen Versuchsreihe in \cite{marijan.2026} erreicht. Diese hohe Ergebnisdichte impliziert, dass viele Modelle aus statistischer Sicht als gleichwertig betrachtet werden können, wobei minimale Abweichungen plausibel auf geringe Schwankungen im Trainingsprozess zurückzuführen sind. \par
+Grundsätzlich schneiden lineare Modelle, also die lineare Regression und die Lasso-Regression, schlechter ab als ihre nichtlinearen Pendants. Ihre dennoch vergleichsweise gute Leistung deutet auf eine insgesamt moderate Systemkomplexität hin. Gleichzeitig zeigt der direkte Vergleich, dass lineare Modelle nicht in der Lage sind, die vorhandenen nichtlinearen Zusammenhänge in gleichem Maße zu erfassen wie komplexere Modellarchitekturen. \par
+Unter Berücksichtigung der beiden unterschiedlichen Datensätze sind die besten Modellperformances basierend auf dem jeweils minimalen Simulationsfehler für alle untersuchten Modellarchitekturen in Tabelle \ref{tab:model_performance} zusammengefasst. Zusätzlich ist für jedes Modell die relative Abweichung $\Delta$ zum jeweils besten Modell innerhalb derselben Kategorie angegeben. Ergänzt werden die tabellarischen Ergebnisse durch die Verteilungsplots in Abbildung \ref{fig:violin}. Während Abbildung \ref{fig:violin_stationary} die Ergebnisse auf den quasi-stationären Testdaten darstellt, zeigen die Plots in Abbildung \ref{fig:violin_transient} die der transienten Testdaten. Bei den Plots handelt es sich um eine Kombination aus Violin- und Boxplots. Hierbei ermöglicht der Violinplot durch seine Kerndichteschätzung die Visualisierung der strukturellen Eigenschaften der Verteilung. Zusätzlich bietet der Boxplot eine statistische Einordnung und berücksichtigt auch untere „Ausreißer“, die zur Identifikation der besten Ergebnisse relevant sind. \par
+Die Analyse der quasi-stationären Testdaten ergibt, dass sich die Fehlerverteilungen der nichtlinearen Modelle nur marginal unterscheiden. Dennoch ist bei den besten Konfigurationen eine Überlegenheit von Feedforward-Architekturen erkennbar. Insbesondere erzielt das statische MLP hier die beste Performance über alle durchgeführten Experimente. Jedoch zeigen auch die dynamischen Modelle, die zeitliche Fenster berücksichtigen, auf den quasi-stationären Daten insgesamt gute Ergebnisse. Insbesondere das CNN weist eine vergleichbare Performance auf. Das \ac{LSTM} hingegen weist mit seiner rekurrenten Architektur sowohl eine schlechtere Best-Performance als auch eine insgesamt nach oben verschobene Fehlerverteilung auf (siehe Abbildung \ref{fig:violin_stationary}). Dies deutet darauf hin, dass die interne Zustandsrückkopplung des \ac{LSTM} bei stationären und zeitlich invarianten Mustern keinen zusätzlichen Informationsgewinn liefert, sondern zu einem Overfitting auf Rauschanteile führt. \par
+Bei der Betrachtung der transienten Testdaten, die durch dynamische zeitliche Veränderungen charakterisiert sind, ergibt sich ein anderes Bild. Erwartungsgemäß erzielt hier das \ac{LSTM} den geringsten Simulationsfehler, da seine Architektur explizit für die Modellierung sequenzieller Abhängigkeiten konzipiert ist. Die Anzahl der Neuronen je Hidden-Layer in den Modellen mit der besten Performance liegt zwischen $8$ und $16$. Diese relativ geringe Anzahl deutet darauf hin, dass auch bei Auswahl des komplexeren dynamischen Modelltyps eine geringe Komplexität ausreichend ist. Bemerkenswert ist jedoch die hohe Leistungsfähigkeit des statischen MLP auch auf dem dynamischen Datensatz. Das bestperformenste MLP liegt nur knapp hinter dem deutlich komplexeren \ac{LSTM}. Darüber hinaus zeigt die Verteilung der MAEs aller statischen MLP-Konfigurationen eine hohe Dichte im unteren Fehlerbereich, was in Abbildung \ref{fig:violin_transient} deutlich wird. Dass die nicht-linearen dynamischen Modelle in den transienten Bereichen nicht signifikant besser performen, lässt vermuten, dass die Datenerfassung mit lediglich einem Hertz die Dynamik des Systems nicht ausreichend abbildet.\par
+Für die Auswahl einer geeigneten Modellarchitektur zur Beschreibung des betrachteten Prozesses lässt sich zusammenfassend festhalten, dass keine Architektur auf beiden Datensätzen gleichermaßen als überlegen identifiziert werden kann. Daher ist die Generalisierungsfähigkeit über beide Domänen hinweg ein zentrales Auswahlkriterium, welches für den Einsatz des statischen MLP spricht. Die Fehlerverteilungen zeigen außerdem, dass dieses Modell eine hohe Dichte guter Ergebnisse aufweist und somit weniger sensitiv gegenüber suboptimalen Hyperparameter-Wahlen reagiert. Es erweist sich folglich als robuster im Trainingsprozess im Vergleich zu den übrigen Architekturen.
+Darüber hinaus ist zu berücksichtigen, welcher Systemzustand für die angestrebte Anwendung von höherer Relevanz ist. Diese Frage lässt sich zwar nicht allgemeingültig beantworten, im Kontext der Betriebspunktoptimierung kommt dem stationären Zustand jedoch eine größere Bedeutung zu. Schließlich ist bei vergleichbarer Leistungsfähigkeit gemäß dem Prinzip der Parsimonie das einfachere Modell zu bevorzugen. Vor diesem Hintergrund stellt das statische MLP einen geeigneten und ausgewogenen Allrounder für die vorliegende Problemstellung dar.
+%Abbildung des verwendeten MLP
+%
+\section{Concept Drift} \label{sec:concept_drift}
+Datengetriebene Modelle wie das in Abschnitt \ref{sec:modellierung} entwickelte statische MLP setzen implizit voraus, dass die zugrunde liegende Datenverteilung über die Zeit stabil bleibt. In realen Industrieumgebungen ist diese Annahme jedoch häufig verletzt, da sich Prozesse infolge von Verschleiß, Materialwechseln oder veränderten Betriebsbedingungen kontinuierlich verändern können. Dieses Phänomen wird als \ac{CD} bezeichnet und stellt eine zentrale Herausforderung für den dauerhaften Einsatz datengetriebener Modelle dar.
+Aufbauend auf der in Abschnitt \ref{sec:modellierung} eingeführten Prozessmodellierung werden in diesem Abschnitt die theoretischen Grundlagen zum Umgang mit \ac{CD} erarbeitet. Dazu wird zunächst in Abschnitt \ref{sec:terminologie} eine einheitliche Terminologie etabliert und die verschiedenen Ausprägungen von \ac{CD} mathematisch abgegrenzt. Anschließend werden in Abschnitt \ref{sec:drift_erkennung} ausgewählte Methoden zur Erkennung von \ac{CD} im Datenstrom vorgestellt. Abschließend behandelt Abschnitt \ref{sec:drift_adaption} Strategien zur Modelladaption unter \ac{CD}.
+%
+\subsection{Terminologie} \label{sec:terminologie}
+%
+Viele Anwendungen der datengetriebenen Prozessmodellierung arbeiten in der industriellen Praxis in dynamischen Umgebungen, in denen die zugrunde liegenden Prozesse nicht streng stationär sind. Werden die Ursachen dieser Dynamiken während des Modelltrainings nicht erfasst, die den Prozess jedoch erheblich beeinflussen, spricht man von einem so genannten \emph{Hidden Context} \cite{widmer.1996}. Darüber hinaus ist es möglich, dass sich die dem Modell zugrunde liegende Zielfunktion über die Zeit hinweg verändert \cite{hoens.2012}. In der Praxis werden diese veränderlichen Einflüsse bei der Modellentwicklung jedoch häufig nicht ausreichend berücksichtigt. Dies kann sich dann im laufenden Betrieb in einem Leistungsabfall des Modells äußern. \par
+Wie sich dieser Leistungsabfall phänomenologisch darstellen kann, ist in Abbildung \ref{fig:phenomenon} veranschaulicht. Dabei werden vier typische Arten unterschieden, nämlich (\subref{fig:phenomenon_sudden_drift}) die plötzliche Veränderung (engl. \emph{Sudden Drift}), (\subref{fig:phenomenon_incremental_drift}) die inkrementelle Veränderung (engl. \emph{Incremental Drift}), (\subref{fig:phenomenon_gradual_drift}) die schleichende Veränderung (engl. \emph{Gradual Drift}) sowie (\subref{fig:phenomenon_recurring_drift}) die wiederkehrende Veränderung (engl. \emph{Recurring Drift}). Diese systematischen Veränderungen sind jedoch von (\subref{fig:phenomenon_outlier}) Ausreißern und (\subref{fig:phenomenon_noise}) statistischem Rauschen abzugrenzen. \par
+%
+\begin{figure}[ht!]
+    \centering
+    \begin{subfigure}[b]{0.345\textwidth}
+        \centering
+        \input{../plots/phenomenon_sudden_drift.pgf}
+        \caption{Sudden Drift}
+        \label{fig:phenomenon_sudden_drift}
+    \end{subfigure}
+    \hspace{-2em}
+    \begin{subfigure}[b]{0.345\textwidth}
+        \centering
+        \input{../plots/phenomenon_incremental_drift.pgf}
+        \caption{Incremental Drift}
+        \label{fig:phenomenon_incremental_drift}
+    \end{subfigure}
+    \hspace{-2em}
+    \begin{subfigure}[b]{0.345\textwidth}
+        \centering
+        \input{../plots/phenomenon_gradual_drift.pgf}
+        \caption{Gradual Drift}
+        \label{fig:phenomenon_gradual_drift}
+    \end{subfigure}
+    
+    % \vskip\baselineskip
+
+    \begin{subfigure}[b]{0.345\textwidth}
+        \centering
+        \input{../plots/phenomenon_recurring_drift.pgf}
+        \caption{Recurring Drift}
+        \label{fig:phenomenon_recurring_drift}
+    \end{subfigure}
+    \hspace{-2em}
+    \begin{subfigure}[b]{0.345\textwidth}
+        \centering
+        \input{../plots/phenomenon_outlier.pgf}
+        \caption{Ausreißer}
+        \label{fig:phenomenon_outlier}
+    \end{subfigure}
+    \hspace{-2em}
+    \begin{subfigure}[b]{0.345\textwidth}
+        \centering
+        \input{../plots/phenomenon_noise.pgf}
+        \caption{Rauschen}
+        \label{fig:phenomenon_noise}
+    \end{subfigure}
+
+    \caption{Phänomenologisches Verhalten von Datenverschiebungen}
+    \label{fig:phenomenon}
+\end{figure}
+%
+Obwohl das beschriebene Phänomen der Modelldegradation in der Literatur weitreichend bekannt ist, werden für die verschiedenen Ausprägungen oft unterschiedliche und teils inkonsistente Begriffe verwendet. In manchen Fällen finden sich sogar identische Begrifflichkeiten für gänzlich unterschiedliche Effekte \cite{bayram.2022}. Häufig verwendete Begriffe stellen in diesem Kontext \emph{Dataset Shift} und \emph{Concept Drift} dar. Grundlegend ist jedoch jede Art von Drift oder Shift durch eine spezifische Veränderung der zugrunde liegenden Datenverteilung gekennzeichnet. Der Begriff des Dataset Shift wird dabei verwendet, um das Abweichen der Datenverteilung zwischen einem statischen Trainings- und einem Test-Szenario zu beschreiben \cite{quinonero.2008}. Concept Drift hingegen bezieht sich primär auf den zeitlichen Verlauf von Verteilungsänderungen im Kontext von kontinuierlichen Datenströmen und Online-Learning-Szenarien \cite{gama.2014}. Webb et al. bezeichnen den Concept Drift im Bereich des Stream-Learnings als das direkte Pendant zum Dataset Shift im Batch-Learning \cite{webb.2016}. \par
+Obwohl es sich bei der vorliegenden Problemstellung methodisch um Batch-Learning handelt, resultiert die in Abschnitt \ref{sec:motivation} beschriebene Veränderung aus einem zeit-kontinuierlichem Datenstrom. Daher fokussiert sich diese Arbeit auf den Concept Drift. Dazu soll zunächst definiert werden, was unter \emph{Concept} zu verstehen ist. Gama et al. definieren in dem Zusammenhang ein Concept $C_t$ als multivariate Wahrscheinlichkeitsverteilung der Features $X$ und der Labels $y$ zu einem bestimmten Zeitpunkt $t$ \cite{gama.2014, webb.2016}. Damit gilt:
+%
+\begin{equation} \label{eq:concept}
+    C_t = P_t(X, y)
+\end{equation}
+%
+Im Zusammenhang der Definition des Concept Drifts ist anzumerken, dass auch hier in der Literatur einige Begriffe existieren, die als unterschiedliche Ausprägungsformen des Concept Drifts verstanden werden können. Dazu zählen \emph{Permanent Drift}, \emph{Temporary Drift}, \emph{Sampling Shift}, \emph{Feature Change}, \emph{Conditional Change}, \emph{Global Drift}, \emph{Label Shift} und \emph{Target Shift}, um nur eine Auswahl zu nennen \cite{bayram.2022}.
+Das Fehlen einer einheitlichen Terminologie wurde 2012 erstmals maßgeblich von Moreno-Torres et al. thematisiert \cite{moreno-torres.2012}. \par
+Um die terminologische Unschärfe aufzulösen, ist es daher zielführend, die verschiedenen Effekte mathematisch voneinander abzugrenzen. Einen solchen Ansatz verfolgen Bayram et al., die die Begriffe der Literatur anhand ihrer mathematischen Definitionen strukturieren \cite{bayram.2022}. Basierend auf dieser Systematik sind die verschiedenen Arten von Drifts in Tabelle \ref{tab:cd_definitionen} aufgeführt, wobei für jede mathematische Definition je ein in der Literatur verwendeter Begriff ausgewählt wurde.
+
+\begin{table}[tb!]
+    \centering
+    \renewcommand{\arraystretch}{1.2} % Zeilenabstand
+    \caption{Terminologie und ihre zugehörigen mathematischen Definitionen}
+    \begin{tabular}{rc}
+        \toprule
+        \textbf{Terminologie} & \textbf{Mathematische Definition} \\ 
+        \midrule
+        Covariate Shift & \parbox{10cm}{
+            \begin{equation} \label{eq:covariate_shift} 
+                P_t(X) \neq P_{t+\Delta t}(X)
+            \end{equation}} \\
+        Prior probability Shift & \parbox{10cm}{
+            \begin{equation} \label{eq:prior_prob_shift}
+                P_t(y) \neq P_{t+\Delta t}(y)
+            \end{equation}} \\
+        Concept Drift & \parbox{10cm}{
+            \begin{equation} \label{eq:concept_drift}
+                P_t(X, y) \neq P_{t+\Delta t}(X, y)
+            \end{equation}} \\
+        Real Concept Drift & \parbox{10cm}{
+            \begin{equation} \label{eq:real_concept_drift}
+                P_t(y \mid X) \neq P_{t+\Delta t}(y \mid X)
+            \end{equation}} \\
+        Actual Drift & \parbox{10cm}{
+            \begin{equation} \label{eq:actual_drift}
+                P_t(y \ | \ X) \neq P_{t+w}(y \ | \ X) \text{ und } P_t(X) = P_{t+\Delta t}(X) 
+            \end{equation}} \\
+        Virtual Drift & \parbox{10cm}{
+            \begin{equation} \label{eq:virtual_drift}
+                P_t(y \ | \ X) = P_{t+\Delta t}(y \ | \ X) \text{ und } P_t(X) \neq P_{t+\Delta t}(X) 
+            \end{equation}} \\ 
+        \bottomrule
+\end{tabular}
+\label{tab:cd_definitionen}
+\vspace{3mm}
+\end{table}
+%
+Demzufolge lässt sich Concept Drift formal gemäß \eqref{eq:concept_drift} als die Veränderung der multivariaten Verteilung $P$ der Features $X$ und der Labels $y$ zwischen zwei Zeitpunkten $t$ und $t + \Delta t$ beschreiben. 
+Wird lediglich die Veränderung der Verteilung der Features betrachtet, also der veränderlichen Kovariablen (engl. covariate), ist gemäß \eqref{eq:covariate_shift} die Rede von \emph{Covariate Shift}. Analog wird beim \emph{Prior probability Shift} gemäß \eqref{eq:prior_prob_shift} ausschließlich die Veränderung der Zielgröße betrachtet. 
+Für die genauere Betrachtung der verschiedenen Formen von Concept Drift sind \emph{Real Concept Drift} gemäß \eqref{eq:real_concept_drift}, \emph{Actual Drift} gemäß \eqref{eq:actual_drift} und \emph{Virtual Drift} gemäß \eqref{eq:virtual_drift} zu unterscheiden. Ihnen gemein ist die Betrachtung der a-posteriori-Wahrscheinlichkeitsverteilung der Labels $P_t(y \mid X)$ zu verschiedenen Zeitpunkten. Gemäß dem Satz von Bayes lässt sich die bedingte Wahrscheinlichkeit wie folgt umformulieren:
+%
+\begin{equation} \label{eq:bayes}
+    P_t(y \mid X) = \frac{P_t(X \mid y) \cdot P_t(y)}{P_t(X)}
+\end{equation}
+%
+Dabei bezeichnet $P_t(y \mid X)$ die a-posteriori-Wahrscheinlichkeitsverteilung der Labels und $P_t(X)$ die Wahrscheinlichkeitsverteilung der Eingabedaten. $P_t(y)$ stellt weiter die a-priori-Wahrscheinlichkeitsverteilung der Labels und $P_t(X | y)$ die bedingte bedingte Wahrscheinlichkeitsdichteverteilung (engl. Likelihood) dar.
+% offline learning vs online learning
+% stream learning vs Batch learning
+% Entwicklung offline learning -> online learning
+%
+\subsection{Drift-Erkennung} \label{sec:drift_erkennung}
+%
+\begin{figure}[hbt!]
+    \centering
+    \includesvg[width=\linewidth]{Grafiken/drift_detection.svg}
+    \caption{Methoden zur Erkennung von \ac{CD} angelehnt an \cite{bayram.2022}}
+    \label{fig:drift_detection}
+\end{figure}
+%
+Um einen \ac{CD} gemäß \eqref{eq:concept_drift} in einem kontinuierlichen Datenstrom festzustellen, existiert in der Literatur eine Vielzahl von Erkennungsverfahren, die als Drift-Detektoren bezeichnet werden. Im Kern basieren die Detektionsmethoden unabhängig von ihrer algorithmischen Implementierung auf statistischen Hypothesentests \cite{bayram.2022}. Hierfür wird kontinuierlich eine Teststatistik berechnet, welche die strukturelle Ähnlichkeit oder Abweichung zwischen einer historischen Referenzdatenmenge $\mathcal{D}_t$ und einer aktuell erhobenen Datenmenge $\mathcal{D}_{t+w}$ zu einem späteren Zeitpunkt $t+w$ quantifiziert. Beide Datenmengen bestehen aus Paaren von Eingangsvariablen $X$ und zugehörigen Zielvariablen $y$ und stellen empirische Stichproben der jeweiligen zugrunde liegenden gemeinsamen Wahrscheinlichkeitsverteilungen dar.\par
+Die zugrunde liegende Nullhypothese $H_0$ nimmt stets an, dass sich die wahren Wahrscheinlichkeitsverteilungen der beiden Datenmengen nicht signifikant unterscheiden – folglich also kein \ac{CD} vorliegt. Formal lässt sich dies durch einen Hypothesentest und eine Teststatistik $D$ ausdrücken:
+%
+\begin{equation}
+    H_0: P(\mathcal{D}_t) = P(\mathcal{D}_{t+w}) \quad \text{gegen} \quad H_1: P(\mathcal{D}_t) \neq P(\mathcal{D}_{t+w})
+    \label{eq:drift_hypothesis}
+\end{equation}
+%
+Um diese Hypothese zu überprüfen, wird ein empirischer Wert der Teststatistik $D(\mathcal{D}_t, \mathcal{D}_{t+w})$ berechnet und mit einem vordefinierten Schwellenwert $\lambda$ abgeglichen \cite{dries.2009}. Solange $D(\mathcal{D}_t, \mathcal{D}_{t+w}) \leq \lambda$ gilt, kann $H_0$ nicht verworfen werden und das System geht von einer stabilen Verteilung aus. Wird der Schwellenwert hingegen überschritten, also $D > \lambda$, wird die Nullhypothese zum gewählten Signifikanzniveau verworfen und das System deklariert einen \ac{CD}. \par
+Abhängig von der Teststatistik können verschiedene Methoden der Drift-Erkennung unterschieden werden, wie in Abbildung \ref{fig:drift_detection} dargestellt \cite{bayram.2022}. Die rot markierten Pfade stellen dabei diejenigen Ansätze dar, die in dieser Arbeit verwendet wurden. Allen Drift-Detektionsmethoden liegt dieselbe Nullhypothese zugrunde, wonach keine signifikante Änderung der Datenverteilung vorliegt. Die Unterschiede ergeben sich hingegen aus der Wahl der Teststatistik und der Art der Auswertung des Datenstroms. \par
+Bei der \emph{Datenverteilungs-basierten Erkennung} werden Distanzmaße verwendet, um die Ähnlichkeit zwischen den Datenverteilungen in zwei verschiedenen Zeitfenstern abzuschätzen \cite{kifer.2004}. Zwar ist dieser Ansatz auch für ungelabelte Daten geeignet, es wird jedoch nicht berücksichtigt, ob die Änderungen tatsächlich die Vorhersageleistung des Modells beeinflussen \cite{gama.2014}.
+\emph{Multiple hypothesis-based Drift-Detektoren} stellen hybride Verfahren dar, die mehrere Detektionsmethoden parallel oder aufeinanderfolgend auswerten \cite{lu.2018}. Während parallele Ansätze Entscheidungsregeln kombinieren, nutzen hierarchische Verfahren eine Struktur aus Warnung und Validierung. 
+Unter \emph{Kontext-basierter Drift-Erkennung} lassen sich solche Ansätze zusammenfassen, die klassische Detektoren um kontextuelle Informationen aus System oder Modell erweitern \cite{bayram.2022}. Der Begriff kann hier als Sammelbegriff für unterschiedliche methodische Ausprägungen verstanden werden. \par
+Ansätze der \emph{Performance-basierten Erkennung} verfolgen Abweichungen im Output-Fehler des Modells, um Veränderungen zu erkennen. Ihr Hauptvorteil besteht darin, dass so Drifts nur detektieren werden, wenn auch die Leistung beeinträchtigt wird. Wie in Abbildung \ref{fig:drift_detection} veranschaulicht, lassen sich diese Methoden je nach der zur Erkennung von Leistungseinbrüchen verwendeten Strategie weiter in folgende Kategorien einteilen: \emph{statistische Prozesskontrolle}, \emph{Fenster-basierte Verfahren} und \emph{Ensemble-Learning}. \par
+Bei der statistischen Prozesskontrolle wird die Qualität des (kontinuierlichen) Lernprozesses anhand der zeitlichen Entwicklung der Fehlerrate überwacht. Überschreitet die Fehlerrate eine statistisch definierte Schwelle, wird ein \ac{CD} detektiert.
+Die wohl am häufigsten zitierte Methode dieser Kategorie ist die so genannte \textbf{Drift-Erkennungsmethode (DDM)} von Gama et al. \cite{gama.2004}. 
+DDM überwacht die Fehlerrate im Datenstrom und basiert auf der Annahme, dass jede Modellentscheidung entweder korrekt oder fehlerhaft ist. Entsprechend werden Fehlklassifikationen als Bernoulli-Zufallsvariable modelliert, sodass pro Beobachtung lediglich zwei Ausprägungen (Richtig oder Falsch) möglich sind. 
+Nach $i$ Beobachtungen werden die Fehlerrate $p_i$ sowie deren Standardabweichung 
+%
+\begin{equation} \label{eq:std_ddm}
+    \sigma_i = \sqrt{\frac{p_i(1-p_i)}{i}}
+\end{equation}
+%
+geschätzt. Unter der Annahme eines stationären Zustands und für eine hinreichend große Anzahl an Beobachtungen kann die zugrunde liegende Binomialverteilung durch eine Normalverteilung approximiert werden. DDM speichert dabei die bislang minimal beobachteten Fehlerraten $p_{\mathrm{min}}$ und Standardabweichungen $\sigma_{\mathrm{min}}$, die fortlaufend aktualisiert werden, sofern $p_i+\sigma_i < $p_{\mathrm{min}}$⁡+\sigma_{\mathrm{min}}$.
+Ein Warnzustand wird dann ausgelöst, wenn die aktuelle Fehlerrate signifikant vom bisherigen Minimum abweicht, konkret wenn $p_i+\sigma_i\ge $p_{\mathrm{min}}$⁡+2 \ \sigma_{\mathrm{min}}$. Überschreitet die Abweichung eine Schwelle von $p_i+\sigma_i \ge $p_{\mathrm{min}}$ + 3 \ \sigma_{\mathrm{min}}$, wird ein \ac{CD} detektiert. Der Warnzustand erlaubt dabei eine frühzeitige Indikation eines potenziellen Drifts und wird häufig zur Anpassung des Beobachtungsfensters genutzt. \par
+Eine Erweiterung der DDM stellt die \textbf{Early Drift Detection Method (EDDM)} dar \cite{baena.2006}. EDDM wurde insbesondere zur verbesserten Erkennung gradueller Konzeptdrifts entwickelt, ohne dabei bei abrupten Driftformen an Performance einzubüßen. Im Gegensatz zu DDM analysiert EDDM die zeitlichen Abstände zwischen aufeinanderfolgenden Fehlklassifikationen. Die zentrale Annahme ist dabei, dass ein gradueller Drift zu einer sukzessiven Verkürzung der Abstände zwischen aufeinanderfolgenden Fehlklassifikationen führt.
+Für jedes Zeitintervall $i$ wird daher die mittlere Distanz zwischen zwei Fehlklassifikationen $p'_i$ sowie deren Standardabweichung $\sigma'_i$ geschätzt. Während des Lernprozesses speichert EDDM die Referenzwerte $p'_{\max}$ und $\sigma'_{\max}$, sofern $p'_i + 2 \ \sigma'_i > p'_{\max} + 2\,\sigma'_{\max}$. Diese Referenzwerte entsprechen dem Zustand, in dem das Modell das zugrunde liegende Konzept am besten approximiert.
+Zur Drift-Erkennung sei die dimensionslose Kennzahl
+%
+\begin{equation}
+    \label{eq:eddm_ratio}
+    r_i = \frac{p'_i + 2\,\sigma'_i}{p'_{\max} + 2\,\sigma'_{\max}}
+\end{equation}
+%
+definiert, welche den aktuellen Abstandsausdruck relativ zum bislang maximal beobachteten Referenzwert beschreibt. Auf Basis dieser Größe werden zwei Schwellenwerte unterschieden:
+%
+\begin{itemize}
+    \item Ein Warnzustand wird ausgelöst, wenn $r_i < \alpha$.
+    \item Ein Konzeptdrift wird detektiert, wenn $r_i < \beta$, wobei $\beta < \alpha$.
+\end{itemize}
+%
+Nach Erreichen des Driftzustands werden die Referenzwerte $p'_{\max}$ und $\sigma'_{\max}$ zurückgesetzt.
+\par
+Bei Fenster-basierten Verfahren wird ein Datenstrom in Referenz- und Detektionsfenster geteilt. Drifts werden anhand signifikanter Unterschiede von statistischen Tests zwischen beiden Fenstern erkannt. Die Fenster können dabei zeit- oder größenbasiert definiert und flexibel positioniert werden.
+Ein Fenster-basierter Ansatz ist das \textbf{\ac{ADWIN}} von Bifet et al. (2007) \cite{bifet.2007}. Dabei wird \ac{CD} anhand sequentieller statistischer Hypothesentests über ein adaptives Datenfenster erkannt. Ziel des Algorithmus ist es, ein Fenster $W$ so groß wie möglich zu halten, solange die Nullhypothese einer konstanten Erwartung innerhalb dieses Fensters nicht verworfen werden kann. Dazu wird $W$ fortlaufend in zwei aufeinanderfolgende Teilfenster $W_0$ und $W_1$ mit Längen $n_0$ und $n_1$ unterteilt, sodass $n = n_0 + n_1$. Mit der Zerlegung des aktuellen Fensters wird geprüft, ob sich die beobachteten Mittelwerte $\hat{\mu}_{W_0}$ und $\hat{\mu}_{W_1}$ signifikant unterscheiden. Die Entscheidungsregel basiert auf der Hoeffding-Schranke $\varepsilon_{\mathrm{cut}}$, mit 
+%
+\begin{equation} \label{eq:adwin_threshold}
+    \varepsilon_{\mathrm{cut}} = \sqrt{\frac{1}{2m} \cdot \ln(\frac{4}{\delta'})} \ \text{,} \quad m = \frac{1}{\nicefrac{1}{n_0} + \nicefrac{1}{n_1}} \quad \text{und} \quad \delta'=\frac{\delta}{n} \ \text{,}
+\end{equation}
+%
+wobei $m$ das harmonische Mittel der Fensterlängen darstellt und $\delta$ das globale Signifikanzniveau des Hypothesentests bezeichnet. Das angepasste Niveau $\delta'$ wird zur Kontrolle multipler Hypothesentests eingeführt. Überschreitet die Differenz der Mittelwerte den Schwellenwert $\varepsilon_{\mathrm{cut}}$, wird die Nullhypothese verworfen und auf einen \ac{CD} geschlossen, woraufhin der ältere Fensteranteil $W_0$ entfernt wird. Andernfalls bleibt das Fenster unverändert, sodass sich das Fenster durch neue Datenpunkte sukzessive vergrößert. Als Schätzung der aktuellen Erwartung gibt \ac{ADWIN} kontinuierlich den empirischen Mittelwert $\hat{\mu}_W$ des aktuellen Fensters aus. Das zugrunde liegende Prinzip von \ac{ADWIN} ist unabhängig vom konkreten statistischen Test formuliert und erlaubt alternative Formen einer Teststatistik. \par
+%
+\begin{figure}[hbt!]
+    \centering
+    \includesvg[width=\linewidth]{Grafiken/KSWIN_memory.svg}
+    \caption{Speicherstrategie von KSWIN angelehnt an \cite{raab.2020}}
+    \label{fig:KSWIN_memory}
+\end{figure}
+%
+Ein weiterer Fenster-basierter Ansatz zur Erkennung von \ac{CD} ist das \textbf{Kolmogorov-Smirnov Windowing (KSWIN)} von Raab et al. (2020) \cite{raab.2020}. KSWIN basiert auf einem Gleitfenster fester Größe, das kontinuierlich die zuletzt beobachteten Datenpunkte eines Datenstroms speichert und mithilfe eines nicht-parametrischen statistischen Tests auf Verteilungsänderungen untersucht. Hierzu wird ein Fenster $W$ der Größe $n$ geführt, das mit jedem neu eintreffenden Datenpunkt aktualisiert wird, indem der älteste Wert entfernt und der neue Wert hinzugefügt wird. Aus diesem Fenster werden zwei Teilfenster konstruiert: Ein aktuelles Detektionsfenster $W_1$, das die $r$ zuletzt eingetroffenen Datenpunkte enthält, sowie ein Referenzfenster $W_0$, das ebenfalls aus $r$ Datenpunkten besteht. Diese werden uniform zufällig aus dem älteren Bereich des Fensters $W$ gezogen, der nicht zu $W_1$ gehört. Auf diese Weise soll $W_0$ die historische Datenverteilung approximieren, ohne Annahmen über deren Form zu treffen. Die Speicherstrategie ist in Abbildung \ref{fig:KSWIN_memory} veranschaulicht. \par
+Zur Drift-Erkennung wird der \emph{Kolmogorov-Smirnov-Test} zwischen den empirischen Verteilungsfunktionen der beiden Teilfenster $W_0$ und $W_1$ durchgeführt \cite{lopes.2011}. Der Test basiert auf der maximalen absoluten Abweichung
+%
+\begin{equation}
+    \operatorname{dist}(W_0,W_1) = \sup_x \left| F_{W_0}(x) - F_{W_1}(x) \right| \ \text{,}    
+\end{equation}
+%
+wobei $F_{W_0}$ und $F_{W_1}$ die empirischen kumulativen Verteilungsfunktionen der jeweiligen Fenster darstellen. Überschreitet diese Distanz einen durch ein Signifikanzniveau bestimmten Schwellenwert, wird die Nullhypothese gleicher Verteilungen verworfen und auf einen \ac{CD} geschlossen.
+%
+\subsection{Drift-Adaption} \label{sec:drift_adaption}
+Wie einleitend in Abschnitt \ref{sec:motivation} exemplarisch dargestellt, kann die Modellperformance durch \ac{CD} beeinflusst werden. Durch Methoden zur Erkennung von \ac{CD}, wie sie in Abschnitt \ref{sec:drift_erkennung} beschrieben sind, lässt sich der Drift zwar detektieren, das durch den Drift beeinträchtigte Modell bleibt dabei jedoch unverändert. Zur Verbesserung der Performance bedarf es folglich einer Anpassung des Modells. 
+Einen umfassenden und bis heute maßgeblichen Überblick über Strategien zur Anpassung von Modellen unter \ac{CD}, der in der Literatur häufig als Referenz herangezogen wird, liefern Gama et al. in ihrer Survey-Arbeit zur \ac{CD}-Adaption \cite{gama.2014}. \par
+Zunächst hängt die konkrete Ausgestaltung einer Anpassung gegenüber \ac{CD} davon ab, welche Informationen im Datenstrom vorgehalten und wie sie verwaltet werden. Bei der Speicherung von Informationen im Datenstrom können grundlegend zwei Speichertypen unterschieden werden: dem Kurz- und dem Langzeitspeicher. Beim Kurzzeitspeicher handelt es sich um die Daten selbst, die verarbeitet werden. Der Langzeitspeicher hingegen stellt eine Generalisierung von Daten dar, nämlich das Modell. Beide Speichergrundlagen sind essenziell für die Handhabung von \ac{CD}. 
+Der Kurzzeitspeicher bestimmt, welche aktuellen Informationen beim Anpassungsprozess verwendet werden sollen, etwa einzelne Datenpunkte oder gleitende Fenster fixer oder variabler Größe. Ergänzend regeln Vergessensmechanismen, wie ältere Informationen verworfen werden. Hier wiederum kann zwischen abrupten und graduellen Ansätzen unterschieden werden. Ein schnelleres Vergessen erhöht in diesem Zusammenhang zwar die Reaktionsfähigkeit gegenüber Drifts, geht jedoch mit einer höheren Anfälligkeit gegenüber Rauschen einher. \par
+Der zweite Speichertyp – das Modell – steht im Zentrum der Anpassung. Ziel modellbasierter Anpassungsstrategien ist es, die im Modell verankerte Generalisierung an veränderte Zusammenhänge anzupassen und dadurch die Prädiktionsgüte unter Driftbedingungen zu verbessern bzw. wiederherzustellen. Bei der Adaption gilt als eine besondere Herausforderung das so genannte \emph{Stability-plasticity-dilemma}, dem Spagat zwischen der Fähigkeit eines Modells, neues Wissen aufzunehmen (Plastizität) und vorhandenes Wissen zu erhalten (Stabilität). Hierbei das richtige Gleichgewicht zu finden ist von zentraler Bedeutung, da zu viel Plastizität zu katastrophalem Vergessen führen kann, also dem Verlust bereits erlernter Informationen, wenn neue Informationen erfasst werden. Gleichzeitig kann zu viel Stabilität dafür sorgen, dass Anpassungen an Drifts nicht wirksam sind. \par
+Zur Anpassung eines Modells an veränderte Datenverteilungen existieren grundsätzlich zwei Strategien. Einerseits kann ein vollständiges Neutrainieren erfolgen, bei dem auf Basis gepufferter, aktualisierter Daten ein neues Modell erzeugt und das bisherige Modell verworfen wird. Dieser Ansatz wird häufig als \emph{Full Relearning} bezeichnet und dient in der Forschung als robuste Referenz, ist jedoch mit erhöhtem Rechenaufwand und Datenbedarf verbunden. Insbesondere bei Notwendigkeit von statistischer Versuchsplanung zur Datenakquise stellt dies eine große Herausforderung dar. 
+Andererseits kann das bestehende Modell inkrementell angepasst werden, indem neue Beobachtungen schrittweise in das Modell integriert werden. Dieses Vorgehen ist dem Bereich des \emph{Continual Learning} bzw. des \emph{Incremental Learning} zuzuordnen und zielt darauf ab, eine kontinuierliche Modelladaption ohne vollständig neues Modelltraining zu ermöglichen. Gerade unter \ac{CD} stellt diese Strategie jedoch besondere Anforderungen, da fortlaufende Updates das Risiko katastrophalen Vergessens erhöhen und ein sorgfältiges Austarieren von Stabilität und Plastizität erfordern. In der Praxis spiegelt sich dieser Zielkonflikt in einem Trade-off zwischen Adaptionsgeschwindigkeit, Robustheit und Validierbarkeit wider. Hybride Ansätze versuchen hier eine Lösung dieses Zielkonfliktes zu bieten \cite{gama.2004}. \par
+Neben der Art der Modellanpassung ist entscheidend, wann bzw. wodurch diese ausgelöst wird. Abhängig davon, ob eine Anpassung gezielt durch erkannte Veränderungen erfolgt oder unabhängig davon kontinuierlich durchgeführt wird, können folgende Ansätze unterschieden werden:
+%
+\begin{itemize}
+    \item \textbf{Aktive Anpassung (engl. auch informed adaptation)} \newline
+    Die ergebnisgetriebene Anpassung wird durch den Output der Drift-Erkennung ausgelöst und kann entsprechend zielgerichtet erfolgen. Dieser reaktive Charakter macht sie jedoch vollständig abhängig von der Detektionsqualität, da nicht erkannte Drifts keine Anpassung auslösen. Die Methode eignet sich daher vor allem für plötzliche, klar identifizierbare Drifts.
+    \item \textbf{Passive Anpassung (engl. auch blind adaptation)} \newline
+    Die Anpassung erfolgt kontinuierlich und unabhängig von etwaigen Driftinformationen. Der Ansatz ist sehr einfach anzuwenden, da es keiner Drift-Erkennung bedarf. Bei zu niedriger Anpassungsfrequenz besteht jedoch das Risiko, auf bereits eingetretene Drifts nicht zu reagieren. Bei zu hoher Anpassungsfrequenz wird das Modell ohne vorliegenden Drift ohne Notwendigkeit angepasst, was zu Overfitting führen kann und das katastrophale Vergessen begünstigt. Diese Methode ist proaktiv und daher besonders geeignet für schleichende oder nicht klar trennbare Drifts, da die Anpassung kontinuierlich und unabhängig von einer Drift-Erkennung erfolgt.
+\end{itemize}
+%
+Der Langzeitspeicher kann darüber hinaus auch so gestaltet sein, dass mehrere Modelle parallel vorgehalten und angepasst werden. Ein etablierter Ansatz ist dabei das Ensemble-Learning, bei dem eine Zusammenstellung aus mehreren Modellen gemeinsam eine Vorhersage generiert. Adaptive Ensembles basieren in dem Kontext auf der Annahme, dass Daten während einer Veränderung aus einer gemischten Verteilung stammen, die als gewichtete Kombination von Verteilungen betrachtet werden kann, die die Zielkonzepte charakterisieren. Jedes einzelne Modell bildet dabei eine Verteilung ab \cite{scholz.2007}. Die endgültige Vorhersage ergibt sich typischerweise als gewichtete Kombination der Einzelvorhersagen, wobei die Gewichtung die Leistung der jeweiligen Modelle auf den neuesten Daten widerspiegelt und im zeitlichen Verlauf angepasst wird.
+Bei wiederkehrenden Konzeptdrifts bieten Ensemble-Ansätze in Kombination mit einer geeigneten Modellverwaltung besondere Vorteile. Dadurch kann der mit erneutem Training verbundene Rechenaufwand deutlich reduziert und die Reaktionsfähigkeit des Systems auf bereits bekannte Konzepte verbessert werden. Die konkrete Behandlung solcher rekurrenten Drifts ist dabei stark vom eingesetzten Verfahren und der Driftcharakteristik abhängig.
+
+% TODO: 
+% Lima als Quelle für CD in Regressionsmodellen
+% Abbildung Adaptation
+% Abbildung LTH
+% global vs local model replacement ?
+% Fully parameter updating bs partial parameter updating
