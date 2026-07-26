@@ -15,7 +15,7 @@ In Abbildung \ref{fig:zementindustrie} sind die beschriebenen Prozessschritte de
 \begin{figure}[htb!]
     \vspace{5mm}
     \centering
-    \includesvg[width=\linewidth]{../graphics/Mühlen_in_Zementindustrie.svg}
+    \includesvg[width=\linewidth]{\graphdir Mühlen_in_Zementindustrie.svg}
     \caption{Schematische Abbildung der konsekutiven Prozessschritte in der Zementherstellung, Abbildung von Gebr. Pfeiffer SE}
     \label{fig:zementindustrie}
 \end{figure}
@@ -27,7 +27,7 @@ Der prinzipielle Aufbau einer VRM ist in Abbildung \ref{fig:muehle} schematisch 
 \begin{figure}[hbt!]
     \centering
     \hspace*{-4cm}
-    \includesvg[width=0.8\linewidth]{Grafiken/MVR-C_6.svg}
+    \includesvg[width=0.8\linewidth]{\graphdir MVR-C_6.svg}
     \caption{Schematische Abbildung einer VRM vom Typ MVR der Firma Gebr. Pfeiffer SE}
     \label{fig:muehle}
 \end{figure}
@@ -72,7 +72,7 @@ Da jede Stellgröße innerhalb eines definierten Wertebereichs variiert werden k
 %
 \begin{figure}[hbt!]
     \centering
-    \includesvg[width=0.9\linewidth]{Grafiken/GPlink.svg}
+    \includesvg[width=0.9\linewidth]{\graphdir GPlink.svg}
     \caption{Schematische Abbildung der Datenverarbeitung mit GPlink/GPpro}
     \label{fig:gplink}
 \end{figure}
@@ -409,7 +409,7 @@ Dabei bezeichnet $P_t(y \mid X)$ die a-posteriori-Wahrscheinlichkeitsverteilung 
 %
 \begin{figure}[hbt!]
     \centering
-    \includesvg[width=\linewidth]{Grafiken/drift_detection.svg}
+    \includesvg[width=\linewidth]{\graphdir drift_detection.svg}
     \caption{Methoden zur Erkennung von \ac{CD} angelehnt an \cite{bayram.2022}}
     \label{fig:drift_detection}
 \end{figure}
@@ -437,8 +437,8 @@ Nach $i$ Beobachtungen werden die Fehlerrate $p_i$ sowie deren Standardabweichun
     \sigma_i = \sqrt{\frac{p_i(1-p_i)}{i}}
 \end{equation}
 %
-geschätzt. Unter der Annahme eines stationären Zustands und für eine hinreichend große Anzahl an Beobachtungen kann die zugrunde liegende Binomialverteilung durch eine Normalverteilung approximiert werden. DDM speichert dabei die bislang minimal beobachteten Fehlerraten $p_{\mathrm{min}}$ und Standardabweichungen $\sigma_{\mathrm{min}}$, die fortlaufend aktualisiert werden, sofern $p_i+\sigma_i < $p_{\mathrm{min}}$⁡+\sigma_{\mathrm{min}}$.
-Ein Warnzustand wird dann ausgelöst, wenn die aktuelle Fehlerrate signifikant vom bisherigen Minimum abweicht, konkret wenn $p_i+\sigma_i\ge $p_{\mathrm{min}}$⁡+2 \ \sigma_{\mathrm{min}}$. Überschreitet die Abweichung eine Schwelle von $p_i+\sigma_i \ge $p_{\mathrm{min}}$ + 3 \ \sigma_{\mathrm{min}}$, wird ein \ac{CD} detektiert. Der Warnzustand erlaubt dabei eine frühzeitige Indikation eines potenziellen Drifts und wird häufig zur Anpassung des Beobachtungsfensters genutzt. \par
+geschätzt. Unter der Annahme eines stationären Zustands und für eine hinreichend große Anzahl an Beobachtungen kann die zugrunde liegende Binomialverteilung durch eine Normalverteilung approximiert werden. DDM speichert dabei die bislang minimal beobachteten Fehlerraten $p_{\mathrm{min}}$ und Standardabweichungen $\sigma_{\mathrm{min}}$, die fortlaufend aktualisiert werden, sofern $p_i+\sigma_i < p_{\mathrm{min}} + \sigma_{\mathrm{min}}$.
+Ein Warnzustand wird dann ausgelöst, wenn die aktuelle Fehlerrate signifikant vom bisherigen Minimum abweicht, konkret wenn $p_i+\sigma_i\ge p_{\mathrm{min}} + 2 \ \sigma_{\mathrm{min}}$. Überschreitet die Abweichung eine Schwelle von $p_i+\sigma_i \ge p_{\mathrm{min}} + 3 \ \sigma_{\mathrm{min}}$, wird ein \ac{CD} detektiert. Der Warnzustand erlaubt dabei eine frühzeitige Indikation eines potenziellen Drifts und wird häufig zur Anpassung des Beobachtungsfensters genutzt. \par
 Eine Erweiterung der DDM stellt die \textbf{Early Drift Detection Method (EDDM)} dar \cite{baena.2006}. EDDM wurde insbesondere zur verbesserten Erkennung gradueller Konzeptdrifts entwickelt, ohne dabei bei abrupten Driftformen an Performance einzubüßen. Im Gegensatz zu DDM analysiert EDDM die zeitlichen Abstände zwischen aufeinanderfolgenden Fehlklassifikationen. Die zentrale Annahme ist dabei, dass ein gradueller Drift zu einer sukzessiven Verkürzung der Abstände zwischen aufeinanderfolgenden Fehlklassifikationen führt.
 Für jedes Zeitintervall $i$ wird daher die mittlere Distanz zwischen zwei Fehlklassifikationen $p'_i$ sowie deren Standardabweichung $\sigma'_i$ geschätzt. Während des Lernprozesses speichert EDDM die Referenzwerte $p'_{\max}$ und $\sigma'_{\max}$, sofern $p'_i + 2 \ \sigma'_i > p'_{\max} + 2\,\sigma'_{\max}$. Diese Referenzwerte entsprechen dem Zustand, in dem das Modell das zugrunde liegende Konzept am besten approximiert.
 Zur Drift-Erkennung sei die dimensionslose Kennzahl
@@ -468,7 +468,7 @@ wobei $m$ das harmonische Mittel der Fensterlängen darstellt und $\delta$ das g
 %
 \begin{figure}[hbt!]
     \centering
-    \includesvg[width=\linewidth]{Grafiken/KSWIN_memory.svg}
+    \includesvg[width=\linewidth]{\graphdir KSWIN_memory.svg}
     \caption{Speicherstrategie von KSWIN angelehnt an \cite{raab.2020}}
     \label{fig:KSWIN_memory}
 \end{figure}

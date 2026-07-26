@@ -828,7 +828,7 @@
 % Name des aktuellen Unterverzeichnisses
 \newcommand\chaptersubdir{}
 % Kapiteldatei aus Unterverzeichnis einbinden
-\newcommand\includefile[2]{
+\newcommand\includefile[2][.]{
  \renewcommand{\chaptersubdir}{#1}
  \input{#1/#2}
 }

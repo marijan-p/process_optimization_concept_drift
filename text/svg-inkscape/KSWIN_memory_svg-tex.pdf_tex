@@ -1,0 +1,93 @@
+%% Creator: Inkscape 1.4.2 (f4327f4, 2025-05-13), www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'KSWIN_memory_svg-tex.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{360bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.52083333)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.20729167,0.32604167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$1$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.290625,0.32604167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$2$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.39479167,0.32604167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}...\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.49895833,0.32604167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$n \text{-} r$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.58493219,0.3261753){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$n \text{-} r \text{+} 1$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.68645833,0.32604167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}...\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.790625,0.32604167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$n$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.24895833,0.11979167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$i_1$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.353125,0.11979167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}...\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.45729167,0.11979167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$i_r$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.58399381,0.11969272){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$n \text{-} r \text{+} 1$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.68645833,0.11979167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}...\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.790625,0.11979167){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$n$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.49895833,0.47509443){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Gleitendes Fenster $W$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.36152177,0.04974842){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Probe des letzten\\Concept $W_0$.\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.68695129,0.04914865){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Angenommenes neues\\Concept $W_1$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.90009443,0.38361809){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Eingang zu\\Zeit $t$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{KSWIN_memory_svg-tex.pdf}}%
+    \put(0.09839028,0.38241855){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}Ausgang zu\\Zeit $t \text{-} n$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%

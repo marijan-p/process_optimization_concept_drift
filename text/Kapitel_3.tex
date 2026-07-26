@@ -36,7 +36,7 @@ Die Generalisierung erfolgt in zwei Stufen zunehmender Realitätsnähe. Zunächs
 %
 \section{Synthetischer Datensatz} \label{sec:synthetischer_datensatz}
 %
-\input{../results/synthetic_data_generation.tex}
+\input{\resultsdir syn_generation.tex}
 %
 Als erster Schritt zur Generalisierung wird ein synthetischer Datenstrom erzeugt, der unter kontrollierten Bedingungen die Erprobung des Adaptionsansatzes bei \ac{CD} ermöglicht. Dabei sollen die wesentlichen Eigenschaften prozesstechnischer Messdaten synthetisch nachgebildet werden. 
 Abbildung~\ref{fig:datenstromsynthese} gibt einen Überblick über die zugrunde liegende Simulationsstrategie. Die drei Hauptkomponenten - die exogenen Setpoints, die Aktuatordynamik und die Systemantwort - werden dabei von \ac{CD} beeinflusst, dessen Modellierung in Abschnitt~\ref{sec:generieren_von_cd} beschrieben wird. Darauf aufbauend wird in Abschnitt~\ref{sec:generieren_von_setpoints} die Erzeugung stückweise konstanter exogener Setpoints erläutert. Diese durchlaufen $\mathrm{PT}_1$-Glieder, die als Spezialfall der in Abschnitt~\ref{sec:systemidentifikation} eingeführten Zustandsraumdarstellung die Trägheit der Aktuatoren nachbilden. Deren Modellierung ist in Abschnitt~\ref{sec:simulation_signal_input} ausgeführt. Das heterogene Rauschmodell, beschrieben in Abschnitt~\ref{sec:hinzufügen_von_rauschen}, überlagert die erzeugten Signale additiv als Beobachtungsrauschen und wirkt damit unabhängig vom \ac{CD}. Die rauschfreien Aktuatorsignale dienen als Eingang eines Wiener-Modells, das eine gewichtete Summation, ein weiteres $\mathrm{PT}_1$-Glied zur Abbildung der Prozessträgheit und eine statische Nichtlinearität in Serie schaltet; sein Ausgang $y$ bildet die beobachtete Systemantwort. Das Wiener-Modell wird in Abschnitt~\ref{sec:systemantwort} näher spezifiziert und auf den vorliegenden Fall angewandt. Die gesamte Datenstromsynthese wurde in Python implementiert.
@@ -44,7 +44,7 @@ Der erzeugte Datenstrom bildet die Grundlage der anschließenden Verarbeitungske
 %
 \begin{figure}[bt!]
     \centering
-    \includesvg[width=\linewidth]{../graphics/datenstromsynthese.svg}
+    \includesvg[width=\linewidth]{\graphdir datenstromsynthese.svg}
     \caption{Übersicht zur Simulationsstrategie}
     \label{fig:datenstromsynthese}
 \end{figure}
@@ -70,7 +70,7 @@ Das Zielniveau $c_i^{-} \sim \mathcal{U}(c_{\min},\, c_{\min}/\paramCdBandDiv)$ 
 \begin{figure}[bt!]
     \centering
     \makebox[\textwidth][c]{%
-        \input{../plots/synthetic_concept_drift.pgf}
+        \input{\plotdir syn_concept_drift.pgf}
     }
     \caption{Verlauf des synthetischen Driftsignals $c[k]$ über ein Kalenderjahr}
     \label{fig:synthetic_concept_drift}
@@ -102,7 +102,7 @@ Der Setpoint-Driftkoeffizient $\kappa_w$ skaliert die Stärke der Operatorreakti
 \begin{figure}[b!]
     \centering
     \makebox[\textwidth][c]{%
-        \input{../plots/setpoints.pgf}
+        \input{\plotdir syn_setpoints.pgf}
     }
     \caption{Einfluss von \ac{CD} auf eine Setpoint-Zeitreihe über ein halbes Jahr}
     \label{fig:setpoint_cd}
@@ -143,7 +143,7 @@ werden im Folgenden als $\tilde{u}_i^o[k]$ bezeichnet. \par
 \begin{figure}[bt!]
     \centering
     \makebox[\textwidth][c]{%
-        \input{../plots/pt1.pgf}
+        \input{\plotdir syn_pt1.pgf}
     }
     \caption{Qualitative Darstellung des Einflusses von \ac{CD} auf ein $\mathrm{PT}_1$-Glied}
     \label{fig:pt1}
@@ -199,7 +199,7 @@ Abbildung \ref{fig:pt1_noise} zeigt exemplarisch in Blau den Verlauf des Signals
 \begin{figure}[bt!]
     \centering
     \makebox[\textwidth][c]{%
-        \input{../plots/pt1_noise.pgf}
+        \input{\plotdir syn_pt1_noise.pgf}
     }
     \caption{Zeitverlauf des $\mathrm{PT}_1$-Ausgangssignals $u^o_1[k]$ und des mit gemischtem gaußschen Rauschen überlagerten Signals $u_1[k]$ während eines transienten Übergangs}
     \label{fig:pt1_noise}
@@ -212,7 +212,7 @@ Das Wiener-Modell kann eine breite Klasse nichtlinearer Systeme approximieren un
 %
 \begin{figure}[bt!]
     \centering
-    \includesvg[width=.75\linewidth]{../graphics/wiener_modell.svg}
+    \includesvg[width=.75\linewidth]{\graphdir wiener_modell.svg}
     \caption{Struktur des Wiener-Modells}
     \label{fig:wiener_modell_struktur}
 \end{figure}
@@ -251,7 +251,7 @@ Gaussian-Mixture-Dichte bezeichnet. \par
 \begin{figure}[bt!]
     \centering
     \makebox[\textwidth][c]{%
-        \input{../plots/wiener_output.pgf}
+        \input{\plotdir syn_wiener_output.pgf}
     }
     \caption{Vergleich der verrauschten drift-freien und drift-behafteten Systemantworten $y[k]$ und $\tilde{y}[k]$ am Übergang eines \emph{Sudden Drifts}} 
     \label{fig:wiener_output}
@@ -261,7 +261,7 @@ Abbildung~\ref{fig:wiener_output} zeigt exemplarisch den Verlauf der verrauschte
 %
 \subsection{Modellierung} \label{sec:datensynthese_modellierung}
 %
-\input{../results/synthetic_data_model_error_stats.tex}
+\input{\resultsdir syn_model_error.tex}
 %
 Nachdem ein industrieller Prozess anhand des synthetischen Datensatzes in den vorigen Abschnitten nachempfunden wurde, soll dieser Prozess nun modelliert werden. Dazu werden drei Modellansätze auf dem drift-freien Referenzzeitraum trainiert bzw. initialisiert und anschließend auf den Datenstrom angewandt. Die Beschränkung des Trainings auf den drift-freien Zeitraum entspricht dabei der Anforderung an drift-freie Referenzdaten. \par
 Die Auswahl der Modellansätze fußt auf den in  Kapitel~\ref{cap:grundlagen} eingeführten Architekturen. Für den Mühlen-Anwendungsfall wurde das statische MLP in Abschnitt~\ref{sec:modellvergleich} bereits als geeigneter Kompromiss identifiziert. Mit dem Ziel der Generalisierung dieses Anwendungsbeispiels auf allgemein industrielle Prozesse ist die Beibehaltung dieser Modellarchitektur naheliegend. Ergänzend werden der Kalman-Filter und der Extended Kalman-Filter (vgl. Abschnitt~\ref{sec:modellarchitekturen}) als Vergleichsverfahren herangezogen. 
@@ -326,21 +326,21 @@ Ansätze dennoch vergleichbar. \par
     \centering
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_model_error_mlp.pgf}
+        \input{\plotdir syn_model_error_mlp.pgf}
         \caption{Statisches MLP}
         \label{fig:synthetic_data_model_error_mlp}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_model_error_kf.pgf}
+        \input{\plotdir syn_model_error_kf.pgf}
         \caption{Kalman-Filter}
         \label{fig:synthetic_data_model_error_kf}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_model_error_ekf.pgf}
+        \input{\plotdir syn_model_error_ekf.pgf}
         \caption{Extended Kalman-Filter}
         \label{fig:synthetic_data_model_error_ekf}
     \end{subfigure}
@@ -376,7 +376,7 @@ Erwartungsgemäß können auch die Filterverfahren den Drift mit ihrer quasi-sta
 %
 \subsection{Drift-Erkennung} \label{sec:datensynthese_drift_erkennung}
 %
-\input{../results/synthetic_data_detection_stats.tex}
+\input{\resultsdir syn_detection.tex}
 %
 Zur Detektion des in Abschnitt \ref{sec:generieren_von_cd} generierten \ac{CD} werden die in Abschnitt~\ref{sec:drift_erkennung} eingeführten Performance-basierten Drift-Detektoren herangezogen. Als Eingangssignal der Detektion dient der normierte Simulationsfehler des in Abschnitt \ref{sec:datensynthese_modellierung} eingeführten MLP, dessen Architektur auch im ausgehenden Anwendungsfall der Mühle verwendet wird. Konkret kommen als Detektionsverfahren die beiden Fenster-basierten Verfahren \emph{KSWIN} und \ac{ADWIN} sowie die beiden auf statistischer Prozesskontrolle beruhenden Verfahren \emph{DDM} und \emph{EDDM} zum Einsatz. \par
 %
@@ -410,28 +410,28 @@ zusammengefasst, wobei $N_{\mathrm{sd}}$ die Zahl der Sudden Drifts bezeichnet. 
     \centering
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_detection_kswin.pgf}
+        \input{\plotdir syn_detection_kswin.pgf}
         \caption{KSWIN}
         \label{fig:synthetic_data_detection_kswin}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_detection_adwin.pgf}
+        \input{\plotdir syn_detection_adwin.pgf}
         \caption{\ac{ADWIN}}
         \label{fig:synthetic_data_detection_adwin}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_detection_ddm.pgf}
+        \input{\plotdir syn_detection_ddm.pgf}
         \caption{DDM}
         \label{fig:synthetic_data_detection_ddm}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_detection_eddm.pgf}
+        \input{\plotdir syn_detection_eddm.pgf}
         \caption{EDDM}
         \label{fig:synthetic_data_detection_eddm}
     \end{subfigure}
@@ -466,7 +466,7 @@ Insgesamt erfassen die Fenster-basierten Verfahren KSWIN und \ac{ADWIN} sämtlic
 %
 \subsection{Drift-Adaption} \label{sec:datensynthese_drift_adaption}
 %
-\input{../results/synthetic_data_adaptation_stats.tex}
+\input{\resultsdir syn_adaptation.tex}
 %
 Nachdem der \ac{CD} im vorigen Abschnitt detektiert werden konnte, besteht der abschließende Schritt der Verarbeitungskette darin, das in Abschnitt~\ref{sec:datensynthese_modellierung} eingeführte MLP an den drift-behafteten Prozess zu adaptieren und damit der Modellverschlechterung entgegenzuwirken. Methodisch werden drei Varianten dem drift-behafteten Modell gegenübergestellt: 
 %
@@ -524,28 +524,28 @@ Das Freeze-Muster, das ausschließlich das Output-Layer freigibt, ist für die D
     \centering
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_adaptation_baseline.pgf}
+        \input{\plotdir syn_adaptation_baseline.pgf}
         \caption{Baseline (keine Adaption)}
         \label{fig:synthetic_data_adaptation_baseline}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_adaptation_blind.pgf}
+        \input{\plotdir syn_adaptation_blind.pgf}
         \caption{Passive Adaption}
         \label{fig:synthetic_data_adaptation_blind}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_adaptation_informed.pgf}
+        \input{\plotdir syn_adaptation_informed.pgf}
         \caption{Aktive Adaption}
         \label{fig:synthetic_data_adaptation_informed}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/synthetic_data_adaptation_combined.pgf}
+        \input{\plotdir syn_adaptation_combined.pgf}
         \caption{Kombinierte Adaption}
         \label{fig:synthetic_data_adaptation_combined}
     \end{subfigure}
@@ -593,7 +593,7 @@ Das \ac{TEP} besteht aus fünf systemischen Hauptkomponenten, die sequenziell mi
 %
 \begin{figure}[tbp]
     \centering
-    \includesvg[width=1.0\linewidth, inkscapelatex=false]{../graphics/Bathelt_PID.svg}
+    \includesvg[width=1.0\linewidth, inkscapelatex=false]{\graphdir Bathelt_PID.svg}
     \caption{Anlagenschema des \ac{TEP} mit seinen fünf Hauptkomponenten, in Anlehnung an \cite{bathelt.2015}, in Schwarz vereinheitlicht}
     \label{fig:tep_pid}
 \end{figure}
@@ -687,7 +687,7 @@ Für die Zielsetzung dieser Arbeit folgt daraus, dass der \ac{TEP} in seiner urs
 %
 % \begin{figure}[tbp]
 %     \centering
-%     % \includesvg[width=\linewidth]{../graphics/tep_drift_signal.svg}
+%     % \includesvg[width=\linewidth]{\graphdir tep_drift_signal.svg}
 %     \caption{Verlauf des im C-Code injizierten Driftsignals bzw.\ des betroffenen Parameters}
 %     \label{fig:tep_drift_signal}
 % \end{figure}
@@ -716,7 +716,7 @@ Auf Basis des drift-behafteten Prozessmodells wird über die \textit{pyTEP}-Schn
 %
 % \begin{figure}[tbp]
 %     \centering
-%     % \includesvg[width=\linewidth]{../graphics/tep_stream_example.svg}
+%     % \includesvg[width=\linewidth]{\graphdir tep_stream_example.svg}
 %     \caption{Beispielhafter Ausschnitt des generierten drift-behafteten Datenstroms}
 %     \label{fig:tep_stream_example}
 % \end{figure}
@@ -745,7 +745,7 @@ Der generierte Prozess wird auf dem drift-freien Referenzzeitraum modelliert und
 %
 % \begin{figure}[tbp]
 %     \centering
-%     % \includesvg[width=\linewidth]{../graphics/tep_model_error.svg}
+%     % \includesvg[width=\linewidth]{\graphdir tep_model_error.svg}
 %     \caption{Simulationsfehler des Modells über den drift-behafteten Datenstrom}
 %     \label{fig:tep_model_error}
 % \end{figure}
@@ -769,7 +769,7 @@ Zur Detektion des im C-Code injizierten \ac{CD} werden dieselben performance-bas
 %
 % \begin{figure}[tbp]
 %     \centering
-%     % \includesvg[width=\linewidth]{../graphics/tep_detection.svg}
+%     % \includesvg[width=\linewidth]{\graphdir tep_detection.svg}
 %     \caption{Detektionszeitpunkte der Verfahren im Verlauf des Simulationsfehlers}
 %     \label{fig:tep_detection}
 % \end{figure}
@@ -801,7 +801,7 @@ Als abschließender Schritt der Verarbeitungskette wird das Modell an den drift-
 %
 % \begin{figure}[tbp]
 %     \centering
-%     % \includesvg[width=\linewidth]{../graphics/tep_adaptation.svg}
+%     % \includesvg[width=\linewidth]{\graphdir tep_adaptation.svg}
 %     \caption{Simulationsfehler der Adaptionsstrategien über den drift-behafteten Datenstrom}
 %     \label{fig:tep_adaptation}
 % \end{figure}

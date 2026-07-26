@@ -1,3 +1,5 @@
+% !TEX program = xelatex
+% !TEX root = Dissertation.tex
 %---------------------------------------------------------------
 % Dissertation von Pascal Marijan
 %---------------------------------------------------------------
@@ -69,17 +71,18 @@
 %---------------------------------------------------------------
 % Grafik-Paket für eps bzw. pdf
 %---------------------------------------------------------------
+\newcommand{\graphdir}{../graphics/}
+\newcommand{\plotdir}{../plots/}
+\newcommand{\resultsdir}{../results/}
 \usepackage{graphicx}
 \usepackage{pgf}
-\graphicspath{{../plots/}{../results/}{results/}}
+\graphicspath{{\plotdir/}{\resultsdir/}}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{subcaption}
 \usepackage{svg}
-\newcommand{\plotdir}{../plots/}
-\newcommand{\resultsdir}{../results/}
 
 %---------------------------------------------------------------
 % Eindbinden von pdf-Dokumenten
@@ -135,10 +138,10 @@ tabsize=4,
 %---------------------------------------------------------------
 \usepackage{hyperref}
 \hypersetup{
- pdftitle    = {Hier könnte dein Titel stehen},
+ pdftitle    = {Prozessoptimierung unter Concept Drift: Adaptive Simulationsmodelle im industriellen Umfeld},
  pdfsubject  = {},
- pdfauthor   = {John Doe},
- pdfkeywords = {Nach Bedarf},
+ pdfauthor   = {Pascal Marijan},
+ pdfkeywords = {Concept Drift},
  pdfborder   = 0 0 0,
  plainpages  = false,
  bookmarksnumbered = true
@@ -147,6 +150,7 @@ tabsize=4,
 % amsthm für \newtheorem (z.B. für Definitionen)
 %---------------------------------------------------------------
 \usepackage{amsthm}
+\providecommand{\mathdefault}[1]{#1}
 \theoremstyle{definition} % Style festelgen
 \newtheorem{definition}{Definition} % Neues Theorem mit Caption Definition erstellen
 \usepackage{xpatch}
@@ -188,9 +192,8 @@ tabsize=4,
 %---------------------------------------------------------------
 % acronym for abbreviations
 %---------------------------------------------------------------
-\usepackage{acronym}
+\usepackage[printonlyused,nohyperlinks]{acronym}
 \renewcommand*{\acsfont}[1]{\texttt{#1}}
-% \input{Abkuerzungsverzeichnis/acronym-format}
 \usepackage{array}
 
 %---------------------------------------------------------------
@@ -199,23 +202,23 @@ tabsize=4,
 \begin{document}
  
  % Titelblatt: Einmal für die Einreichung und einmal für die genehmigte Dissertation 
- \includefile{Titel}{Titelseite_Diss}
+ \includefile[Titel]{Titelseite_Diss}
  %\includefile{Titel}{Titelseite_Diss_genehmigt}
  
  \pagenumbering{gobble}
- \includefile{Titel}{Selbstaendigkeit}
+ \includefile[Titel]{Selbstaendigkeit}
  
  % VDI-Vorgaben: Vorwort / Danksagung auf Seite III und IV
  \pagenumbering{Roman}
  \setcounter{page}{3}
- \includefile{Titel}{Vorwort} 
+ \includefile[Titel]{Vorwort} 
 
  \tableofcontents
  % VDI-Vorgaben: Nur Kurzfassung oder Abstract (je nach Sprache)
- \includefile{Titel}{Kurzfassung}
+ \includefile[Titel]{Kurzfassung}
  % \includefile{Titel}{Abstract}
- \includefile{Abkuerzungsverzeichnis}{Abkuerzungsverzeichnis}
- \includefile{Abkuerzungsverzeichnis}{Symbolverzeichnis}
+ \includefile[Abkuerzungsverzeichnis]{Abkuerzungsverzeichnis}
+ \includefile[Abkuerzungsverzeichnis]{Symbolverzeichnis}
  \cleardoublepage
 %---------------------------------------------------------------
 % Beginn des Inhaltes 
@@ -233,7 +236,7 @@ tabsize=4,
 % Beginn des Anhangs 
 %---------------------------------------------------------------
  \appendix
- \includefile{Anhang}{Anhang} 
+ \includefile[Anhang]{Anhang} 
  
 %---------------------------------------------------------------
 % Literaturverzeichnis
@@ -252,6 +255,6 @@ tabsize=4,
 % Lebenslauf
 %---------------------------------------------------------------
 %Keine Seitenzahl für Lebenslauf
-\includefile{Anhang}{Lebenslauf}
+\includefile[Anhang]{Lebenslauf}
  
 \end{document}
