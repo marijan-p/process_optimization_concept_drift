@@ -155,8 +155,7 @@ C = _ColorView()
 TEXTWIDTH_PT = 458.08954        # \the\textwidth der Diss-Vorlage
 INCH_PER_PT = 1.0 / 72.27
 
-
-def apply_rc(width_scale: float = 1.0) -> float:
+def fig_width(width_scale: float = 1.0) -> float:
     """Setzt die rcParams der Arbeit und gibt die Textbreite in Zoll zurueck.
 
     Ersetzt die bisherige manuelle rcParams.update-Zelle in den Notebooks.
@@ -206,5 +205,5 @@ def swatch():
 
 
 if __name__ == "__main__":
-    apply_rc()
+    fig_width()
     swatch()
