@@ -3,7 +3,7 @@
 %---------------------------------------------------------------
 \chapter{Generalisierung} \label{cap:generalisierung}
 %
-Grundlage dieser Arbeit ist ein Regressionsmodell, das, wie in Abschnitt~\ref{sec:modellierung} beschrieben, mit einem DOE-basierten Datensatz aus Sensordaten im stationären Zustand eines Prozesses der Prozessindustrie trainiert wurde. Als geeignete Modellarchitektur wurde hierfür ein MLP identifiziert. Die Güte dieses Modells wird jedoch durch \ac{CD} beeinträchtigt, dessen Grundlagen in Abschnitt~\ref{sec:concept_drift} allgemein dargestellt sind. Verändert sich das zugrunde liegende Prozessverhalten über die Zeit, weicht die Datengrundlage zunehmend von der Trainingsverteilung ab, sodass die Modellperformance sinkt, wie in Kapitel~\ref{cap:einleitung} skizziert. Diese Problemstellung soll nicht an die Besonderheiten der Vertikalrollenmühle gebunden bleiben und wird daher zunächst von der spezifischen Anwendung gelöst und auf allgemeinere prozesstechnische Fragestellungen übertragen. Auf dem so generalisierten Problem setzt der hier verfolgte Lösungsansatz an, der dem drift-bedingten Leistungsabfall durch eine kontinuierliche Adaption des Modells begegnet. \par
+Grundlage dieser Arbeit ist ein Regressionsmodell, das, wie in Abschnitt~\ref{sec:modellierung} beschrieben, mit einem \ac{DOE}-basierten Datensatz aus Sensordaten im stationären Zustand eines Prozesses der Prozessindustrie trainiert wurde. Als geeignete Modellarchitektur wurde hierfür ein \ac{MLP} identifiziert. Die Güte dieses Modells wird jedoch durch \ac{CD} beeinträchtigt, dessen Grundlagen in Abschnitt~\ref{sec:concept_drift} allgemein dargestellt sind. Verändert sich das zugrunde liegende Prozessverhalten über die Zeit, weicht die Datengrundlage zunehmend von der Trainingsverteilung ab, sodass die Modellperformance sinkt, wie in Kapitel~\ref{cap:einleitung} skizziert. Diese Problemstellung soll nicht an die Besonderheiten der Vertikalrollenmühle gebunden bleiben und wird daher zunächst von der spezifischen Anwendung gelöst und auf allgemeinere prozesstechnische Fragestellungen übertragen. Auf dem so generalisierten Problem setzt der hier verfolgte Lösungsansatz an, der dem drift-bedingten Leistungsabfall durch eine kontinuierliche Adaption des Modells begegnet. \par
 Damit eine Datengrundlage diese generalisierende Rolle erfüllen kann, muss sie einerseits hinreichend allgemein sein, um eine Generalisierung zu ermöglichen, und andererseits genügend Ähnlichkeit zum ursprünglichen Prozess aufweisen, um methodische Konsistenz sicherzustellen. Grundlage einer validen Generalisierung ist daher die Auswahl einer geeigneten Datengrundlage, die folgende Voraussetzungen erfüllt:
 %
 \begin{itemize}
@@ -40,7 +40,7 @@ Die Generalisierung erfolgt in zwei Stufen zunehmender Realitätsnähe. Zunächs
 %
 Als erster Schritt zur Generalisierung wird ein synthetischer Datenstrom erzeugt, der unter kontrollierten Bedingungen die Erprobung des Adaptionsansatzes bei \ac{CD} ermöglicht. Dabei sollen die wesentlichen Eigenschaften prozesstechnischer Messdaten synthetisch nachgebildet werden. 
 Abbildung~\ref{fig:datenstromsynthese} gibt einen Überblick über die zugrunde liegende Simulationsstrategie. Die drei Hauptkomponenten - die exogenen Setpoints, die Aktuatordynamik und die Systemantwort - werden dabei von \ac{CD} beeinflusst, dessen Modellierung in Abschnitt~\ref{sec:generieren_von_cd} beschrieben wird. Darauf aufbauend wird in Abschnitt~\ref{sec:generieren_von_setpoints} die Erzeugung stückweise konstanter exogener Setpoints erläutert. Diese durchlaufen $\mathrm{PT}_1$-Glieder, die als Spezialfall der in Abschnitt~\ref{sec:systemidentifikation} eingeführten Zustandsraumdarstellung die Trägheit der Aktuatoren nachbilden. Deren Modellierung ist in Abschnitt~\ref{sec:simulation_signal_input} ausgeführt. Das heterogene Rauschmodell, beschrieben in Abschnitt~\ref{sec:hinzufügen_von_rauschen}, überlagert die erzeugten Signale additiv als Beobachtungsrauschen und wirkt damit unabhängig vom \ac{CD}. Die rauschfreien Aktuatorsignale dienen als Eingang eines Wiener-Modells, das eine gewichtete Summation, ein weiteres $\mathrm{PT}_1$-Glied zur Abbildung der Prozessträgheit und eine statische Nichtlinearität in Serie schaltet; sein Ausgang $y$ bildet die beobachtete Systemantwort. Das Wiener-Modell wird in Abschnitt~\ref{sec:systemantwort} näher spezifiziert und auf den vorliegenden Fall angewandt. Die gesamte Datenstromsynthese wurde in Python implementiert.
-Der erzeugte Datenstrom bildet die Grundlage der anschließenden Verarbeitungskette aus Modellierung, Detektion und Adaption. Zunächst wird der synthetische Prozess in Abschnitt~\ref{sec:datensynthese_modellierung} modelliert, wobei ein MLP sowie ein Kalman- und ein Extended-Kalman-Filter gegenübergestellt werden. Aufbauend auf dem Simulationsfehler des MLP behandelt Abschnitt~\ref{sec:datensynthese_drift_erkennung} die Detektion des \ac{CD}. Abschnitt~\ref{sec:datensynthese_drift_adaption} schließt die Kette mit der Adaption des Modells an den drift-behafteten Prozess ab.
+Der erzeugte Datenstrom bildet die Grundlage der anschließenden Verarbeitungskette aus Modellierung, Detektion und Adaption. Zunächst wird der synthetische Prozess in Abschnitt~\ref{sec:datensynthese_modellierung} modelliert, wobei ein \ac{MLP} sowie ein Kalman- und ein Extended-Kalman-Filter gegenübergestellt werden. Aufbauend auf dem Simulationsfehler des \ac{MLP} behandelt Abschnitt~\ref{sec:datensynthese_drift_erkennung} die Detektion des \ac{CD}. Abschnitt~\ref{sec:datensynthese_drift_adaption} schließt die Kette mit der Adaption des Modells an den drift-behafteten Prozess ab.
 %
 \begin{figure}[bt!]
     \centering
@@ -114,7 +114,7 @@ Die driftinduzierte Korrektur ist mit dem Driftkoeffizienten $\kappa_w = 4$ bere
 \subsection{Signal-Inputs} \label{sec:simulation_signal_input}
 % 
 Zur Simulation der Prozesssignale wird ein lineares dynamisches System erster Ordnung ($\mathrm{PT}_1$-Glied) verwendet, welches das verzögerte Anpassungsverhalten vieler technischer Systeme in kompakter Form beschreibt. Es erlaubt die Approximation von Einschwingvorgängen, wie sie beispielsweise in thermischen Systemen, Speicherprozessen oder mechanisch trägen Aggregaten auftreten. Dadurch können realistische Übergänge zwischen stationären Betriebszuständen erzeugt werden.
-Zwar sind die transienten Übergänge für die nachfolgende Modellierung anhand eines stationären MLP nicht unmittelbar relevant, werden aber aus Gründen der Realitätsnähe und Reproduzierbarkeit mitberechnet.
+Zwar sind die transienten Übergänge für die nachfolgende Modellierung anhand eines stationären \ac{MLP} nicht unmittelbar relevant, werden aber aus Gründen der Realitätsnähe und Reproduzierbarkeit mitberechnet.
 Das $\mathrm{PT}_1$-Glied kann dabei als Spezialfall der in Abschnitt~\ref{sec:systemidentifikation} eingeführten allgemeinen Zustandsraumdarstellung interpretiert werden. Während Gleichung~\eqref{eq:zustandsraum} jedoch eine allgemein nicht-lineare Systembeschreibung zugrunde legt, wird beim $\mathrm{PT}_1$-Glied ein vereinfachtes Modell mit linearer Dynamik betrachtet. Konkret wird angenommen, dass die Zustandsänderung proportional zur Abweichung zwischen aktuellem Zustand und dem Eingangssignal ist. Daraus ergibt sich die (zeit-kontinuierliche) Differentialgleichung
 %
 \begin{equation} \label{eq:pt1}
@@ -153,7 +153,7 @@ Abbildung~\ref{fig:pt1} stellt qualitativ den Einfluss von \ac{CD} auf das Verha
 %
 \subsection{Rauschen} \label{sec:hinzufügen_von_rauschen}
 %
-Reale Sensordaten unterliegen typischerweise mehreren überlagerten Störquellen unterschiedlicher Charakteristik wie feinem thermischen Grundrauschen, gelegentlichen Messimpulsen sowie selteneren Ausreißerereignissen. Zur realistischen Synthese des Datenstroms wird der Signal-Input daher zusätzlich mit einem Rauschterm überlagert. Ein einfaches additives weißes gaußsches Rauschen mit einer einzigen Standardabweichung $\sigma$ ist dabei nicht in der Lage, diese Heterogenität adäquat abzubilden. Daher basiert das verwendete Rauschmodell auf einem \emph{Gaussian Mixture Model} (GMM), das $N_{\mathrm{q}}$ überlagerte Rauschquellen mit unterschiedlichen Standardabweichungen und Auftrittswahrscheinlichkeiten beschreibt. Die Wahrscheinlichkeitsdichtefunktion des Rauschterms $\eta$ lautet:
+Reale Sensordaten unterliegen typischerweise mehreren überlagerten Störquellen unterschiedlicher Charakteristik wie feinem thermischen Grundrauschen, gelegentlichen Messimpulsen sowie selteneren Ausreißerereignissen. Zur realistischen Synthese des Datenstroms wird der Signal-Input daher zusätzlich mit einem Rauschterm überlagert. Ein einfaches additives weißes gaußsches Rauschen mit einer einzigen Standardabweichung $\sigma$ ist dabei nicht in der Lage, diese Heterogenität adäquat abzubilden. Daher basiert das verwendete Rauschmodell auf einem \ac{GMM}, das $N_{\mathrm{q}}$ überlagerte Rauschquellen mit unterschiedlichen Standardabweichungen und Auftrittswahrscheinlichkeiten beschreibt. Die Wahrscheinlichkeitsdichtefunktion des Rauschterms $\eta$ lautet:
 %
 \begin{equation}
     p(\eta) \;=\; \sum_{j=1}^{N_{\mathrm{q}}} \nu_j \cdot
@@ -175,7 +175,7 @@ Die konkret verwendeten Komponentenkonfigurationen für die beiden synthetisiert
 %
 \begin{table}[ht]
 \centering
-\caption{Parametrisierung des GMM-Rauschmodells je Eingangssignal}
+\caption{Parametrisierung des \ac{GMM}-Rauschmodells je Eingangssignal}
 \label{tab:noise_components}
 \begin{tabular}{llcc}
 \toprule
@@ -194,7 +194,7 @@ Die konkret verwendeten Komponentenkonfigurationen für die beiden synthetisiert
 \end{tabular}
 \end{table}
 %
-Abbildung \ref{fig:pt1_noise} zeigt exemplarisch in Blau den Verlauf des Signals $u^o_1[k]$ sowie in Grau den der verrauschten Variante $u_1[k]$. Das GMM führt zu zufälligen Streuungen um das Referenzsignal, wobei sowohl im stationären Bereich als auch während des Übergangs vereinzelt größere Ausreißer auftreten.
+Abbildung \ref{fig:pt1_noise} zeigt exemplarisch in Blau den Verlauf des Signals $u^o_1[k]$ sowie in Grau den der verrauschten Variante $u_1[k]$. Das \ac{GMM} führt zu zufälligen Streuungen um das Referenzsignal, wobei sowohl im stationären Bereich als auch während des Übergangs vereinzelt größere Ausreißer auftreten.
 %
 \begin{figure}[bt!]
     \centering
@@ -207,7 +207,7 @@ Abbildung \ref{fig:pt1_noise} zeigt exemplarisch in Blau den Verlauf des Signals
 %
 \subsection{Systemantwort} \label{sec:systemantwort}
 %
-Die Systemantwort beschreibt grundsätzlich, wie ein technisches System auf eine Eingangsfolge reagiert und dabei eine messbare Ausgangsgröße erzeugt. Zur Modellierung stehen Ansätze unterschiedlicher Komplexität zur Verfügung. Für den vorliegenden Anwendungsfall wird ein Modell gesucht, das einen guten Kompromiss zwischen Realitätsnähe und Modellkomplexität bietet. Blockorientierte nichtlineare Modelle bieten hierfür einen geeigneten Ansatz, da sie lineare dynamische und statische nichtlineare Blöcke in Serie schalten \cite{giri.2010}. Das 1930 eingeführte \emph{Hammerstein-Modell} ordnet dabei eine statische Nichtlinearität einem LTI-Block vor. Die Vertauschung dieser Blöcke führt zum 1958 eingeführten \emph{Wiener-Modell}, bei dem zunächst der LTI-Block das Eingangssignal dynamisch formt, bevor die statische Nichtlinearität $g(\cdot)$ wirkt~\cite{wiener.1958, schoukens.2019}. Die Struktur des Wiener-Modells ist in Abbildung \ref{fig:wiener_modell_struktur} grafisch veranschaulicht. \par
+Die Systemantwort beschreibt grundsätzlich, wie ein technisches System auf eine Eingangsfolge reagiert und dabei eine messbare Ausgangsgröße erzeugt. Zur Modellierung stehen Ansätze unterschiedlicher Komplexität zur Verfügung. Für den vorliegenden Anwendungsfall wird ein Modell gesucht, das einen guten Kompromiss zwischen Realitätsnähe und Modellkomplexität bietet. Blockorientierte nichtlineare Modelle bieten hierfür einen geeigneten Ansatz, da sie lineare dynamische und statische nichtlineare Blöcke in Serie schalten \cite{giri.2010}. Das 1930 eingeführte \emph{Hammerstein-Modell} ordnet dabei eine statische Nichtlinearität einem Block eines \ac{LTI} vor. Die Vertauschung dieser Blöcke führt zum 1958 eingeführten \emph{Wiener-Modell}, bei dem zunächst der \ac{LTI}-Block das Eingangssignal dynamisch formt, bevor die statische Nichtlinearität $g(\cdot)$ wirkt~\cite{wiener.1958, schoukens.2019}. Die Struktur des Wiener-Modells ist in Abbildung \ref{fig:wiener_modell_struktur} grafisch veranschaulicht. \par
 Das Wiener-Modell kann eine breite Klasse nichtlinearer Systeme approximieren und findet in der Praxis u.\,a. bei chemischen Prozessen und biologischen Systemen Anwendung \cite{giri.2010}. Für den vorliegenden Aufbau ist es besonders geeignet, da der Prozess auf die bereits dynamisch geformten Eingangssignale aus Abschnitt~\ref{sec:simulation_signal_input} träge und nichtlinear reagieren soll und damit genau der Blockfolge des Wiener-Modells folgt. 
 %
 \begin{figure}[bt!]
@@ -217,18 +217,18 @@ Das Wiener-Modell kann eine breite Klasse nichtlinearer Systeme approximieren un
     \label{fig:wiener_modell_struktur}
 \end{figure}
 %
-Im Wiener-Modell werden die Eingangssignale mit der Impulsantwort des LTI-Blocks gefaltet, gewichtet aufsummiert und durch die statische Nichtlinearität geführt. Formal lässt sich der Ausgang als 
+Im Wiener-Modell werden die Eingangssignale mit der Impulsantwort des \ac{LTI}-Blocks gefaltet, gewichtet aufsummiert und durch die statische Nichtlinearität geführt. Formal lässt sich der Ausgang als 
 %
 \begin{equation}
     y^o[k] = g\bigl(v^o[k]\bigr), \qquad v^o[k] = \sum_{i=1}^{N_{\mathrm{in}}} \alpha_i \cdot (f \ast u_i^o)[k]
     \label{eq:wiener_allgemein}
 \end{equation}
 %
-schreiben, wobei $\alpha_i$ die Gewichtungskoeffizienten, $f$ die Impulsantwort des LTI-Blocks und $v^o[k]$ den rauschfreien Ausgang des linearen Teilsystems bezeichnen. \par
-Als LTI-Block kommt ein weiteres $\mathrm{PT}_1$-Glied gemäß Gleichung~\eqref{eq:diskretes_pt1} zum Einsatz, das die Trägheit des Prozesses nachbildet und mit der Prozesszeitkonstante $T_y$ sowie der Verstärkung $K_p = \paramKp$ parametrisiert ist. Die Faltung lässt stationäre Werte damit unverändert und glättet lediglich die Übergänge zwischen Betriebspunkten. Die Prozessdynamik wird als drift-frei angenommen. Als statische Nichtlinearität wird eine linear-kubische Kennlinie $g(v) = v + \beta v^3$ mit $\beta > 0$ gewählt, wie sie beispielsweise progressive Federkennlinien oder Verfestigungsverhalten technischer Systeme abbildet und in der Literatur zum Wiener-Modell etabliert ist. Die Kennlinie ist streng monoton und invertierbar, sodass Drift-bedingte Verschiebungen durchgägnig auf die Systemantwort wirken.
+schreiben, wobei $\alpha_i$ die Gewichtungskoeffizienten, $f$ die Impulsantwort des \ac{LTI}-Blocks und $v^o[k]$ den rauschfreien Ausgang des linearen Teilsystems bezeichnen. \par
+Als \ac{LTI}-Block kommt ein weiteres $\mathrm{PT}_1$-Glied gemäß Gleichung~\eqref{eq:diskretes_pt1} zum Einsatz, das die Trägheit des Prozesses nachbildet und mit der Prozesszeitkonstante $T_y$ sowie der Verstärkung $K_p = \paramKp$ parametrisiert ist. Die Faltung lässt stationäre Werte damit unverändert und glättet lediglich die Übergänge zwischen Betriebspunkten. Die Prozessdynamik wird als drift-frei angenommen. Als statische Nichtlinearität wird eine linear-kubische Kennlinie $g(v) = v + \beta v^3$ mit $\beta > 0$ gewählt, wie sie beispielsweise progressive Federkennlinien oder Verfestigungsverhalten technischer Systeme abbildet und in der Literatur zum Wiener-Modell etabliert ist. Die Kennlinie ist streng monoton und invertierbar, sodass Drift-bedingte Verschiebungen durchgägnig auf die Systemantwort wirken.
 \par
 Im Fall von \ac{CD} wirkt der Drift auf zwei Wegen auf die Systemantwort. Zum einen verändert sich durch die zeitvariante Parametrierung der $\mathrm{PT}_1$-Glieder
-(vgl. Abschnitt~\ref{sec:simulation_signal_input}) das Verhalten der Eingangssignale. Zum anderen geht das Driftsignal, gewichtet mit dem Driftkoeffizienten $\kappa_y$, als zusätzlicher Eingang in das Modell ein und bewirkt eine drift-bedingte Verschiebung des stationären Arbeitspunkts der Ausgangsgröße. Das $\mathrm{PT}_1$-Glied des LTI-Blocks selbst bleibt dabei unverändert, sodass dessen Zeitinvarianz gewahrt bleibt:
+(vgl. Abschnitt~\ref{sec:simulation_signal_input}) das Verhalten der Eingangssignale. Zum anderen geht das Driftsignal, gewichtet mit dem Driftkoeffizienten $\kappa_y$, als zusätzlicher Eingang in das Modell ein und bewirkt eine drift-bedingte Verschiebung des stationären Arbeitspunkts der Ausgangsgröße. Das $\mathrm{PT}_1$-Glied des \ac{LTI}-Blocks selbst bleibt dabei unverändert, sodass dessen Zeitinvarianz gewahrt bleibt:
 %
 \begin{equation}
     \tilde{v}^o[k] = \sum_{i=1}^{N_{\mathrm{in}}} \alpha_i \cdot (f \ast \tilde{u}_i^o)[k] \;+\; \kappa_y \cdot (f \ast c)[k]
@@ -236,7 +236,7 @@ Im Fall von \ac{CD} wirkt der Drift auf zwei Wegen auf die Systemantwort. Zum ei
 \end{equation}
 %
 Die drift-behaftete Systemantwort ergibt sich entsprechend gemäß Gleichung~\eqref{eq:wiener_allgemein} als $\tilde{y}^o[k] = g\bigl(\tilde{v}^o[k]\bigr) = \tilde{v}^o[k] + \beta\,\bigl(\tilde{v}^o[k]\bigr)^3$. \par
-Analog zur Vorgehensweise in Abschnitt~\ref{sec:hinzufügen_von_rauschen} wird die Systemantwort abschließend mit additivem GMM-Rauschen überlagert. Die beobachteten, verrauschten Signale lauten
+Analog zur Vorgehensweise in Abschnitt~\ref{sec:hinzufügen_von_rauschen} wird die Systemantwort abschließend mit additivem \ac{GMM}-Rauschen überlagert. Die beobachteten, verrauschten Signale lauten
 %
 \begin{equation}
     y[k] = y^o[k] + \eta_y[k], \qquad
@@ -264,12 +264,12 @@ Abbildung~\ref{fig:wiener_output} zeigt exemplarisch den Verlauf der verrauschte
 \input{\resultsdir syn_model_error.tex}
 %
 Nachdem ein industrieller Prozess anhand des synthetischen Datensatzes in den vorigen Abschnitten nachempfunden wurde, soll dieser Prozess nun modelliert werden. Dazu werden drei Modellansätze auf dem drift-freien Referenzzeitraum trainiert bzw. initialisiert und anschließend auf den Datenstrom angewandt. Die Beschränkung des Trainings auf den drift-freien Zeitraum entspricht dabei der Anforderung an drift-freie Referenzdaten. \par
-Die Auswahl der Modellansätze fußt auf den in  Kapitel~\ref{cap:grundlagen} eingeführten Architekturen. Für den Mühlen-Anwendungsfall wurde das statische MLP in Abschnitt~\ref{sec:modellvergleich} bereits als geeigneter Kompromiss identifiziert. Mit dem Ziel der Generalisierung dieses Anwendungsbeispiels auf allgemein industrielle Prozesse ist die Beibehaltung dieser Modellarchitektur naheliegend. Ergänzend werden der Kalman-Filter und der Extended Kalman-Filter (vgl. Abschnitt~\ref{sec:modellarchitekturen}) als Vergleichsverfahren herangezogen. 
-Beide Verfahren zählen zu den klassischen Ansätzen der rekursiven Zustands- und Parameterschätzung linearer bzw. schwach nichtlinearer dynamischer Systeme und finden in der Prozessindustrie weiterhin breite Anwendung \cite{kalman.1960, welch.1995}. Im Gegensatz zum MLP, das als Black-Box-Modell ohne strukturelles Vorwissen auskommt, nutzen die Filterverfahren die bekannte Struktur des zugrunde liegenden Systems dabei explizit aus. Der Vergleich erlaubt damit eine Aussage darüber, ob der drift-bedingte Leistungsabfall des Modells ein spezifisches Problem datengetriebener Black-Box-Modelle ist oder auch klassische, strukturbasierte Schätzverfahren betrifft. \par
-Vor dem Training werden die verrauschten Signale mit einem gleitenden Mittelwert über ein Fenster von $\paramWindow$ geglättet, analog zur Glättung der realen Sensordaten in Abschnitt~\ref{sec:modellvergleich}. Die geglätteten Signale werden durch das Superskript $\mathrm{f}$ markiert, sodass $u_i^{\mathrm{f}}[k]$ bzw. $\tilde{u}_i^{\mathrm{f}}[k]$ und $y^{\mathrm{f}}[k]$ bzw. $\tilde{y}^{\mathrm{f}}[k]$ die gefilterten Inputs und Outputs darstellen. Als Trainingsdaten dient ein unabhängiger, drift-freier Referenzdatensatz, der analog zur Datenselektion im Mühlen-Anwendungsfall nach dem Latin-Hypercube-Ansatz wie in Abschnitt~\ref{sec:datenselektion} beschrieben zur Simulation eines DOE erzeugt wird. Die Stellgrößen werden dabei gleichmäßig über ihren Wertebereich gezogen und die quasi-stationären Betriebspunkte gemäß den Abschnitten~\ref{sec:simulation_signal_input}, \ref{sec:hinzufügen_von_rauschen} und \ref{sec:systemantwort} simuliert. Beim Modelltraining bilden die drift-freien Eingangssignale $u_i^{\mathrm{f}}[k]$ die Features und die ebenfalls drift-freie Systemantwort $y^{\mathrm{f}}[k]$ das Label. Die Features werden vor dem Training, analog zum Anwendungsfall in Abschnitt~\ref{sec:modellvergleich}, mittels Min-Max-Normierung auf den Wertebereich $[0,1]$ skaliert. \par
+Die Auswahl der Modellansätze fußt auf den in  Kapitel~\ref{cap:grundlagen} eingeführten Architekturen. Für den Mühlen-Anwendungsfall wurde das statische \ac{MLP} in Abschnitt~\ref{sec:modellvergleich} bereits als geeigneter Kompromiss identifiziert. Mit dem Ziel der Generalisierung dieses Anwendungsbeispiels auf allgemein industrielle Prozesse ist die Beibehaltung dieser Modellarchitektur naheliegend. Ergänzend werden der Kalman-Filter und der Extended Kalman-Filter (vgl. Abschnitt~\ref{sec:modellarchitekturen}) als Vergleichsverfahren herangezogen. 
+Beide Verfahren zählen zu den klassischen Ansätzen der rekursiven Zustands- und Parameterschätzung linearer bzw. schwach nichtlinearer dynamischer Systeme und finden in der Prozessindustrie weiterhin breite Anwendung \cite{kalman.1960, welch.1995}. Im Gegensatz zum \ac{MLP}, das als Black-Box-Modell ohne strukturelles Vorwissen auskommt, nutzen die Filterverfahren die bekannte Struktur des zugrunde liegenden Systems dabei explizit aus. Der Vergleich erlaubt damit eine Aussage darüber, ob der drift-bedingte Leistungsabfall des Modells ein spezifisches Problem datengetriebener Black-Box-Modelle ist oder auch klassische, strukturbasierte Schätzverfahren betrifft. \par
+Vor dem Training werden die verrauschten Signale mit einem gleitenden Mittelwert über ein Fenster von $\paramWindow$ geglättet, analog zur Glättung der realen Sensordaten in Abschnitt~\ref{sec:modellvergleich}. Die geglätteten Signale werden durch das Superskript $\mathrm{f}$ markiert, sodass $u_i^{\mathrm{f}}[k]$ bzw. $\tilde{u}_i^{\mathrm{f}}[k]$ und $y^{\mathrm{f}}[k]$ bzw. $\tilde{y}^{\mathrm{f}}[k]$ die gefilterten Inputs und Outputs darstellen. Als Trainingsdaten dient ein unabhängiger, drift-freier Referenzdatensatz, der analog zur Datenselektion im Mühlen-Anwendungsfall nach dem Latin-Hypercube-Ansatz wie in Abschnitt~\ref{sec:datenselektion} beschrieben zur Simulation eines \ac{DOE} erzeugt wird. Die Stellgrößen werden dabei gleichmäßig über ihren Wertebereich gezogen und die quasi-stationären Betriebspunkte gemäß den Abschnitten~\ref{sec:simulation_signal_input}, \ref{sec:hinzufügen_von_rauschen} und \ref{sec:systemantwort} simuliert. Beim Modelltraining bilden die drift-freien Eingangssignale $u_i^{\mathrm{f}}[k]$ die Features und die ebenfalls drift-freie Systemantwort $y^{\mathrm{f}}[k]$ das Label. Die Features werden vor dem Training, analog zum Anwendungsfall in Abschnitt~\ref{sec:modellvergleich}, mittels Min-Max-Normierung auf den Wertebereich $[0,1]$ skaliert. \par
 %
-Das MLP folgt der in Abschnitt~\ref{sec:modellarchitekturen} eingeführten Feedforward-Struktur und besteht aus \paramNLayers Hidden-Layern mit jeweils $\paramNeurons$ Neuronen und Tanh-Aktivierung sowie einem linearen Ausgabeneuron. Diese bewusst minimale Komplexität ist an die geringe Dimensionalität des synthetischen Systems angepasst und steht im Einklang mit der Erkenntnis aus Abschnitt~\ref{sec:modellvergleich}, dass Netze geringer Komplexität für derartige Regressionsaufgaben ausreichen.
-Das Training erfolgt mit dem Adam-Optimierer und dem MSE als Verlustfunktion über maximal $\paramEpochs$ Epochen bei einer Batchgröße von $\paramBatch$. Dabei werden $\paramValSplitPct\,\%$ der Trainingsdaten zur Validierung zurückgehalten. \par
+Das \ac{MLP} folgt der in Abschnitt~\ref{sec:modellarchitekturen} eingeführten Feedforward-Struktur und besteht aus \paramNLayers Hidden-Layern mit jeweils $\paramNeurons$ Neuronen und Tanh-Aktivierung sowie einem linearen Ausgabeneuron. Diese bewusst minimale Komplexität ist an die geringe Dimensionalität des synthetischen Systems angepasst und steht im Einklang mit der Erkenntnis aus Abschnitt~\ref{sec:modellvergleich}, dass Netze geringer Komplexität für derartige Regressionsaufgaben ausreichen.
+Das Training erfolgt mit dem Adam-Optimierer und dem \ac{MSE} als Verlustfunktion über maximal $\paramEpochs$ Epochen bei einer Batchgröße von $\paramBatch$. Dabei werden $\paramValSplitPct\,\%$ der Trainingsdaten zur Validierung zurückgehalten. \par
 %
 Als rekursiver Parameterschätzer wird der Kalman-Filter formuliert. 
 Hierzu wird ausgenutzt, dass die linear-kubische Kennlinie $g(v) = v + \beta v^3$
@@ -287,7 +287,7 @@ Angewandt auf die geglätteten Signale ergibt sich mit dem Parametervektor $\the
 %
 wobei $\tilde{\zeta}_{\mathrm{m}}[k] \approx \zeta_{\mathrm{m}}[k] / g'(v[k])$
 das durch die Inverse transformierte Messrauschen bezeichnet, das hier in
-erster Näherung als gaußsch mit konstanter Varianz $R$ angesetzt wird. Das im Datenstrom enthaltene GMM-Rauschen wird hier also durch gaußsches Messrauschen approximiert. Als Zustandsübergang wird ein Random-Walk-Modell $\theta[k+1] = \theta[k] + \zeta_{\mathrm{p}}[k]$ mit dem Prozessrauschen $\zeta_{\mathrm{p}}[k] \sim \mathcal{N}(0, Q)$ und dessen Kovarianzmatrix $Q$ angesetzt. Die Initialisierung $\theta_0$ erfolgt durch eine Least-Squares-Schätzung auf den transformierten drift-freien Trainingsdaten. Die Messrauschvarianz $R$ wird als Varianz der zugehörigen Residuen bestimmt. \par
+erster Näherung als gaußsch mit konstanter Varianz $R$ angesetzt wird. Das im Datenstrom enthaltene \ac{GMM}-Rauschen wird hier also durch gaußsches Messrauschen approximiert. Als Zustandsübergang wird ein Random-Walk-Modell $\theta[k+1] = \theta[k] + \zeta_{\mathrm{p}}[k]$ mit dem Prozessrauschen $\zeta_{\mathrm{p}}[k] \sim \mathcal{N}(0, Q)$ und dessen Kovarianzmatrix $Q$ angesetzt. Die Initialisierung $\theta_0$ erfolgt durch eine Least-Squares-Schätzung auf den transformierten drift-freien Trainingsdaten. Die Messrauschvarianz $R$ wird als Varianz der zugehörigen Residuen bestimmt. \par
 %
 Der \ac{EKF} schätzt demgegenüber die Gewichtungskoeffizienten der Linearkombination direkt. Mit dem Parametervektor $\theta = [\theta_1, \theta_2]^T$ lautet die nichtlineare Beobachtungsfunktion
 %
@@ -318,7 +318,7 @@ Messrauschen $R$ & Residualvarianz der LS-Schätzung & Residualvarianz im Ausgan
 \end{tabular}
 \end{table}
 %
-Zur Evaluation werden alle drei Modelle auf einen Zeitraum der ersten sechs Monate des Datenstroms angewandt, sowohl auf den drift-freien als auch auf den drift-behafteten Signalen. Als Vergleichsgröße dient beim MLP der Simulationsfehler $\hat{y}[k] - y^{\mathrm{f}}[k]$, bei den Filterverfahren die Innovation, also die Abweichung zwischen Messung und Prädiktion vor dem Korrekturschritt. Beide Größen messen, wie gut das jeweilige Modell die beobachtete Systemantwort beschreibt. Um die drei Ansätze in einer gemeinsamen Darstellung gegenüberstellen zu können, werden Simulationsfehler und Innovationen je Modell und Szenario mittelwertbereinigt und auf Einheitsvarianz skaliert. Die Innovation des \ac{KF} liegt dabei im transformierten Messraum $z = g^{-1}(y)$;
+Zur Evaluation werden alle drei Modelle auf einen Zeitraum der ersten sechs Monate des Datenstroms angewandt, sowohl auf den drift-freien als auch auf den drift-behafteten Signalen. Als Vergleichsgröße dient beim \ac{MLP} der Simulationsfehler $\hat{y}[k] - y^{\mathrm{f}}[k]$, bei den Filterverfahren die Innovation, also die Abweichung zwischen Messung und Prädiktion vor dem Korrekturschritt. Beide Größen messen, wie gut das jeweilige Modell die beobachtete Systemantwort beschreibt. Um die drei Ansätze in einer gemeinsamen Darstellung gegenüberstellen zu können, werden Simulationsfehler und Innovationen je Modell und Szenario mittelwertbereinigt und auf Einheitsvarianz skaliert. Die Innovation des \ac{KF} liegt dabei im transformierten Messraum $z = g^{-1}(y)$;
 durch die abschließende Skalierung auf Einheitsvarianz bleiben die drei
 Ansätze dennoch vergleichbar. \par
 %
@@ -327,7 +327,7 @@ Ansätze dennoch vergleichbar. \par
     \begin{subfigure}[t]{\textwidth}
         \centering
         \input{\plotdir syn_model_error_mlp.pgf}
-        \caption{Statisches MLP}
+        \caption{Statisches \ac{MLP}}
         \label{fig:synthetic_data_model_error_mlp}
     \end{subfigure}
 
@@ -348,11 +348,11 @@ Ansätze dennoch vergleichbar. \par
     \label{fig:synthetic_data_model_error_cd}
 \end{figure}
 %
-Abbildung~\ref{fig:synthetic_data_model_error_cd} stellt für das MLP (\subref{fig:synthetic_data_model_error_mlp}), den \ac{KF} (\subref{fig:synthetic_data_model_error_kf}) und den \ac{EKF} (\subref{fig:synthetic_data_model_error_ekf}) den normierten Simulationsfehler bzw. die normierte Innovation auf dem drift-freien (blau) und dem drift-behafteten (orange) Teststrom dar, jeweils überlagert mit dem Driftsignal $c[k]$ (grün). Auf dem drift-freien Datenstrom verbleiben die Fehler aller drei Modelle als mittelwertfreies, strukturloses Band um Null. Dies bestätigt die korrekte, drift-freie Initialisierung.
+Abbildung~\ref{fig:synthetic_data_model_error_cd} stellt für das \ac{MLP} (\subref{fig:synthetic_data_model_error_mlp}), den \ac{KF} (\subref{fig:synthetic_data_model_error_kf}) und den \ac{EKF} (\subref{fig:synthetic_data_model_error_ekf}) den normierten Simulationsfehler bzw. die normierte Innovation auf dem drift-freien (blau) und dem drift-behafteten (orange) Teststrom dar, jeweils überlagert mit dem Driftsignal $c[k]$ (grün). Auf dem drift-freien Datenstrom verbleiben die Fehler aller drei Modelle als mittelwertfreies, strukturloses Band um Null. Dies bestätigt die korrekte, drift-freie Initialisierung.
 Auf dem drift-behafteten Datenstrom hingegen folgt der Fehlerverlauf bei allen drei Ansätzen der Sägezahnstruktur des Driftsignals. Der \emph{Incremental Drift} innerhalb der Segmente äußert sich in einem mit dem Driftbetrag $|c[k]|$ systematisch anwachsenden Fehlerbetrag, während der \emph{Sudden Drift} an der Segmentgrenze einen sprunghaften Wechsel des Fehlerniveaus verursacht. Dementsprechend korreliert der Betrag des Fehlers im drift-behafteten Fall mit dem Betrag des Driftsignals, und die zuvor um Null zentrierten Residuen nehmen einen systematischen Bias an. 
-Quantitativ bestätigt sich diese Beobachtung: Der RMSE des Fehlers bzw. der Innovation steigt bei allen drei Modellen vom drift-freien zum drift-behafteten Fall deutlich an (siehe Tabelle~\ref{tab:synthetic_data_model_error_stats}). Die Degradation betrifft damit alle drei Modellklassen in vergleichbarer Größenordnung. \par
-Worin sich die drei Ansätze hingegen unterscheiden, ist die Zusammensetzung dieses Fehleranstiegs, die sich anhand der visuellen Darstellung sowie der Kennzahlen in Tabelle~\ref{tab:synthetic_data_model_error_stats} erkennen lässt. Beim MLP entsteht ein gerichteter, systematischer Fehler. Der Fehler im drift-behafteten Fall nimmt einen deutlich von Null verschiedenen Mittelwert $\bar{e}$ an, der dem Drift in einer Vorzugsrichtung folgt. Bei \ac{KF} und \ac{EKF} bleibt die Innovation demgegenüber nahezu mittelwertfrei. Die Verschlechterung äußert sich hier überwiegend in einer wachsenden, zeitlich aber ungerichteten Streuung $\sigma$.
-Beim MLP korreliert also der Fehler selbst richtungstreu mit $c[k]$ und verschiebt sich mit dem Drift, während bei den Filterverfahren nicht die Innovation selbst, sondern deren Streuung mit $c[k]$ korreliert. Die Schwere des Drifts schlägt sich bei den Filtern somit in der Breite und nicht in der Lage der Innovationsverteilung nieder. \par
+Quantitativ bestätigt sich diese Beobachtung: Der \ac{RMSE} des Fehlers bzw. der Innovation steigt bei allen drei Modellen vom drift-freien zum drift-behafteten Fall deutlich an (siehe Tabelle~\ref{tab:synthetic_data_model_error_stats}). Die Degradation betrifft damit alle drei Modellklassen in vergleichbarer Größenordnung. \par
+Worin sich die drei Ansätze hingegen unterscheiden, ist die Zusammensetzung dieses Fehleranstiegs, die sich anhand der visuellen Darstellung sowie der Kennzahlen in Tabelle~\ref{tab:synthetic_data_model_error_stats} erkennen lässt. Beim \ac{MLP} entsteht ein gerichteter, systematischer Fehler. Der Fehler im drift-behafteten Fall nimmt einen deutlich von Null verschiedenen Mittelwert $\bar{e}$ an, der dem Drift in einer Vorzugsrichtung folgt. Bei \ac{KF} und \ac{EKF} bleibt die Innovation demgegenüber nahezu mittelwertfrei. Die Verschlechterung äußert sich hier überwiegend in einer wachsenden, zeitlich aber ungerichteten Streuung $\sigma$.
+Beim \ac{MLP} korreliert also der Fehler selbst richtungstreu mit $c[k]$ und verschiebt sich mit dem Drift, während bei den Filterverfahren nicht die Innovation selbst, sondern deren Streuung mit $c[k]$ korreliert. Die Schwere des Drifts schlägt sich bei den Filtern somit in der Breite und nicht in der Lage der Innovationsverteilung nieder. \par
 %
 \begin{table}[tbp]
 \centering
@@ -360,12 +360,12 @@ Beim MLP korreliert also der Fehler selbst richtungstreu mit $c[k]$ und verschie
 \label{tab:synthetic_data_model_error_stats}
 \begin{tabular}{lccccc}
 \toprule
-\multirow{2}{*}[-4pt]{\textbf{Modell}} & \multicolumn{2}{c}{RMSE} & \multicolumn{2}{c}{Streuung $\sigma$}
+\multirow{2}{*}[-4pt]{\textbf{Modell}} & \multicolumn{2}{c}{\ac{RMSE}} & \multicolumn{2}{c}{Streuung $\sigma$}
  & \multirow{2}{*}[-4pt]{\shortstack[c]{Mittelwert $\bar{e}$\\[4pt](drift-behaftet)}} \\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}
  & drift-frei & drift-behaftet & drift-frei & drift-behaftet & \\
 \midrule
-MLP & $\statMLPRmseFree$ & $\statMLPRmseDrift$ & $\statMLPSigmaFree$ & $\statMLPSigma$ & $\statMLPBias$ \\
+\ac{MLP} & $\statMLPRmseFree$ & $\statMLPRmseDrift$ & $\statMLPSigmaFree$ & $\statMLPSigma$ & $\statMLPBias$ \\
 \ac{KF} & $\statKFRmseFree$ & $\statKFRmseDrift$ & $\statKFSigmaFree$ & $\statKFSigma$ & $\statKFBias$ \\
 \ac{EKF} & $\statEKFRmseFree$ & $\statEKFRmseDrift$ & $\statEKFSigmaFree$ & $\statEKFSigma$ & $\statEKFBias$ \\
 \bottomrule
@@ -378,9 +378,9 @@ Erwartungsgemäß können auch die Filterverfahren den Drift mit ihrer quasi-sta
 %
 \input{\resultsdir syn_detection.tex}
 %
-Zur Detektion des in Abschnitt \ref{sec:generieren_von_cd} generierten \ac{CD} werden die in Abschnitt~\ref{sec:drift_erkennung} eingeführten Performance-basierten Drift-Detektoren herangezogen. Als Eingangssignal der Detektion dient der normierte Simulationsfehler des in Abschnitt \ref{sec:datensynthese_modellierung} eingeführten MLP, dessen Architektur auch im ausgehenden Anwendungsfall der Mühle verwendet wird. Konkret kommen als Detektionsverfahren die beiden Fenster-basierten Verfahren \emph{KSWIN} und \ac{ADWIN} sowie die beiden auf statistischer Prozesskontrolle beruhenden Verfahren \emph{DDM} und \emph{EDDM} zum Einsatz. \par
+Zur Detektion des in Abschnitt \ref{sec:generieren_von_cd} generierten \ac{CD} werden die in Abschnitt~\ref{sec:drift_erkennung} eingeführten Performance-basierten Drift-Detektoren herangezogen. Als Eingangssignal der Detektion dient der normierte Simulationsfehler des in Abschnitt \ref{sec:datensynthese_modellierung} eingeführten MLP, dessen Architektur auch im ausgehenden Anwendungsfall der Mühle verwendet wird. Konkret kommen als Detektionsverfahren die beiden Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN} sowie die beiden auf statistischer Prozesskontrolle beruhenden Verfahren \ac{DDM} und \ac{EDDM} zum Einsatz. \par
 %
-Wie bereits in Abschnitt~\ref{sec:drift_erkennung} beschrieben, verarbeiten die Fenster-basierten Verfahren eine kontinuierliche Größe und verwenden daher hier den Betrag des Simulationsfehlers $|e[k]|$. DDM und EDDM hingegen basieren auf Fehlerraten und sind ursprünglich auf binäre Fehlersignale ausgelegt, wie sie bei Klassifikationsaufgaben durch korrekte oder falsche Modellentscheidungen entstehen. Ein solches binäres Fehlersignal existiert für die vorliegende Regressionsaufgabe jedoch nicht, sodass der kontinuierliche Fehler vor der Auswertung binarisiert werden muss. Dazu wird ein Schwellenwert $\lambda_{\mathrm{bin}}$ eingeführt, der den Fehler in einen korrekten ($|e[k]| \le \lambda_{\mathrm{bin}}$) und einen fehlerhaften Zustand ($|e[k]| > \lambda_{\mathrm{bin}}$) übersetzt. Da der Fehler in Abschnitt~\ref{sec:datensynthese_modellierung} auf Einheitsvarianz normiert wurde, entspricht der Schwellenwert einem Vielfachen der Standardabweichung. \par
+Wie bereits in Abschnitt~\ref{sec:drift_erkennung} beschrieben, verarbeiten die Fenster-basierten Verfahren eine kontinuierliche Größe und verwenden daher hier den Betrag des Simulationsfehlers $|e[k]|$. \ac{DDM} und \ac{EDDM} hingegen basieren auf Fehlerraten und sind ursprünglich auf binäre Fehlersignale ausgelegt, wie sie bei Klassifikationsaufgaben durch korrekte oder falsche Modellentscheidungen entstehen. Ein solches binäres Fehlersignal existiert für die vorliegende Regressionsaufgabe jedoch nicht, sodass der kontinuierliche Fehler vor der Auswertung binarisiert werden muss. Dazu wird ein Schwellenwert $\lambda_{\mathrm{bin}}$ eingeführt, der den Fehler in einen korrekten ($|e[k]| \le \lambda_{\mathrm{bin}}$) und einen fehlerhaften Zustand ($|e[k]| > \lambda_{\mathrm{bin}}$) übersetzt. Da der Fehler in Abschnitt~\ref{sec:datensynthese_modellierung} auf Einheitsvarianz normiert wurde, entspricht der Schwellenwert einem Vielfachen der Standardabweichung. \par
 %
 Ein wesentlicher Unterschied zum Mühlen-Anwendungsfall besteht darin, dass der synthetische Datenstrom die Drift-Zeitpunkte als \emph{Ground Truth} bereitstellt. Aus $c[k]$ werden dazu zwei Referenzgrößen abgeleitet: die Menge der \emph{Sudden Drifts} als Indizes der sprungartigen Anstiege an den Segmentgrenzen sowie eine Unterscheidung zwischen drift-aktiven und drift-inaktiven Phasen. Obwohl sich $c[k]$ kontinuierlich verändert, gilt ein Zeitschritt als drift-inaktiv (bzw.\ \emph{stabil}), wenn die Driftamplitude unter $10\,\%$ ihres Maximalwerts bleibt:
 %
@@ -411,7 +411,7 @@ zusammengefasst, wobei $N_{\mathrm{sd}}$ die Zahl der Sudden Drifts bezeichnet. 
     \begin{subfigure}[t]{\textwidth}
         \centering
         \input{\plotdir syn_detection_kswin.pgf}
-        \caption{KSWIN}
+        \caption{\ac{KSWIN}}
         \label{fig:synthetic_data_detection_kswin}
     \end{subfigure}
 
@@ -425,26 +425,26 @@ zusammengefasst, wobei $N_{\mathrm{sd}}$ die Zahl der Sudden Drifts bezeichnet. 
     \begin{subfigure}[t]{\textwidth}
         \centering
         \input{\plotdir syn_detection_ddm.pgf}
-        \caption{DDM}
+        \caption{\ac{DDM}}
         \label{fig:synthetic_data_detection_ddm}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
         \centering
         \input{\plotdir syn_detection_eddm.pgf}
-        \caption{EDDM}
+        \caption{\ac{EDDM}}
         \label{fig:synthetic_data_detection_eddm}
     \end{subfigure}
     \caption{Erkannte Drifts verschiedener Detektionsmethoden auf dem normierten Simulationsfehler im Vergleich zum Driftsignal $c[k]$}
     \label{fig:synthetic_data_detection_comparison}
 \end{figure}
 %
-Abbildung~\ref{fig:synthetic_data_detection_comparison} stellt die erkannten Drifts der vier Parameter-optimierten Detektoren (\subref{fig:synthetic_data_detection_kswin}) KSWIN, (\subref{fig:synthetic_data_detection_adwin}) \ac{ADWIN}, (\subref{fig:synthetic_data_detection_ddm}) DDM und (\subref{fig:synthetic_data_detection_eddm}) EDDM dem Driftsignal $c[k]$ gegenüber. Die zugehörigen Kennzahlen fasst Tabelle~\ref{tab:synthetic_data_detection_stats} zusammen. Ausgewertet wird der gesamte Datenstrom über ein Kalenderjahr, der an seinen Segmentgrenzen vier Sudden Drifts aufweist (vgl. Abbildung \ref{fig:synthetic_concept_drift}). Die Abbildung zeigt davon exemplarisch die ersten sechs Monate.
-Eine Besonderheit der Fenster-basierten Verfahren ist, dass sie den fortlaufenden \emph{Incremental Drift} innerhalb eines Segments nicht als einmaliges Ereignis, sondern kontinuierlich als wiederholte Verteilungsänderung detektieren. Dies führt zu einer dichten Folge von Detektionen über die gesamte aktive Driftphase. Für die grafische Darstellung wird daher für KSWIN und \ac{ADWIN} eine Refraktärzeit von $\paramRefract$ Abtastschritten eingeführt, innerhalb derer nach einer Detektion weitere Detektionen unterdrückt werden. DDM und EDDM bleiben davon unberührt. Die in Tabelle~\ref{tab:synthetic_data_detection_stats} dargestellten Kennzahlen sind jedoch auf der vollständigen Detektionsfolge ohne Refraktärzeit berechnet. \par
+Abbildung~\ref{fig:synthetic_data_detection_comparison} stellt die erkannten Drifts der vier Parameter-optimierten Detektoren (\subref{fig:synthetic_data_detection_kswin}) \ac{KSWIN}, (\subref{fig:synthetic_data_detection_adwin}) \ac{ADWIN}, (\subref{fig:synthetic_data_detection_ddm}) \ac{DDM} und (\subref{fig:synthetic_data_detection_eddm}) \ac{EDDM} dem Driftsignal $c[k]$ gegenüber. Die zugehörigen Kennzahlen fasst Tabelle~\ref{tab:synthetic_data_detection_stats} zusammen. Ausgewertet wird der gesamte Datenstrom über ein Kalenderjahr, der an seinen Segmentgrenzen vier Sudden Drifts aufweist (vgl. Abbildung \ref{fig:synthetic_concept_drift}). Die Abbildung zeigt davon exemplarisch die ersten sechs Monate.
+Eine Besonderheit der Fenster-basierten Verfahren ist, dass sie den fortlaufenden \emph{Incremental Drift} innerhalb eines Segments nicht als einmaliges Ereignis, sondern kontinuierlich als wiederholte Verteilungsänderung detektieren. Dies führt zu einer dichten Folge von Detektionen über die gesamte aktive Driftphase. Für die grafische Darstellung wird daher für \ac{KSWIN} und \ac{ADWIN} eine Refraktärzeit von $\paramRefract$ Abtastschritten eingeführt, innerhalb derer nach einer Detektion weitere Detektionen unterdrückt werden. \ac{DDM} und \ac{EDDM} bleiben davon unberührt. Die in Tabelle~\ref{tab:synthetic_data_detection_stats} dargestellten Kennzahlen sind jedoch auf der vollständigen Detektionsfolge ohne Refraktärzeit berechnet. \par
 %
-Auswertend lässt sich festhalten, dass KSWIN und \ac{ADWIN} sämtliche Segmentsprünge zuverlässig und mit geringem Verzug erkennen (vgl. Tabelle~\ref{tab:synthetic_data_detection_stats}). Zugleich zeichnen sie den fortlaufenden Incremental Drift nach, was sich ohne Refraktärzeit in einer Vielzahl von Einzeldetektionen äußert. Mit Refraktärzeit reduziert sich diese auf wenige Detektionen, die die aktiven Drifts zuverlässig markieren. Diese hohe Sensitivität geht jedoch mit vergleichsweise vielen Fehlalarmen in stabilen Phasen gemäß \eqref{eq:drift_aktiv} einher. \par
+Auswertend lässt sich festhalten, dass \ac{KSWIN} und \ac{ADWIN} sämtliche Segmentsprünge zuverlässig und mit geringem Verzug erkennen (vgl. Tabelle~\ref{tab:synthetic_data_detection_stats}). Zugleich zeichnen sie den fortlaufenden Incremental Drift nach, was sich ohne Refraktärzeit in einer Vielzahl von Einzeldetektionen äußert. Mit Refraktärzeit reduziert sich diese auf wenige Detektionen, die die aktiven Drifts zuverlässig markieren. Diese hohe Sensitivität geht jedoch mit vergleichsweise vielen Fehlalarmen in stabilen Phasen gemäß \eqref{eq:drift_aktiv} einher. \par
 %
-DDM und EDDM verhalten sich demgegenüber deutlich konservativer. Während DDM sämtliche Segmentsprünge erfasst, verfehlt EDDM den schwächsten Sudden Drift, sodass dessen Recall hinter dem der übrigen Verfahren zurückbleibt. Zugleich markieren beide den fortlaufenden Incremental Drift deutlich spärlicher und lösen in stabilen Phasen gemäß \eqref{eq:drift_aktiv} keine Fehlalarme aus. Dieses Verhalten ist eine unmittelbare Folge der Binarisierung: Da nur Fehlerbeträge oberhalb von $\lambda_{\mathrm{bin}}$ einfließen, reagieren beide Verfahren vorrangig auf ausgeprägte Fehlerexkursionen und bleiben gegenüber schwächeren Änderungen vergleichsweise unempfindlich. \par
+\ac{DDM} und \ac{EDDM} verhalten sich demgegenüber deutlich konservativer. Während \ac{DDM} sämtliche Segmentsprünge erfasst, verfehlt \ac{EDDM} den schwächsten Sudden Drift, sodass dessen Recall hinter dem der übrigen Verfahren zurückbleibt. Zugleich markieren beide den fortlaufenden Incremental Drift deutlich spärlicher und lösen in stabilen Phasen gemäß \eqref{eq:drift_aktiv} keine Fehlalarme aus. Dieses Verhalten ist eine unmittelbare Folge der Binarisierung: Da nur Fehlerbeträge oberhalb von $\lambda_{\mathrm{bin}}$ einfließen, reagieren beide Verfahren vorrangig auf ausgeprägte Fehlerexkursionen und bleiben gegenüber schwächeren Änderungen vergleichsweise unempfindlich. \par
 %
 \begin{table}[tbp]
 \centering
@@ -454,21 +454,21 @@ DDM und EDDM verhalten sich demgegenüber deutlich konservativer. Während DDM s
 \toprule
 \textbf{Detektor} & Recall $\rho$ & Verzug $\bar{d}$ & Fehlalarme $N_{\mathrm{fa}}$ & Detektionen \\
 \midrule
-KSWIN & $\driftKSWINRecall$ & $\driftKSWINDelay$ & $\driftKSWINFalse$ & $\driftKSWINDrifts$ \\
+\ac{KSWIN} & $\driftKSWINRecall$ & $\driftKSWINDelay$ & $\driftKSWINFalse$ & $\driftKSWINDrifts$ \\
 \ac{ADWIN} & $\driftADWINRecall$ & $\driftADWINDelay$ & $\driftADWINFalse$ & $\driftADWINDrifts$ \\
-DDM   & $\driftDDMRecall$   & $\driftDDMDelay$   & $\driftDDMFalse$   & $\driftDDMDrifts$   \\
-EDDM  & $\driftEDDMRecall$  & $\driftEDDMDelay$  & $\driftEDDMFalse$  & $\driftEDDMDrifts$  \\
+\ac{DDM}   & $\driftDDMRecall$   & $\driftDDMDelay$   & $\driftDDMFalse$   & $\driftDDMDrifts$   \\
+\ac{EDDM}  & $\driftEDDMRecall$  & $\driftEDDMDelay$  & $\driftEDDMFalse$  & $\driftEDDMDrifts$  \\
 \bottomrule
 \end{tabular}
 \end{table}
 %
-Insgesamt erfassen die Fenster-basierten Verfahren KSWIN und \ac{ADWIN} sämtliche Sudden Drifts sowie den Incremental Drift fortlaufend, was eine hohe Reaktionsfähigkeit ermöglicht, jedoch mit zahlreichen Fehlalarmen einhergeht. Die Fehlerraten-basierten Verfahren DDM und EDDM liefern demgegenüber eine spärlichere, fehlalarmfreie Detektion, wobei EDDM einen \emph{Sudden Drift} verfehlt. Welches Verhalten vorzuziehen ist, hängt damit von der angestrebten Adaptionsstrategie ab. \par
+Insgesamt erfassen die Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN} sämtliche Sudden Drifts sowie den Incremental Drift fortlaufend, was eine hohe Reaktionsfähigkeit ermöglicht, jedoch mit zahlreichen Fehlalarmen einhergeht. Die Fehlerraten-basierten Verfahren \ac{DDM} und \ac{EDDM} liefern demgegenüber eine spärlichere, fehlalarmfreie Detektion, wobei \ac{EDDM} einen \emph{Sudden Drift} verfehlt. Welches Verhalten vorzuziehen ist, hängt damit von der angestrebten Adaptionsstrategie ab. \par
 %
 \subsection{Drift-Adaption} \label{sec:datensynthese_drift_adaption}
 %
 \input{\resultsdir syn_adaptation.tex}
 %
-Nachdem der \ac{CD} im vorigen Abschnitt detektiert werden konnte, besteht der abschließende Schritt der Verarbeitungskette darin, das in Abschnitt~\ref{sec:datensynthese_modellierung} eingeführte MLP an den drift-behafteten Prozess zu adaptieren und damit der Modellverschlechterung entgegenzuwirken. Methodisch werden drei Varianten dem drift-behafteten Modell gegenübergestellt: 
+Nachdem der \ac{CD} im vorigen Abschnitt detektiert werden konnte, besteht der abschließende Schritt der Verarbeitungskette darin, das in Abschnitt~\ref{sec:datensynthese_modellierung} eingeführte \ac{MLP} an den drift-behafteten Prozess zu adaptieren und damit der Modellverschlechterung entgegenzuwirken. Methodisch werden drei Varianten dem drift-behafteten Modell gegenübergestellt: 
 %
 \begin{itemize}
     \item eine \emph{passive} Adaption
@@ -478,7 +478,7 @@ Nachdem der \ac{CD} im vorigen Abschnitt detektiert werden konnte, besteht der a
 %
 Passive und aktive Adaption sowie deren Kombination werden im Folgenden zunächst definiert und anschließend methodisch ausgestaltet. \par
 %
-Allen adaptiven Strategien liegt ein inkrementelles Nachtraining des MLP zugrunde. Anstatt das Modell vollständig neu zu trainieren, wird das bestehende Netz schrittweise an die veränderten Zusammenhänge angepasst. Dabei werden ausgewählte Layer des Netzes eingefroren, während die verbleibenden Schichten mit kleiner Lernrate über wenige Epochen mit dem Adam-Optimierer und dem MSE als Verlustfunktion nachtrainiert werden. Ein Early-Stopping-Kriterium bricht das Training bei ausbleibender Verbesserung vorzeitig ab und begrenzt so das Risiko eines Overfitting an einen kurzen, lokalen Datenausschnitt. Zusätzlich wird jedes Nachtraining validiert: Senkt es den MSE auf dem eigenen Trainingsfenster nicht, wird das Update verworfen und der vorherige Gewichtsstand wiederhergestellt. Das Einfrieren von Layern, die kleine Lernrate sowie das Early-Stopping wirken dabei dem in Abschnitt~\ref{sec:drift_adaption} beschriebenen \emph{Stability-Plasticity-Dilemma} entgegen, indem sie die Plastizität gezielt begrenzen. Im Gegensatz zum initialen Training auf dem drift-freien Referenzzeitraum (vgl. Abschnitt~\ref{sec:datensynthese_modellierung}) werden für die Adaption die drift-behafteten Eingangssignale $\tilde{u}_i^{\mathrm{f}}[k]$ als Features und die ebenfalls drift-behaftete Systemantwort $\tilde{y}^{\mathrm{f}}[k]$ als Label verwendet. Die kontinuierliche Verfügbarkeit des Labels entspricht dabei dem Mühlen-Anwendungsfall, in dem die Zielgröße sensorisch fortlaufend erfasst wird. \par
+Allen adaptiven Strategien liegt ein inkrementelles Nachtraining des \ac{MLP} zugrunde. Anstatt das Modell vollständig neu zu trainieren, wird das bestehende Netz schrittweise an die veränderten Zusammenhänge angepasst. Dabei werden ausgewählte Layer des Netzes eingefroren, während die verbleibenden Schichten mit kleiner Lernrate über wenige Epochen mit dem Adam-Optimierer und dem \ac{MSE} als Verlustfunktion nachtrainiert werden. Ein Early-Stopping-Kriterium bricht das Training bei ausbleibender Verbesserung vorzeitig ab und begrenzt so das Risiko eines Overfitting an einen kurzen, lokalen Datenausschnitt. Zusätzlich wird jedes Nachtraining validiert: Senkt es den \ac{MSE} auf dem eigenen Trainingsfenster nicht, wird das Update verworfen und der vorherige Gewichtsstand wiederhergestellt. Das Einfrieren von Layern, die kleine Lernrate sowie das Early-Stopping wirken dabei dem in Abschnitt~\ref{sec:drift_adaption} beschriebenen \emph{Stability-Plasticity-Dilemma} entgegen, indem sie die Plastizität gezielt begrenzen. Im Gegensatz zum initialen Training auf dem drift-freien Referenzzeitraum (vgl. Abschnitt~\ref{sec:datensynthese_modellierung}) werden für die Adaption die drift-behafteten Eingangssignale $\tilde{u}_i^{\mathrm{f}}[k]$ als Features und die ebenfalls drift-behaftete Systemantwort $\tilde{y}^{\mathrm{f}}[k]$ als Label verwendet. Die kontinuierliche Verfügbarkeit des Labels entspricht dabei dem Mühlen-Anwendungsfall, in dem die Zielgröße sensorisch fortlaufend erfasst wird. \par
 %
 Zur Adaption wird der Strom auf ein gröberes Abtastraster mit dem Adaptionsintervall $T_{\mathrm{a}} = \paramTa$ reduziert, was $\num{\paramNPoints}$ Datenpunkten entspricht, und anschließend chunk-weise verarbeitet. Ein \emph{Chunk} bezeichnet in dem Zusammenhang einen zusammenhängenden Abschnitt des Datenstroms fester Länge -- hier etwa einen Tag bzw.\ $\num{\paramChunk}$ Datenpunkte -- und bildet die Einheit, auf der über eine Anpassung entschieden wird. Der Strom wird somit nicht punktweise, sondern blockweise in solchen Chunks durchlaufen. Innerhalb eines Chunks wird der Strom zunächst in einem Durchgang prädiziert und daraus der Simulationsfehler bestimmt. Anschließend werden die Strategie-spezifischen Bedingungen geprüft und nur bei Bedarf das Nachtraining ausgelöst. Die Verarbeitung folgt durchgängig dem prequentiellen Prinzip (\emph{test-then-train}). Jeder Datenpunkt wird dabei zunächst prädiziert und fließt erst danach in ein etwaiges Nachtraining ein. Trainingsfenster greifen hier zu keinem Zeitpunkt auf zukünftige Datenpunkte zu. \par
 % --- Strategien ---
@@ -488,19 +488,19 @@ Die \emph{aktive} Adaption koppelt das Nachtraining hingegen an die Drift-Detekt
 %
 Die \emph{kombinierte} Strategie soll beide Mechanismen zusammenführen, wobei die periodische passive Komponente als Rückfallebene (\emph{Backstop}) wirkt. Sie löst nur aus, wenn im selben Zeitraum keine detektor-getriggerte Anpassung erfolgt ist. Verpasst der Detektor eine Veränderung, fängt die periodische Komponente sie auf. \par
 % --- Methodik: Screening ---
-Da die aktive Strategie von der Wahl des Detektors abhängt, wird dieser nicht manuell festgelegt, sondern anhand eines Screenings bestimmt. Als Trigger stehen die vier statistischen Detektoren KSWIN, \ac{ADWIN}, DDM und EDDM sowie ein Schwellwert-Detektor zur Auswahl. Der Schwellwert-Detektor bildet die performance-basierte Erkennung (Abschnitt~\ref{sec:drift_erkennung}) in ihrer einfachsten Form ab, indem er anschlägt, sobald der über ein gleitendes Fenster berechnete RMSE des Simulationsfehlers $e[k]$ einen festgelegten Schwellwert überschreitet.
-Für jeden Trigger wird ein vollständiger Adaptionslauf durchgeführt. Derjenige Trigger mit dem kleinsten resultierenden RMSE wird dann als aktive Strategie ausgewählt und als aktive Komponente der kombinierten Strategie übernommen. Die Anforderungen an den Detektor unterscheiden sich dabei von der reinen Detektions-Evaluation aus Abschnitt~\ref{sec:datensynthese_drift_erkennung}, denn im geschlossenen Kreis arbeitet er auf dem Simulationsfehler $e[k]$ des sich fortlaufend ändernden Modells, dessen Niveau sich mit jeder Anpassung verschiebt.
-Fehlerraten-basierte Verfahren wie DDM oder EDDM setzen dazu den Betrag des Simulationsfehlers $|e[k]|$ über die in Abschnitt~\ref{sec:datensynthese_drift_erkennung} eingeführte Schwelle $\lambda_{\mathrm{bin}}$ in ein binäres Richtig/Falsch-Signal um. Diese Schwelle ist am Fehlerniveau des statischen Modells festgelegt. Sobald die laufende Adaption dieses Niveau absenkt, passt sie nicht mehr, und der Detektor arbeitet außerhalb seines vorgesehenen Betriebspunkts. Die Fenster-basierten Verfahren KSWIN und \ac{ADWIN} vergleichen dagegen ein aktuelles Detektionsfenster mit einem mitlaufenden Referenzfenster und kommen ohne fest kalibrierten Schwellwert aus, sodass sie vom absoluten Fehlerniveau kaum betroffen sind. Um für alle Verfahren einen passenden Betriebspunkt zu erhalten, werden die Detektorparameter nicht aus der reinen Detektion übernommen, sondern im geschlossenen Adaptionskreis neu abgestimmt. \par
+Da die aktive Strategie von der Wahl des Detektors abhängt, wird dieser nicht manuell festgelegt, sondern anhand eines Screenings bestimmt. Als Trigger stehen die vier statistischen Detektoren \ac{KSWIN}, \ac{ADWIN}, \ac{DDM} und \ac{EDDM} sowie ein Schwellwert-Detektor zur Auswahl. Der Schwellwert-Detektor bildet die performance-basierte Erkennung (Abschnitt~\ref{sec:drift_erkennung}) in ihrer einfachsten Form ab, indem er anschlägt, sobald der über ein gleitendes Fenster berechnete \ac{RMSE} des Simulationsfehlers $e[k]$ einen festgelegten Schwellwert überschreitet.
+Für jeden Trigger wird ein vollständiger Adaptionslauf durchgeführt. Derjenige Trigger mit dem kleinsten resultierenden \ac{RMSE} wird dann als aktive Strategie ausgewählt und als aktive Komponente der kombinierten Strategie übernommen. Die Anforderungen an den Detektor unterscheiden sich dabei von der reinen Detektions-Evaluation aus Abschnitt~\ref{sec:datensynthese_drift_erkennung}, denn im geschlossenen Kreis arbeitet er auf dem Simulationsfehler $e[k]$ des sich fortlaufend ändernden Modells, dessen Niveau sich mit jeder Anpassung verschiebt.
+Fehlerraten-basierte Verfahren wie \ac{DDM} oder \ac{EDDM} setzen dazu den Betrag des Simulationsfehlers $|e[k]|$ über die in Abschnitt~\ref{sec:datensynthese_drift_erkennung} eingeführte Schwelle $\lambda_{\mathrm{bin}}$ in ein binäres Richtig/Falsch-Signal um. Diese Schwelle ist am Fehlerniveau des statischen Modells festgelegt. Sobald die laufende Adaption dieses Niveau absenkt, passt sie nicht mehr, und der Detektor arbeitet außerhalb seines vorgesehenen Betriebspunkts. Die Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN} vergleichen dagegen ein aktuelles Detektionsfenster mit einem mitlaufenden Referenzfenster und kommen ohne fest kalibrierten Schwellwert aus, sodass sie vom absoluten Fehlerniveau kaum betroffen sind. Um für alle Verfahren einen passenden Betriebspunkt zu erhalten, werden die Detektorparameter nicht aus der reinen Detektion übernommen, sondern im geschlossenen Adaptionskreis neu abgestimmt. \par
 % --- Methodik: Berechnung ---
 Wird bei der aktiven Strategie zum Zeitschritt $k_{\mathrm{d}}$ ein Drift erkannt, erfolgt unmittelbar ein Nachtraining auf dem zurückliegenden Fenster $[\,k_{\mathrm{d}} - n_{-},\, k_{\mathrm{d}}\,]$. Würde bis zum Nachtraining zunächst $n_{+}$ Punkte abgewartet um dem Nachtraining mehr Daten zur Verfügung zu stellen, entstünde eine Totzeit, in der der bereits detektierte Drift unberücksichtigt bliebe. Stattdessen wird das Modell während einer Nachführphase der Länge $n_{+}$ nachgeführt, das heißt am Ende jedes Chunks durch ein kurzes inkrementelles Nachtraining auf den zuletzt eingetroffenen Datenpunkten an die fortschreitende Veränderung angepasst. Detektionen innerhalb einer laufenden Phase verlängern diese lediglich, ohne ein weiteres Sofort-Training auszulösen. Der Eingriffsaufwand ist damit von der Detektionsdichte entkoppelt. Auch ein fenster-basiertes Verfahren, das den Incremental Drift als dichte Folge von Einzeldetektionen nachzeichnet (vgl. Abschnitt~\ref{sec:datensynthese_drift_erkennung}), wirkt so als Ereignis-Trigger. \par
 %
 Zwischen zwei Sofort-Trainings wird zudem eine Refraktärzeit als Vielfaches der mittleren Dauer stationärer Betriebsphasen erzwungen, die den Eingriffsaufwand begrenzt. \par
 %
-Die Bewertung der Strategien erfolgt über den Simulationsfehler auf dem drift-behafteten Strom über das gesamte Kalenderjahr. Als Kennzahlen dienen der RMSE, der Mittelwert $\bar{e}$ und die Streuung $\sigma$ des Fehlers, die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ sowie die Anzahl der ausgelösten Nachtrainings. 
+Die Bewertung der Strategien erfolgt über den Simulationsfehler auf dem drift-behafteten Strom über das gesamte Kalenderjahr. Als Kennzahlen dienen der \ac{RMSE}, der Mittelwert $\bar{e}$ und die Streuung $\sigma$ des Fehlers, die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ sowie die Anzahl der ausgelösten Nachtrainings. 
 
-Letztere quantifiziert den Eingriffsaufwand der jeweiligen Strategie. Da das inkrementelle Nachtraining stochastisch ist, wird die Auswertung zusätzlich über mehrere Läufe mit unterschiedlichen Seeds wiederholt und als Mittelwert und Streuung des RMSE zusammengefasst. Die Seed-Streuung dient dabei als Maß für die Reproduzierbarkeit einer Strategie. \par
+Letztere quantifiziert den Eingriffsaufwand der jeweiligen Strategie. Da das inkrementelle Nachtraining stochastisch ist, wird die Auswertung zusätzlich über mehrere Läufe mit unterschiedlichen Seeds wiederholt und als Mittelwert und Streuung des \ac{RMSE} zusammengefasst. Die Seed-Streuung dient dabei als Maß für die Reproduzierbarkeit einer Strategie. \par
 %
-Die Wirksamkeit der adaptiven Strategien hängt maßgeblich von ihren Hyperparametern ab. Diese werden daher analog zur Optimierung der Detektoren in Abschnitt~\ref{sec:datensynthese_drift_erkennung} je Strategie mit dem Optimierungsverfahren \texttt{Optuna} eingestellt. Im Unterschied zur Detektion erfordert jeder Versuch hier einen vollständigen Adaptionslauf mit wiederholtem Nachtraining und ist damit rechenintensiver. Das Tuning erfolgt dabei auf einem gröber abgetasteten Strom mit $T_{\mathrm{a}} = \paramTaTune$. Anders als bei der Detektion wird keine \emph{Ground Truth} der Drifts benötigt, da die gemessene Systemantwort als Label vorliegt und der RMSE direkt bewertet werden kann. Die Zielfunktion kombiniert den auf den Fall ohne Adaption normierten RMSE mit einem Strafterm für die Zahl der Nachtrainings, um den Eingriffsaufwand zu begrenzen:
+Die Wirksamkeit der adaptiven Strategien hängt maßgeblich von ihren Hyperparametern ab. Diese werden daher analog zur Optimierung der Detektoren in Abschnitt~\ref{sec:datensynthese_drift_erkennung} je Strategie mit dem Optimierungsverfahren \texttt{Optuna} eingestellt. Im Unterschied zur Detektion erfordert jeder Versuch hier einen vollständigen Adaptionslauf mit wiederholtem Nachtraining und ist damit rechenintensiver. Das Tuning erfolgt dabei auf einem gröber abgetasteten Strom mit $T_{\mathrm{a}} = \paramTaTune$. Anders als bei der Detektion wird keine \emph{Ground Truth} der Drifts benötigt, da die gemessene Systemantwort als Label vorliegt und der \ac{RMSE} direkt bewertet werden kann. Die Zielfunktion kombiniert den auf den Fall ohne Adaption normierten \ac{RMSE} mit einem Strafterm für die Zahl der Nachtrainings, um den Eingriffsaufwand zu begrenzen:
 %
 \begin{equation}
     J_{\mathrm{a}} = \omega_{\mathrm{r}} \, \frac{\mathrm{RMSE}}{\mathrm{RMSE}_{\mathrm{base}}}
@@ -508,7 +508,7 @@ Die Wirksamkeit der adaptiven Strategien hängt maßgeblich von ihren Hyperparam
     \label{eq:adaption_score}
 \end{equation}
 %
-mit den Gewichten $\omega_{\mathrm{r}} = 1{,}0$ und $\omega_{\mathrm{t}} = 0{,}1$, wobei $\mathrm{RMSE}_{\mathrm{base}}$ den RMSE der Baseline, $N_{\mathrm{train}}$ die Zahl der Nachtrainings und $N_{\mathrm{chunk}}$ die Zahl der Chunks bezeichnet. 
+mit den Gewichten $\omega_{\mathrm{r}} = 1{,}0$ und $\omega_{\mathrm{t}} = 0{,}1$, wobei $\mathrm{RMSE}_{\mathrm{base}}$ den \ac{RMSE} der Baseline, $N_{\mathrm{train}}$ die Zahl der Nachtrainings und $N_{\mathrm{chunk}}$ die Zahl der Chunks bezeichnet. 
 
 Optimiert werden die Lernrate, die Epochenzahl, das Freeze-Muster, das Reset-Verhalten, die strategie-spezifischen Fenster- und Schwellenparameter sowie die Refraktärzeit. Drei Maßnahmen sichern die Übertragbarkeit der auf dem gröber abgetasteten Tuning-Strom gefundenen Konfigurationen auf die Zielauflösung ab: 
 %
@@ -561,7 +561,7 @@ Abbildung~\ref{fig:synthetic_data_adaptation_comparison} stellt den normierten S
 \label{tab:synthetic_data_adaptation_stats}
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Strategie} & RMSE & Mittelwert $\bar{e}$ & Streuung $\sigma$ & Korr. $|e|,|c|$ & Nachtrainings \\
+\textbf{Strategie} & \ac{RMSE} & Mittelwert $\bar{e}$ & Streuung $\sigma$ & Korr. $|e|,|c|$ & Nachtrainings \\
 \midrule
 Baseline   & $\adaptBaselineRmse$ & $\adaptBaselineBias$ & $\adaptBaselineSigma$ & $\adaptBaselineCorrAbs$ & $\adaptBaselineNTrain$ \\
 Passiv     & $\adaptBlindRmse$    & $\adaptBlindBias$    & $\adaptBlindSigma$    & $\adaptBlindCorrAbs$    & $\adaptBlindNTrain$ \\
@@ -571,9 +571,9 @@ Kombiniert & $\adaptCombinedRmse$ & $\adaptCombinedBias$ & $\adaptCombinedSigma$
 \end{tabular}
 \end{table}
 %
-Mit den getunten Hyperparametern reduzieren alle drei adaptiven Strategien den Simulationsfehler deutlich, wobei sich eine klare Rangfolge ergibt (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Die passive Adaption senkt den RMSE um rund ein Drittel gegenüber dem Fall ohne Adaption. Die aktive Adaption verbessert diesen Wert bei vergleichbarem Eingriffsaufwand weiter. Den geringsten Fehler erzielt die kombinierte Strategie mit einer Reduktion um knapp vier Fünftel gegenüber dem Fall ohne Adaption, bei zugleich moderatem Eingriffsaufwand. Bemerkenswert ist, dass die kombinierte Strategie diese stärkste Fehlerreduktion mit der geringsten Zahl detektor-ausgelöster Anpassungen erreicht, da die passive Komponente bereits einen Großteil der Drift abfängt. \par
+Mit den getunten Hyperparametern reduzieren alle drei adaptiven Strategien den Simulationsfehler deutlich, wobei sich eine klare Rangfolge ergibt (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Die passive Adaption senkt den \ac{RMSE} um rund ein Drittel gegenüber dem Fall ohne Adaption. Die aktive Adaption verbessert diesen Wert bei vergleichbarem Eingriffsaufwand weiter. Den geringsten Fehler erzielt die kombinierte Strategie mit einer Reduktion um knapp vier Fünftel gegenüber dem Fall ohne Adaption, bei zugleich moderatem Eingriffsaufwand. Bemerkenswert ist, dass die kombinierte Strategie diese stärkste Fehlerreduktion mit der geringsten Zahl detektor-ausgelöster Anpassungen erreicht, da die passive Komponente bereits einen Großteil der Drift abfängt. \par
 %
-Im Gegensatz zum Fall ohne Adaption, dessen Fehler von einem gerichteten, mit dem Drift korrelierten Anteil dominiert wird, sinken durch die Adaption sowohl der Bias als auch die Streuung deutlich. Während die passive Adaption den mittleren Fehleranteil $\bar{e}$ am stärksten reduziert, erzielt die kombinierte Strategie die geringste Streuung $\sigma$ und damit den insgesamt kleinsten RMSE. Entsprechend schwächt sich die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ unter der kombinierten Strategie am stärksten ab. Der Restfehler folgt dem Driftsignal kaum noch, der \ac{CD} wird durch die Adaption somit weitgehend kompensiert. \par
+Im Gegensatz zum Fall ohne Adaption, dessen Fehler von einem gerichteten, mit dem Drift korrelierten Anteil dominiert wird, sinken durch die Adaption sowohl der Bias als auch die Streuung deutlich. Während die passive Adaption den mittleren Fehleranteil $\bar{e}$ am stärksten reduziert, erzielt die kombinierte Strategie die geringste Streuung $\sigma$ und damit den insgesamt kleinsten \ac{RMSE}. Entsprechend schwächt sich die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ unter der kombinierten Strategie am stärksten ab. Der Restfehler folgt dem Driftsignal kaum noch, der \ac{CD} wird durch die Adaption somit weitgehend kompensiert. \par
 %
 Insgesamt zeigt sich, dass die Adaption den synthetisch erzeugten \ac{CD} wirksam ausgleichen kann, sofern ihre Hyperparameter geeignet gewählt werden. Insbesondere die Kombination aus kontinuierlicher fehlergetriebener und detektor-getriggerter Anpassung erweist sich als robusteste Strategie, da sie den niedrigsten Gesamtfehler bei überschaubarem Eingriffsaufwand erreicht. \par
 %
@@ -701,9 +701,9 @@ Auf Basis des drift-behafteten Prozessmodells wird über die \textit{pyTEP}-Schn
 %   - pyTEP als Python-Schnittstelle zu MATLAB/Simulink \cite{reinartz.2022}
 %   - gewählter Betriebsmodus (vgl. Tab.~\ref{tab:modes}) und Begründung
 %
-% Absatz 2 — Anregung / DOE:
+% Absatz 2 — Anregung / \ac{DOE}:
 %   - Variation der Setpoints (-15% bis +15%) nach Reinartz et al.
-%   - DOE-Erzeugung analog zur Datenselektion (Abschn.~\ref{sec:datenselektion}, LHS)
+%   - \ac{DOE}-Erzeugung analog zur Datenselektion (Abschn.~\ref{sec:datenselektion}, LHS)
 %
 % Absatz 3 — Pre-Run & Simulation:
 %   - Bestimmung stationärer Arbeitspunkte (Pre-Run)
@@ -727,15 +727,15 @@ Auf Basis des drift-behafteten Prozessmodells wird über die \textit{pyTEP}-Schn
 Der generierte Prozess wird auf dem drift-freien Referenzzeitraum modelliert und anschließend auf den gesamten Datenstrom angewandt, um die drift-bedingte Modellverschlechterung sichtbar zu machen.
 %
 % Absatz 1 — Modellwahl:
-%   - MLP analog Abschn.~\ref{sec:datensynthese_modellierung} (Generalisierung des Ansatzes)
-%   - ENTSCHEIDUNG: Kalman/EKF als Vergleich? (beim TEP evtl. entfallen -> hier festlegen)
+%   - \ac{MLP} analog Abschn.~\ref{sec:datensynthese_modellierung} (Generalisierung des Ansatzes)
+%   - ENTSCHEIDUNG: Kalman/\ac{EKF} als Vergleich? (beim \ac{TEP} evtl. entfallen -> hier festlegen)
 %
 % Absatz 2 — Vorverarbeitung:
 %   - Glättung (gleitender Mittelwert), Min-Max-Normierung
 %   - Feature-/Label-Definition (ausgewählte Messgrößen -> Zielgröße)
 %
 % Absatz 3 — Trainingskonfiguration:
-%   - Architektur, Optimierer (Adam), Verlustfunktion (MSE), Epochen, Batchgröße
+%   - Architektur, Optimierer (Adam), Verlustfunktion (\ac{MSE}), Epochen, Batchgröße
 %   - Training ausschließlich auf drift-freiem Referenzdatensatz
 %
 % Absatz 4 — Ergebnis der Modellgüte:
@@ -756,11 +756,11 @@ Der generierte Prozess wird auf dem drift-freien Referenzzeitraum modelliert und
 Zur Detektion des im C-Code injizierten \ac{CD} werden dieselben performance-basierten Detektoren wie im synthetischen Fall auf den Simulationsfehler des Modells angewandt.
 %
 % Absatz 1 — Detektoren & Eingang:
-%   - KSWIN, ADWIN, DDM, EDDM (Bibliothek frouros), Eingang = Simulationsfehler
+%   - \ac{KSWIN}, ADWIN, \ac{DDM}, \ac{EDDM} (Bibliothek frouros), Eingang = Simulationsfehler
 %   - Verweis Abschn.~\ref{sec:datensynthese_drift_erkennung} zur Vermeidung von Redundanz
 %
 % Absatz 2 — Binarisierung & Konfiguration:
-%   - Schwellenwert lambda_bin für DDM/EDDM
+%   - Schwellenwert lambda_bin für \ac{DDM}/\ac{EDDM}
 %   - Tuning via Optuna, Ground Truth der injizierten Drifts (aus Abschn.~\ref{sec:tep_drift})
 %
 % Absatz 3 — Ergebnis:
@@ -795,7 +795,7 @@ Als abschließender Schritt der Verarbeitungskette wird das Modell an den drift-
 %   - Adaptionsintervall T_a, Chunk-Länge, Auslösebedingungen je Strategie
 %
 % Absatz 4 — Bewertung & Tuning:
-%   -> Kennzahlen (RMSE, Mittelwert, Streuung, Korrelation |e| mit |c[k]|, Anzahl Nachtrainings) in Tabelle
+%   -> Kennzahlen (\ac{RMSE}, Mittelwert, Streuung, Korrelation |e| mit |c[k]|, Anzahl Nachtrainings) in Tabelle
 %   - Optuna-Tuning mit Score J_a (vgl. Gl.~\eqref{eq:adaption_score})
 %   -> im Text qualitativ mit Verweis auf Tabelle
 %
