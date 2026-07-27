@@ -146,7 +146,7 @@ Eine physikalisch motivierte Zustandsraumbeschreibung dieses Systems würde eine
 Ein datenbasierter Input-Output-Modellierungsansatz hingegen ermöglicht es, das dynamische Prozessverhalten direkt aus gemessenen Ein- und Ausgangsdaten zu identifizieren. Dieser Ansatz eignet sich insbesondere für komplexe industrielle Prozesse mit zeitvarianten stochastischen Einflüssen und erlaubt eine Modellierung des Systems ohne Kenntnis der internen Zustände. Als Modellstruktur dieses Ansatzes wurde das neuronale Netz gewählt, welches eine flexible Approximation komplexer, nichtlinearer Zusammenhänge erlaubt.
 %
 \subsection{Modellarchitekturen} \label{sec:modellarchitekturen}
-Durch die prominente Präsenz großer Sprachmodelle (Large Language Models, LLMs) im öffentlichen Diskurs finden die Begriffe „Künstliche Intelligenz“, „Machine Learning“ und „neuronale Netze“ zunehmend Verwendung im allgemeinen Sprachgebrauch. Diese Begriffe bezeichnen jedoch eine Vielzahl unterschiedlicher Modellklassen, deren inhaltliche Breite durch eine Reduktion auf LLMs nicht angemessen abgebildet wird. Gleichzeitig ist im industriellen Kontext zu beobachten, dass zum Teil auch vergleichsweise einfache oder etablierte algorithmische Ansätze unter diesen Begriffen subsumiert werden, was zu einer begrifflichen Verwässerung beiträgt und die fachliche Trennschärfe weiter reduziert. 
+Durch die prominente Präsenz großer Sprachmodelle (engl. \ac{LLM}) im öffentlichen Diskurs finden die Begriffe „Künstliche Intelligenz“, „Machine Learning“ und „neuronale Netze“ zunehmend Verwendung im allgemeinen Sprachgebrauch. Diese Begriffe bezeichnen jedoch eine Vielzahl unterschiedlicher Modellklassen, deren inhaltliche Breite durch eine Reduktion auf \ac{LLM}s nicht angemessen abgebildet wird. Gleichzeitig ist im industriellen Kontext zu beobachten, dass zum Teil auch vergleichsweise einfache oder etablierte algorithmische Ansätze unter diesen Begriffen subsumiert werden, was zu einer begrifflichen Verwässerung beiträgt und die fachliche Trennschärfe weiter reduziert. 
 Um dieser Unschärfe entgegenzuwirken, sollen im Folgenden die für diese Arbeit relevanten Modellstrukturen eingeführt und voneinander abgegrenzt werden. \par
 Zunächst werden dazu Verfahren betrachtet, die nicht in die Kategorie der \ac{NN} fallen, aber durch ihre Einfachheit auszeichnen und häufig als Baseline dienen. \newline
 Dabei sei als erstes die \ac{LR} aufgeführt, die den Zusammenhang zwischen einer abhängigen Zielgröße und einer oder mehreren unabhängigen Inputvariablen durch eine lineare Gleichung beschreibt. Sie ist leicht interpretierbar, bei komplexeren, nicht-linearen Zusammenhängen stößt sie jedoch an ihre Grenzen und kann hier lediglich zur Approximation dienen. \newline
@@ -233,6 +233,8 @@ Zusammenfassend werden bei der Hyperparameter-Optimierung mittels Grid-Search-St
 Durch die Kombination dieser Parameter ergeben sich insgesamt über $500$ unterschiedliche Modell- und Hyperparameterkonfigurationen. Die Bewertung der Modelle erfolgt anhand des mittleren quadratischen Fehlers (engl. \ac{MSE}) und des mittleren absoluten Fehlers (engl. \ac{MAE}). Unabhängig davon, auf welchem der beiden Datensätze ein Modell trainiert ist, werden beide Metriken stets auf den Testdaten beider Datensätze berechnet. Diese wechselseitige Evaluation ermöglicht eine robuste Einschätzung der Generalisierungsfähigkeit der Modelle sowohl für stationäre als auch für transiente Prozesszustände.
 Alle Trainings- und Evaluationsläufe wurden auf einem vom Deutschen Forschungszentrum für Künstliche Intelligenz (DFKI) bereitgestellten Linux-Hochleistungsrechner durchgeführt. \par
 %
+\input{\resultsdir model_comparison.tex}
+%
 \begin{table}[tbp]
     \centering
     \caption{Vergleich der besten Modellarchitekturen auf stationären und transienten Daten}
@@ -243,12 +245,12 @@ Alle Trainings- und Evaluationsläufe wurden auf einem vom Deutschen Forschungsz
         \cmidrule(lr){2-3} \cmidrule(lr){4-5}
     \textbf{Modelltyp} & \textbf{Bester \ac{MAE}} & \textbf{$\Delta$ Best} & \textbf{Bester \ac{MAE}} &  \textbf{$\Delta$ Best} \\
         \midrule
-        Lineare Regression & 0,01400 & +87,7\% & 0,01410 & +43,7\% \\
-        Lasso-Regression & 0,02783 & +273,3\% & 0,03205 & +226,6\% \\
-        \ac{MLP} (statisch) & 0,00745 & \textbf{0,0\%} & 0,01140 & +16,2\% \\
-        \ac{MLP} (dynamisch) & 0,01017 & +36,5\% & 0.01226 & +25,0\% \\
-        \ac{CNN} & 0,00822 & +10,3\% & 0,01278 & +30,3\% \\
-        \ac{LSTM} & 0,01084 & +45,4\% & 0,00981 & \textbf{0,0\%} \\
+        Lineare Regression & \mcLinRegMaeStat & \mcLinRegDeltaStat & \mcLinRegMaeTrans & \mcLinRegDeltaTrans \\
+        Lasso-Regression & \mcLassoMaeStat & \mcLassoDeltaStat & \mcLassoMaeTrans & \mcLassoDeltaTrans \\
+        \ac{MLP} (statisch) & \mcMlpStaticMaeStat & \mcMlpStaticDeltaStat & \mcMlpStaticMaeTrans & \mcMlpStaticDeltaTrans \\
+        \ac{MLP} (dynamisch) & \mcMlpDynamicMaeStat & \mcMlpDynamicDeltaStat & \mcMlpDynamicMaeTrans & \mcMlpDynamicDeltaTrans \\
+        \ac{CNN} & \mcCnnMaeStat & \mcCnnDeltaStat & \mcCnnMaeTrans & \mcCnnDeltaTrans \\
+        \ac{LSTM} & \mcLstmMaeStat & \mcLstmDeltaStat & \mcLstmMaeTrans & \mcLstmDeltaTrans \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -257,7 +259,7 @@ Alle Trainings- und Evaluationsläufe wurden auf einem vom Deutschen Forschungsz
     \centering
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{../plots/model_comparison_stationary.pgf}
+        \input{\plotdir model_comparison_stationary.pgf}
         \caption{Quasi-stationäre Testdaten}
         \label{fig:violin_stationary}
     \end{subfigure}
@@ -266,7 +268,7 @@ Alle Trainings- und Evaluationsläufe wurden auf einem vom Deutschen Forschungsz
     
     \begin{subfigure}[b]{\textwidth}
         \centering
-        \input{../plots/model_comparison_transient.pgf}
+        \input{\plotdir model_comparison_transient.pgf}
         \caption{Transiente Testdaten}
         \label{fig:violin_transient}
     \end{subfigure}

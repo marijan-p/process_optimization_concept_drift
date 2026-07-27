@@ -86,19 +86,25 @@ ROLES = {
     "detection":      dict(color=PALETTE["skyblue"],   linestyle=":",  marker=None, alpha=1.0),
     # --- verrauschtes Signal im LOKALEN Rausch-Vergleich (nur drift-frei) -- #
     "noise":          dict(color=PALETTE["grey"],      linestyle="-",  marker="o",  alpha=1.0),
+    # --- Box-/Statistik-Overlay (z. B. Boxplot ueber Violinplot) ---------- #
+    "box":            dict(color=PALETTE["grey"],      linestyle="-",  marker=None, alpha=1.0),
     # --- optionaler Hervorhebungsakzent ----------------------------------- #
     "highlight":      dict(color=PALETTE["amber"],     linestyle="-",  marker="D",  alpha=1.0),
 }
 
 # Mehrere drift-behaftete Varianten EINER Groesse (z. B. PT1: T-, K-, T&K-Einfluss):
-# alle in derselben Farbe (drift_afflicted), Unterscheidung NUR ueber die
-# Markerform. Keine Dreiecke.
+# alle in derselben Farbe (drift_afflicted), Unterscheidung ueber die
+# Markerform. 
 DRIFT_VARIANT_MARKERS = ["o", "x", "D"]
 
 # Reine Kategorial-Liste fuer echte Nominalskalen ohne semantische Rolle.
 CATEGORICAL = [PALETTE["blue"], PALETTE["vermilion"], PALETTE["green"],
                PALETTE["purple"], PALETTE["skyblue"], PALETTE["amber"],
                PALETTE["tan"], PALETTE["grey"]]
+
+# ColorBrewer/seaborn "Set2". Genutzt fuer reine Nominalskalen mit vielen Kategorien, bei denen
+# die Rollen-Semantik nicht greift (z. B. Modellarchitekturen im model_comparison).
+SET2 = ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f"]
 
 
 # --------------------------------------------------------------------------- #
@@ -155,6 +161,17 @@ C = _ColorView()
 TEXTWIDTH_PT = 458.08954        # \the\textwidth der Diss-Vorlage
 INCH_PER_PT = 1.0 / 72.27
 
+
+def text_width(width_scale: float = 1.0) -> float:
+    """Reine Geometrie: Textbreite der Diss-Vorlage in Zoll, OHNE rcParams-Nebenwirkung.
+
+    Bewusst vom Styling getrennt (im Gegensatz zu ``fig_width``), damit Notebooks mit
+    eigenem Theme (z. B. seaborn/whitegrid via ``apply_paper``) nur die Breite beziehen
+    koennen, ohne den Diss-Stil (Spines aus, eigene Fonts) aufzuzwingen.
+    """
+    return TEXTWIDTH_PT * INCH_PER_PT * width_scale
+
+
 def fig_width(width_scale: float = 1.0) -> float:
     """Setzt die rcParams der Arbeit und gibt die Textbreite in Zoll zurueck.
 
@@ -179,7 +196,39 @@ def fig_width(width_scale: float = 1.0) -> float:
         # Standard-Farbzyklus = Kategorial-Liste (falls einmal ohne Rolle geplottet)
         "axes.prop_cycle": cycler(color=CATEGORICAL),
     })
-    return TEXTWIDTH_PT * INCH_PER_PT * width_scale
+    return text_width(width_scale)
+
+
+def apply_paper(*, usetex: bool = True) -> None:
+    """Seaborn-basiertes Paper-Theme (whitegrid, serif) inkl. pgf/usetex-Backend.
+
+    Erzeugt Plots, die NICHT dem Rollen-/Spines-Konzept von ``fig_width`` folgen, 
+    sondern seaborns whitegrid mit vollem Rahmen und LaTeX-Schrift brauchen (z. B. 
+    Violin-/Boxplots im model_comparison). Geometrie separat ueber ``text_width`` 
+    beziehen.
+    """
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt   # erzwingt vollstaendige mpl-Initialisierung
+    import seaborn as sns
+
+    sns.set_theme(
+        context="paper",
+        style="whitegrid",
+        palette="colorblind",
+        font="serif",
+    )
+    plt.rcParams.update({
+        "figure.dpi": 300,
+        "savefig.dpi": 300,
+        "axes.linewidth": 0.8,
+    })
+    mpl.use("pgf")
+    mpl.rcParams.update({
+        "text.usetex": usetex,
+        "pgf.texsystem": "pdflatex",
+        "font.family": "serif",
+        "pgf.rcfonts": False,
+    })
 
 
 # --------------------------------------------------------------------------- #
