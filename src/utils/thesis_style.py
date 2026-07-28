@@ -93,8 +93,8 @@ ROLES = {
 }
 
 # Mehrere drift-behaftete Varianten EINER Groesse (z. B. PT1: T-, K-, T&K-Einfluss):
-# alle in derselben Farbe (drift_afflicted), Unterscheidung ueber die
-# Markerform. 
+# alle in derselben Farbe (drift_afflicted), Unterscheidung NUR ueber die
+# Markerform. Keine Dreiecke.
 DRIFT_VARIANT_MARKERS = ["o", "x", "D"]
 
 # Reine Kategorial-Liste fuer echte Nominalskalen ohne semantische Rolle.
@@ -102,7 +102,8 @@ CATEGORICAL = [PALETTE["blue"], PALETTE["vermilion"], PALETTE["green"],
                PALETTE["purple"], PALETTE["skyblue"], PALETTE["amber"],
                PALETTE["tan"], PALETTE["grey"]]
 
-# ColorBrewer/seaborn "Set2". Genutzt fuer reine Nominalskalen mit vielen Kategorien, bei denen
+# ColorBrewer/seaborn "Set2" (erste sechs Farben, fest hinterlegt statt seaborn-
+# Abhaengigkeit). Genutzt fuer reine Nominalskalen mit vielen Kategorien, bei denen
 # die Rollen-Semantik nicht greift (z. B. Modellarchitekturen im model_comparison).
 SET2 = ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f"]
 
@@ -166,8 +167,8 @@ def text_width(width_scale: float = 1.0) -> float:
     """Reine Geometrie: Textbreite der Diss-Vorlage in Zoll, OHNE rcParams-Nebenwirkung.
 
     Bewusst vom Styling getrennt (im Gegensatz zu ``fig_width``), damit Notebooks mit
-    eigenem Theme (z. B. seaborn/whitegrid via ``apply_paper``) nur die Breite beziehen
-    koennen, ohne den Diss-Stil (Spines aus, eigene Fonts) aufzuzwingen.
+    eigenem Theme (z. B. seaborn/whitegrid) nur die Breite beziehen koennen, ohne den
+    Diss-Stil (Spines aus, eigene Fonts) aufzuzwingen.
     """
     return TEXTWIDTH_PT * INCH_PER_PT * width_scale
 
@@ -199,36 +200,49 @@ def fig_width(width_scale: float = 1.0) -> float:
     return text_width(width_scale)
 
 
-def apply_paper(*, usetex: bool = True) -> None:
-    """Seaborn-basiertes Paper-Theme (whitegrid, serif) inkl. pgf/usetex-Backend.
+def violin_box(data, x, y, *, order=None, palette=None, box_color=None,
+               box_width=0.12, ax=None, figsize=None):
+    """Kombinierter Violin- (Verteilung) + schmaler Box-Overlay (Median/Quartile)
+    fuer eine kategoriale x-Achse — der arbeitsweit einheitliche Verteilungsplot.
 
-    Erzeugt Plots, die NICHT dem Rollen-/Spines-Konzept von ``fig_width`` folgen, 
-    sondern seaborns whitegrid mit vollem Rahmen und LaTeX-Schrift brauchen (z. B. 
-    Violin-/Boxplots im model_comparison). Geometrie separat ueber ``text_width`` 
-    beziehen.
+    Zeichnet unter den aktuell gesetzten rcParams (i. d. R. via ``fig_width``); ruft
+    KEIN eigenes Theme und SPEICHERT NICHT — Achsentitel, Figure-Groesse und Ablage
+    bleiben beim Aufrufer, da die Notebooks sich darin unterscheiden. Farben je
+    Kategorie aus ``palette`` (Default ``SET2``), Box-Overlay in ``box_color``
+    (Default Rolle ``box``), Median in Weiss; horizontales Hilfsgitter inklusive.
+
+    data : long-form DataFrame; ``x`` kategorial, ``y`` numerisch (Spaltennamen).
+    order : Kategorienreihenfolge. palette : Farbliste. box_width : Box-Breite
+    (z. B. schmaler bei vielen Kategorien). ax / figsize : in vorhandene Achse
+    zeichnen bzw. neue Figure dieser Groesse anlegen.
+
+    Gibt ``(fig, ax)`` zurueck.
     """
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt   # erzwingt vollstaendige mpl-Initialisierung
+    import matplotlib.pyplot as plt
     import seaborn as sns
 
-    sns.set_theme(
-        context="paper",
-        style="whitegrid",
-        palette="colorblind",
-        font="serif",
-    )
-    plt.rcParams.update({
-        "figure.dpi": 300,
-        "savefig.dpi": 300,
-        "axes.linewidth": 0.8,
-    })
-    mpl.use("pgf")
-    mpl.rcParams.update({
-        "text.usetex": usetex,
-        "pgf.texsystem": "pdflatex",
-        "font.family": "serif",
-        "pgf.rcfonts": False,
-    })
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+    else:
+        fig = ax.figure
+    if palette is None:
+        palette = SET2
+    if order is not None and isinstance(palette, (list, tuple)) and len(palette) > len(order):
+        palette = list(palette)[:len(order)]
+    if box_color is None:
+        box_color = color("box")
+
+    sns.violinplot(data=data, x=x, y=y, order=order,
+                   hue=x, legend=False, palette=palette,
+                   cut=0, inner=None, ax=ax)
+    sns.boxplot(data=data, x=x, y=y, order=order,
+                width=box_width, fill=True, showcaps=True, showfliers=False,
+                boxprops=dict(facecolor=box_color, color=box_color),
+                medianprops={"color": "w", "linewidth": 2},
+                whiskerprops={"linewidth": 1.5, "color": box_color},
+                capprops={"color": box_color}, ax=ax)
+    ax.grid(True, axis="y", alpha=0.2)
+    return fig, ax
 
 
 # --------------------------------------------------------------------------- #
