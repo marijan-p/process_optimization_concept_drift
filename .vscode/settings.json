@@ -29,5 +29,24 @@
                 "%DOCFILE%"
             ]
         }
-    ]
+    ],
+    "[latex]": {
+        "editor.wordWrap": "on"
+    },
+    "files.exclude": {
+        "**/*.aux": true,
+        "**/*.bbl": true,
+        "**/*.bcf": true,
+        "**/*.blg": true,
+        "**/*.log": false,
+        "**/*.out": true,
+        "**/*.run.xml": true,
+        "**/*.synctex.gz": true,
+        "**/*.fls": true,
+        "**/*.fdb_latexmk": true,
+        "**/*.toc": true,
+        "**/*.lof": true,
+        "**/*.lot": true,
+        "**/svg-inkscape": true
+    }
 }
