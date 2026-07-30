@@ -5,12 +5,57 @@
 \renewcommand\thesubsection{\thesection.\arabic{subsection}}
 % VDI-Vorgabe: "Anhang" im Inhaltsverzeichnis und als Überschrift vor den Anhangteilen
 \header{Anhang}\label{app}
+\counterwithin{table}{section}
 
 %---------------------------------------------------------------------
 % Anhang A: 
 %---------------------------------------------------------------------
 \section{Appendix A}\label{app:A}
-Hier der erste Anhangteil
+%
+Tabelle~\ref{tab:tep-stoerungen} listet die im Tennessee-Eastman-Prozess vordefinierten Prozessstörungen auf. Die Störungen IDV(1)--IDV(20) entstammen der ursprünglichen Prozessbeschreibung von \cite{downs.1993} und umfassen Sprünge, zufällige Schwankungen, eine langsame Drift sowie klemmende Ventile; IDV(16)--IDV(20) sind dabei nicht näher spezifiziert. Die Erweiterung um IDV(21)--IDV(28) nach \cite{bathelt.2015} ergänzt zusätzliche, als zufällige Schwankungen modellierte Temperatur- und Druckstörungen der Zulaufströme sowie der Kühlwasser-Umwälzeinheiten. Die Störung IDV(29) stellt die eigene Ergänzung dar. Sie modelliert eine Veränderung der Reaktionskinetik als Concept Drift und dient damit als Grundlage für die Generierung synthetischer Prozessdaten mit driftbehafteten Zusammenhängen.
+%
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Prozessstörungen des Tennessee-Eastman-Prozesses nach \cite{downs.1993}, erweitert um die zusätzlichen Störungen nach \cite{bathelt.2015}.}
+\label{tab:tep-stoerungen}
+\begin{tabular}{cll}
+\toprule
+Nummer & Prozessvariable & Typ \\
+\midrule
+IDV(1)  & A/C-Zulaufverhältnis, B-Zusammensetzung konstant (Strom 4) & Sprung \\
+IDV(2)  & B-Zusammensetzung, A/C-Verhältnis konstant (Strom 4) & Sprung \\
+IDV(3)  & D-Zulauftemperatur (Strom 2) & Sprung \\
+IDV(4)  & Eintrittstemperatur des Reaktorkühlwassers & Sprung \\
+IDV(5)  & Eintrittstemperatur des Kondensatorkühlwassers & Sprung \\
+IDV(6)  & Verlust des A-Zulaufs (Strom 1) & Sprung \\
+IDV(7)  & Druckverlust im C-Sammler -- verringerte Verfügbarkeit (Strom 4) & Sprung \\
+IDV(8)  & Zulaufzusammensetzung von A, B, C (Strom 4) & Zufällige Schwankung \\
+IDV(9)  & D-Zulauftemperatur (Strom 2) & Zufällige Schwankung \\
+IDV(10) & C-Zulauftemperatur (Strom 4) & Zufällige Schwankung \\
+IDV(11) & Eintrittstemperatur des Reaktorkühlwassers & Zufällige Schwankung \\
+IDV(12) & Eintrittstemperatur des Kondensatorkühlwassers & Zufällige Schwankung \\
+IDV(13) & Reaktionskinetik & Langsame Drift \\
+IDV(14) & Reaktorkühlwasserventil & Festklemmen \\
+IDV(15) & Kondensatorkühlwasserventil & Festklemmen \\
+IDV(16) & Unbekannt & Unbekannt \\
+IDV(17) & Unbekannt & Unbekannt \\
+IDV(18) & Unbekannt & Unbekannt \\
+IDV(19) & Unbekannt & Unbekannt \\
+IDV(20) & Unbekannt & Unbekannt \\
+\midrule
+IDV(21) & A-Zulauftemperatur (Strom 1) & Zufällige Schwankung \\
+IDV(22) & E-Zulauftemperatur (Strom 3) & Zufällige Schwankung \\
+IDV(23) & A-Zulaufdruck (Strom 1) & Zufällige Schwankung \\
+IDV(24) & D-Zulaufdruck (Strom 2) & Zufällige Schwankung \\
+IDV(25) & E-Zulaufdruck (Strom 3) & Zufällige Schwankung \\
+IDV(26) & A- und C-Zulaufdruck (Strom 4) & Zufällige Schwankung \\
+IDV(27) & Druckschwankung in der Kühlwasser-Umwälzeinheit des Reaktors & Zufällige Schwankung \\
+IDV(28) & Druckschwankung in der Kühlwasser-Umwälzeinheit des Kondensators & Zufällige Schwankung \\
+\textbf{IDV(29)} & \textbf{Reaktionskinetik} & \textbf{Concept Drift} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Appendix B}\label{app:B}
 Und der zweite Anhangteil

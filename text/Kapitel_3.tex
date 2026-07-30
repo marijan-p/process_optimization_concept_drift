@@ -499,7 +499,7 @@ Zwischen zwei Sofort-Trainings wird zudem eine Refraktärzeit als Vielfaches der
 %
 Die Bewertung der Strategien erfolgt über den Simulationsfehler auf dem drift-behafteten Strom über das gesamte Kalenderjahr. Als Kennzahlen dienen der \ac{RMSE}, der Mittelwert $\bar{e}$ und die Streuung $\sigma$ des Fehlers, die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ sowie die Anzahl der ausgelösten Nachtrainings. 
 
-Letztere quantifiziert den Eingriffsaufwand der jeweiligen Strategie. Da das inkrementelle Nachtraining stochastisch ist, wird die Auswertung zusätzlich über mehrere Läufe mit unterschiedlichen Seeds wiederholt und als Mittelwert und Streuung des \ac{RMSE} zusammengefasst. Die Seed-Streuung dient dabei als Maß für die Reproduzierbarkeit einer Strategie. \par
+Letztere quantifiziert den Eingriffsaufwand der jeweiligen Strategie. Da das inkrementelle Nachtraining stochastisch ist, wird die Auswertung zusätzlich über \adaptNSeeds\ unabhängige Läufe mit unterschiedlichen Zufalls-Seeds wiederholt und jede Kennzahl als Mittelwert samt Streuung über diese Läufe zusammengefasst. Die Streuung über die Seeds dient dabei als Maß für die Reproduzierbarkeit einer Strategie. \par
 %
 Die Wirksamkeit der adaptiven Strategien hängt maßgeblich von ihren Hyperparametern ab. Diese werden daher analog zur Optimierung der Detektoren in Abschnitt~\ref{sec:datensynthese_drift_erkennung} je Strategie mit dem Optimierungsverfahren \texttt{Optuna} eingestellt. Im Unterschied zur Detektion erfordert jeder Versuch hier einen vollständigen Adaptionslauf mit wiederholtem Nachtraining und ist damit rechenintensiver. Das Tuning erfolgt dabei auf einem gröber abgetasteten Strom mit $T_{\mathrm{a}} = \paramTaTune$. Anders als bei der Detektion wird keine \emph{Ground Truth} der Drifts benötigt, da die gemessene Systemantwort als Label vorliegt und der \ac{RMSE} direkt bewertet werden kann. Die Zielfunktion kombiniert den auf den Fall ohne Adaption normierten \ac{RMSE} mit einem Strafterm für die Zahl der Nachtrainings, um den Eingriffsaufwand zu begrenzen:
 %
@@ -554,29 +554,41 @@ Das Freeze-Muster, das ausschließlich das Output-Layer freigibt, ist für die D
     \label{fig:synthetic_data_adaptation_comparison}
 \end{figure}
 %
-Abbildung~\ref{fig:synthetic_data_adaptation_comparison} stellt den normierten Simulationsfehler der vier Strategien dem Driftsignal $c[k]$ gegenüber. Die einzelnen Teilabbildungen zeigen für die Baseline ohne Adaption (\subref{fig:synthetic_data_adaptation_baseline}), die passive (\subref{fig:synthetic_data_adaptation_blind}), die aktive (\subref{fig:synthetic_data_adaptation_informed}) und die kombinierte Strategie (\subref{fig:synthetic_data_adaptation_combined}) jeweils den Fehlerverlauf über sechs Monate, wobei in den Detektor-gestützten Varianten zusätzlich die erkannten Drifts markiert sind. Die zugehörigen Kennzahlen fasst Tabelle~\ref{tab:synthetic_data_adaptation_stats} zusammen. Ohne Adaption reproduziert das Modell erwartungsgemäß die in Abschnitt~\ref{sec:datensynthese_modellierung} beschriebene Degradation; der Fehlerverlauf folgt sichtbar der Sägezahnstruktur des Driftsignals. \par
+Abbildung~\ref{fig:synthetic_data_adaptation_comparison} stellt den normierten Simulationsfehler der vier Strategien dem Driftsignal $c[k]$ gegenüber. Die einzelnen Teilabbildungen zeigen für die Baseline ohne Adaption (\subref{fig:synthetic_data_adaptation_baseline}), die passive (\subref{fig:synthetic_data_adaptation_blind}), die aktive (\subref{fig:synthetic_data_adaptation_informed}) und die kombinierte Strategie (\subref{fig:synthetic_data_adaptation_combined}) jeweils den Fehlerverlauf über sechs Monate, wobei in den Detektor-gestützten Varianten zusätzlich die erkannten Drifts markiert sind. Da eine solche Zeitreihe stets nur einen einzelnen der \adaptNSeeds\ Läufe abbilden kann, wird der Medoid-Seed dargestellt, also der Lauf, dessen Kennzahlen dem Mittel über alle Läufe am nächsten liegen. Der Medoid ist der zentralste tatsächlich aufgetretene Vertreter einer Menge und damit, anders als das rechnerische Mittel, ein real beobachteter Lauf. Die zugehörigen Kennzahlen fasst Tabelle~\ref{tab:synthetic_data_adaptation_stats} zusammen. Ohne Adaption reproduziert das Modell erwartungsgemäß die in Abschnitt~\ref{sec:datensynthese_modellierung} beschriebene Degradation, der Fehlerverlauf folgt sichtbar der Sägezahnstruktur des Driftsignals. \par
 %
+\providecommand{\adaptpm}[2]{$#1 \pm #2$}
 \begin{table}[tbp]
 \centering
-\caption{Kennzahlen der vier Adaptionsstrategien auf dem drift-behafteten Strom}
+\caption{Kennzahlen der vier Adaptionsstrategien auf dem drift-behafteten Strom, als Mittelwert $\pm$ Standardabweichung über \adaptNSeeds\ Seeds}
 \label{tab:synthetic_data_adaptation_stats}
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Strategie} & \ac{RMSE} & Mittelwert $\bar{e}$ & Streuung $\sigma$ & Korr. $|e|,|c|$ & Nachtrainings \\
 \midrule
-Baseline   & $\adaptBaselineRmse$ & $\adaptBaselineBias$ & $\adaptBaselineSigma$ & $\adaptBaselineCorrAbs$ & $\adaptBaselineNTrain$ \\
-Passiv     & $\adaptBlindRmse$    & $\adaptBlindBias$    & $\adaptBlindSigma$    & $\adaptBlindCorrAbs$    & $\adaptBlindNTrain$ \\
-Aktiv      & $\adaptInformedRmse$ & $\adaptInformedBias$ & $\adaptInformedSigma$ & $\adaptInformedCorrAbs$ & $\adaptInformedNTrain$ \\
-Kombiniert & $\adaptCombinedRmse$ & $\adaptCombinedBias$ & $\adaptCombinedSigma$ & $\adaptCombinedCorrAbs$ & $\adaptCombinedNTrain$ \\
+Baseline   & \adaptpm{\adaptBaselineRmse}{\adaptBaselineRmseStd} & \adaptpm{\adaptBaselineBias}{\adaptBaselineBiasStd} & \adaptpm{\adaptBaselineSigma}{\adaptBaselineSigmaStd} & \adaptpm{\adaptBaselineCorrAbs}{\adaptBaselineCorrAbsStd} & \adaptpm{\adaptBaselineNTrain}{\adaptBaselineNTrainStd} \\
+Passiv     & \adaptpm{\adaptBlindRmse}{\adaptBlindRmseStd}       & \adaptpm{\adaptBlindBias}{\adaptBlindBiasStd}       & \adaptpm{\adaptBlindSigma}{\adaptBlindSigmaStd}       & \adaptpm{\adaptBlindCorrAbs}{\adaptBlindCorrAbsStd}       & \adaptpm{\adaptBlindNTrain}{\adaptBlindNTrainStd} \\
+Aktiv      & \adaptpm{\adaptInformedRmse}{\adaptInformedRmseStd} & \adaptpm{\adaptInformedBias}{\adaptInformedBiasStd} & \adaptpm{\adaptInformedSigma}{\adaptInformedSigmaStd} & \adaptpm{\adaptInformedCorrAbs}{\adaptInformedCorrAbsStd} & \adaptpm{\adaptInformedNTrain}{\adaptInformedNTrainStd} \\
+Kombiniert & \adaptpm{\adaptCombinedRmse}{\adaptCombinedRmseStd} & \adaptpm{\adaptCombinedBias}{\adaptCombinedBiasStd} & \adaptpm{\adaptCombinedSigma}{\adaptCombinedSigmaStd} & \adaptpm{\adaptCombinedCorrAbs}{\adaptCombinedCorrAbsStd} & \adaptpm{\adaptCombinedNTrain}{\adaptCombinedNTrainStd} \\
 \bottomrule
 \end{tabular}
 \end{table}
 %
-Mit den getunten Hyperparametern reduzieren alle drei adaptiven Strategien den Simulationsfehler deutlich, wobei sich eine klare Rangfolge ergibt (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Die passive Adaption senkt den \ac{RMSE} um rund ein Drittel gegenüber dem Fall ohne Adaption. Die aktive Adaption verbessert diesen Wert bei vergleichbarem Eingriffsaufwand weiter. Den geringsten Fehler erzielt die kombinierte Strategie mit einer Reduktion um knapp vier Fünftel gegenüber dem Fall ohne Adaption, bei zugleich moderatem Eingriffsaufwand. Bemerkenswert ist, dass die kombinierte Strategie diese stärkste Fehlerreduktion mit der geringsten Zahl detektor-ausgelöster Anpassungen erreicht, da die passive Komponente bereits einen Großteil der Drift abfängt. \par
+Mit den getunten Hyperparametern reduzieren alle drei adaptiven Strategien den Simulationsfehler deutlich, wobei sich eine klare Rangfolge ergibt (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Die passive Adaption senkt den \ac{RMSE} bereits auf deutlich weniger als die Hälfte des Werts ohne Adaption. Die aktive Adaption bleibt bei vergleichbarem Eingriffsaufwand knapp dahinter zurück. Den geringsten Fehler erzielt die kombinierte Strategie, die den \ac{RMSE} noch etwas weiter absenkt, allerdings mit dem höchsten Eingriffsaufwand. Dass die kombinierte Strategie den niedrigsten Fehler erreicht, ist darauf zurückzuführen, dass die passive Komponente bereits einen Großteil der Drift abfängt und die detektor-getriggerte Komponente sie gezielt ergänzt. \par
 %
-Im Gegensatz zum Fall ohne Adaption, dessen Fehler von einem gerichteten, mit dem Drift korrelierten Anteil dominiert wird, sinken durch die Adaption sowohl der Bias als auch die Streuung deutlich. Während die passive Adaption den mittleren Fehleranteil $\bar{e}$ am stärksten reduziert, erzielt die kombinierte Strategie die geringste Streuung $\sigma$ und damit den insgesamt kleinsten \ac{RMSE}. Entsprechend schwächt sich die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ unter der kombinierten Strategie am stärksten ab. Der Restfehler folgt dem Driftsignal kaum noch, der \ac{CD} wird durch die Adaption somit weitgehend kompensiert. \par
+Im Gegensatz zum Fall ohne Adaption, dessen Fehler von einem gerichteten, mit dem Drift korrelierten Anteil dominiert wird, sinken durch die Adaption sowohl der Bias als auch die Streuung deutlich. Die kombinierte Strategie reduziert dabei den mittleren Fehleranteil $\bar{e}$ und die Streuung $\sigma$ am stärksten und erreicht damit den insgesamt kleinsten \ac{RMSE}. Entsprechend schwächt sich die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ unter der kombinierten Strategie am stärksten ab. Der Restfehler folgt dem Driftsignal kaum noch, der \ac{CD} wird durch die Adaption somit weitgehend kompensiert. \par
 %
-Insgesamt zeigt sich, dass die Adaption den synthetisch erzeugten \ac{CD} wirksam ausgleichen kann, sofern ihre Hyperparameter geeignet gewählt werden. Insbesondere die Kombination aus kontinuierlicher fehlergetriebener und detektor-getriggerter Anpassung erweist sich als robusteste Strategie, da sie den niedrigsten Gesamtfehler bei überschaubarem Eingriffsaufwand erreicht. \par
+\begin{figure}[tbp]
+    \centering
+    \makebox[\textwidth][c]{%
+        \input{\plotdir syn_adaptation_seed_violin.pgf}
+    }
+    \caption{Verteilung des \ac{RMSE} der drei adaptiven Strategien über \adaptNSeeds\ Läufe mit unterschiedlichen Seeds, dargestellt als Violinen mit überlagerten Boxplots}
+    \label{fig:synthetic_data_adaptation_seed_violin}
+\end{figure}
+%
+Neben den Mittelwerten gibt die Streuung über die \adaptNSeeds\ Läufe Aufschluss über die Reproduzierbarkeit der Strategien. Abbildung~\ref{fig:synthetic_data_adaptation_seed_violin} stellt die Verteilung des \ac{RMSE} je Strategie über alle Läufe als Violinen mit überlagerten Boxplots dar. Die Violinen zeichnen die Dichte der Läufe nach, während die Boxplots Median und Quartile hervorheben. Die passive Adaption weist dabei die schmalste Verteilung und damit die höchste Reproduzierbarkeit auf, wohingegen die kombinierte Strategie trotz ihres niedrigsten mittleren Fehlers die breiteste Streuung über die Läufe zeigt (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Die aktive Adaption ordnet sich sowohl im Mittel als auch in der Streuung dazwischen ein. Der niedrigste Gesamtfehler der kombinierten Strategie geht somit mit einer etwas geringeren Reproduzierbarkeit einher. \par
+%
+Insgesamt zeigt sich, dass die Adaption den synthetisch erzeugten \ac{CD} wirksam ausgleichen kann, sofern ihre Hyperparameter geeignet gewählt werden. Insbesondere die Kombination aus kontinuierlicher fehlergetriebener und detektor-getriggerter Anpassung erweist sich als wirksamste Strategie, da sie den niedrigsten Gesamtfehler erreicht, wenngleich mit dem höchsten Eingriffsaufwand. \par
 %
 \section{Der Tennessee-Eastman-Process} \label{sec:TEP}
 %
@@ -602,7 +614,7 @@ Das \ac{TEP} besteht aus fünf systemischen Hauptkomponenten, die sequenziell mi
 \begin{itemize}
     \item \textbf{Schritt 1} \newline 
     Zunächst werden die Reaktanten $A$, $D$ und $E$ dem System zugeführt. Zusammen mit dem sich bereits im System befindlichen Reaktanten $C$ und dem Inertgas $B$, das als Verunreinigung zu verstehen ist, werden die Gase in den \textbf{Reaktor} geleitet. Im Reaktor finden die vier irreversiblen und exothermen chemischen Reaktionen statt (siehe \eqref{eq:chem_1}-\eqref{eq:chem_4}). 
-    Die Reaktionen laufen an einem in der flüssigen Phase gelösten, nicht-flüchtigen Katalysator ab, wobei die Produkte $G$ und $H$ sowie das Nebenprodukt $F$ entstehen. Die flüssigen Produkte verdampfen und verlassen den Reaktor zusammen mit den nicht umgesetzten Edukten, während der Katalysator im Reaktor verbleibt. Da die exothermen Reaktionen erhebliche Wärme erzeugen, ist der Reaktor mit einem internen Kühlbündel ausgestattet, um die Reaktionswärme abzuführen und die Temperaturstabilität aufrechtzuerhalten.
+    Die Reaktionen laufen an einem in der flüssigen Phase gelösten, nicht-flüchtigen Katalysator ab, wobei die Produkte $G$ und $H$ sowie das Nebenprodukt $F$ entstehen. Die flüssigen Produkte verdampfen und verlassen den Reaktor zusammen mit den nicht umgesetzten Edukten, während der Katalysator im Reaktor verbleibt. Da die exothermen Reaktionen erhebliche Wärme erzeugen, ist der Reaktor mit einem internen Kühlbündel ausgestattet, um die Reaktionswärme abzuführen und eine stabile  Temperatur aufrechtzuerhalten.
     \item \textbf{Schritt 2} \newline 
     Das resultierende Gemisch aus Dämpfen und nicht umgesetzten Gasen, wird anschließend durch den \textbf{Kondensator} geleitet und gekühlt, sodass die Produkte kondensieren.
     %Die Temperatur in dieser Einheit ist entscheidend für das Gleichgewicht zwischen der Kondensationsrate und der flüssigen Produktionsrate im Reaktor.
@@ -612,22 +624,60 @@ Das \ac{TEP} besteht aus fünf systemischen Hauptkomponenten, die sequenziell mi
     Die Flüssigkeit aus dem Separator gelangt zum \textbf{Produktstripper}, wo unten das Reaktionsgas $C$ zugeführt wird. Die Flüssigkeit wird so durch das aufsteigende Gas von Resten der verbleibenden Reaktanten gereinigt. Die Kopfgase gelangen dann über den Recyclingkreislauf wieder in den Reaktor.
     % Obwohl der Stripper mit Dampf beheizt werden kann, hängt der optimale stationäre Betrieb oft allein vom Zufuhrstrom ab, um die Reaktanten D und E zurückzugewinnen.
     \item \textbf{Recyclingkreislauf} \newline
-    Ein Teil der nicht kondensierten Dämpfe aus dem Separator wird abgesaugt, um zu verhindern, dass sich inerte Stoffe und Nebenprodukte im Prozess ansammeln. Die restlichen Dämpfe des Separators werden zusammen mit denen des Strippers durch den (zentrifugalen) \textbf{Kompressor} geleitet, der sie weiter im Recyclingkreislauf zurück in den Reaktor führt. Durch die Rückführung der nicht umgesetzten Stoffe wird eine Steigerung der Gesamteffizienz erreicht.
+    Ein Teil der nicht kondensierten Dämpfe aus dem Separator wird abgesaugt, um zu verhindern, dass sich inerte Stoffe und Nebenprodukte im Prozess ansammeln. Die restlichen Dämpfe des Separators werden zusammen mit denen des Strippers durch den \textbf{Kompressor} geleitet, der sie weiter im Recyclingkreislauf zurück in den Reaktor führt. Durch die Rückführung der nicht umgesetzten Stoffe wird eine Steigerung der Gesamteffizienz erreicht.
 \end{itemize}
 %
-Der \ac{TEP} verfügt über 41 Messgrößen und 12 Stellgrößen, wobei der Großteil der Stellgrößen zur Ventilsteuerung dient. \newline
+Der \ac{TEP} verfügt über 41 Messgrößen und 12 Stellgrößen, wobei der Großteil der Stellgrößen der Ventilsteuerung dient. \newline
 Es gibt sechs primäre Betriebsmodi, die durch unterschiedliche Produktmassenverhältnisse von $G$ und $H$ und durch Produktionsraten vorgegeben sind. 
 %
-Ursprünglich wurde das Modell des \ac{TEP} von \cite{downs.1993} als FORTRAN-Quellcode veröffentlicht.
-Später wurde dieser Quellcode in C-Code konvertiert, um ihn als S-Funktion in MATLAB\textsuperscript{\textregistered}/Simulink\textsuperscript{\textregistered} verwenden zu können. Dieser Code ist im \textit{Tennessee Eastman Challenge Archive} zu finden, welches einige weitere Simulator-Versionen enthält, darunter Ansätze zu Model Predictive Control und dezentralen Steuerungsstrategien, die zwischen 1993 und 1996 vorgestellt wurden \cite{ricker.2005}. Die aktuelle Version des C-Codes ist das Ergebnis einer Überarbeitung von Bathelt et al., die notwendig war, da die Simulations-Engine von Simulink und die ursprüngliche Struktur des Modells nicht mehr zusammenpassten \cite{bathelt.2015}. Zur Simulation in Simulink existiert außerdem das Python-Paket \textit{pyTEP}, das eine Open-Source-Schnittstelle zwischen Simulink und Python bereitstellt und so die Steuerung der Simulation über Python ermöglicht, bei der Prozesseingaben verändert und komplexe Szenarien konfiguriert werden können \cite{reinartz.2022}. Die Daten lassen sich so unter anderem als Pandas DataFrames speichern. Dass der Prozess in dieser Form als Quellcode vorliegt, eröffnet zugleich die Möglichkeit, gezielt in die Prozessdynamik einzugreifen. \par
+Ursprünglich wurde das Modell des \ac{TEP} von \cite{downs.1993} als FORTRAN-Quellcode veröffentlicht. Später wurde dieser Quellcode in C-Code konvertiert, um ihn als S-Funktion in MATLAB\textsuperscript{\textregistered}/Simulink\textsuperscript{\textregistered} verwenden zu können. Dieser Code ist im \textit{Tennessee Eastman Challenge Archive} zu finden, welches einige weitere Simulator-Versionen enthält, darunter Ansätze zu Model Predictive Control und dezentralen Steuerungsstrategien, die zwischen 1993 und 1996 vorgestellt wurden \cite{ricker.2005}. Die aktuelle Version des C-Codes ist das Ergebnis einer Überarbeitung von Bathelt et al., die notwendig war, da die Simulations-Engine von Simulink und die ursprüngliche Struktur des Modells nicht mehr zusammenpassten \cite{bathelt.2015}. Im Zuge dieser Überarbeitung wurden die ursprünglich $20$ Störungsszenarien um acht zusätzliche Störungen erweitert \cite{bathelt.2015}. Tabelle~\ref{tab:tep-stoerungen} im Anhang listet alle Prozessstörungen auf. Zur Simulation in Simulink existiert außerdem das Python-Paket \textit{pyTEP}, das eine Open-Source-Schnittstelle zwischen Simulink und Python bereitstellt und so die Steuerung der Simulation über Python ermöglicht, bei der Prozesseingaben verändert und komplexe Szenarien konfiguriert werden können \cite{reinartz.2022}. Die Daten lassen sich so unter anderem als Pandas DataFrames speichern. Dass der Prozess in dieser Form als Quellcode vorliegt, eröffnet zugleich die Möglichkeit, gezielt in die Prozessdynamik einzugreifen. \par
 %
-In seiner ursprünglichen Konzeption ist der \ac{TEP} nicht als Grundlage für die Untersuchung von \ac{CD} vorgesehen. Downs und Vogel definieren einen festen Katalog vordefinierter Störungen (IDV), die typische Fehlerfälle wie sprunghafte Änderungen der Zulaufzusammensetzung oder Ventilblockaden abbilden, einen kontinuierlichen, schleichenden \ac{CD} der hier betrachteten Art jedoch nicht umfassen \cite{downs.1993}. Der Datensatz wird daher über seine ursprüngliche Bestimmung hinaus genutzt und um einen drift-behafteten Betrieb erweitert. Die dafür entwickelte Injektion eines \ac{CD}-Einflusses unmittelbar im C-Code 
-ergänzt den \ac{TEP} um einen in den etablierten Störungskatalogen nicht enthaltenen, schleichenden Fehlerfall. \par
+In seiner ursprünglichen Konzeption ist der \ac{TEP} nicht als Grundlage für die Untersuchung von \ac{CD} vorgesehen. Downs und Vogel definieren einen festen Katalog vordefinierter Störungen (IDV), die typische Fehlerfälle wie sprunghafte Änderungen der Zulaufzusammensetzung oder Ventilblockaden abbilden, einen kontinuierlichen, schleichenden \ac{CD} der hier betrachteten Art jedoch nicht umfassen \cite{downs.1993}. 
+Dem \ac{TEP} liegt jedoch ein deterministisches dynamisches Prozessmodell zugrunde. Dessen stochastische Anteile lassen sich kontrolliert parametrieren, und als Simulation eines realen industriellen Prozesses bleibt er zugleich anwendungsnah. 
+Der \ac{TEP} wird daher über seine ursprüngliche Bestimmung hinaus genutzt und um einen drift-behafteten Betrieb erweitert. Die dafür entwickelte Injektion eines \ac{CD}-Einflusses unmittelbar im C-Code ergänzt den \ac{TEP} um einen in den etablierten Störungskatalogen nicht enthaltenen, schleichenden Fehlerfall. 
+Damit erfüllt er alle im Eingangsabschnitt von Kapitel \ref{cap:generalisierung} beschriebenen Voraussetzungen und eignet sich somit als Datengrundlage für die in dieser Arbeit behandelte Problemstellung. \par
 %
 Der so erweiterte Prozess bildet die Grundlage der Verarbeitungskette aus Generierung, Modellierung, Detektion und Adaption analog zu Abschnitt~\ref{sec:synthetischer_datensatz}. Zunächst wird in Abschnitt~\ref{sec:tep_drift} die Modellierung des \ac{CD} im C-Code beschrieben, die den drift-behafteten Fehlerfall realisiert. Abschnitt~\ref{sec:tep_generation} erläutert die darauf aufbauende Generierung des Datenstroms über die \texttt{pyTEP}-Schnittstelle. Der erzeugte Datenstrom wird anschließend in Abschnitt~\ref{sec:tep_modellierung} modelliert, bevor Abschnitt~\ref{sec:tep_detektion} die Detektion des \ac{CD} und Abschnitt~\ref{sec:tep_adaption} abschließend die Adaption des Modells an den drift-behafteten Prozess behandelt. \par
 %
+\subsection{Concept Drift} \label{sec:tep_drift}
 %
-\begin{table}[h!]
+Da der \ac{TEP} als C-Code vorliegt, kann der \ac{CD} als eine Störgröße unmittelbar in der Prozessdynamik realisiert werden, wodurch ein schleichender Fehlerfall entsteht.
+%
+% Absatz 1 — Motivation & Verortung:
+%   - Abgrenzung zu den vordefinierten IDV-Störungen (sprunghaft, extern eingespeist)
+%   - Warum ein drift-behafteter Parameter im Modellkern den realen Verschleiß besser abbildet
+%   - Bezug zum synthetischen CD-Signal aus Abschn.~\ref{sec:generieren_von_cd} (Konsistenz)
+%
+Unter den definierten Störfällen kommt Fehler IDV(13) der Zielsetzung dieser Arbeit auf den ersten Blick sehr nahe, da er in der Literatur als \emph{slow drift} der Reaktionskinetik bezeichnet wird \cite{downs.1993}. Bei dessen Aktivierung multipliziert das Modell die Raten der beiden Primärreaktionen \eqref{eq:chem_1} und \eqref{eq:chem_2} mit den zeitvarianten Störfaktoren \texttt{r1f} bzw. \texttt{r2f}, die durch je einen eigenen stochastischen Störprozess erzeugt werden. Jeder dieser Prozesse zieht in zufälligen Zeitabständen einen gleichverteilten Zielwert um den Nominalwert $1$ (Funktion \texttt{tesub5}) und interpoliert zwischen den Zielwerten mit kubischen Polynomen (Funktion \texttt{tesub8}), sodass sich ein glatter, zufällig schwankender Verlauf ergibt. Die Störfaktoren fluktuieren strikt begrenzt und symmetrisch zwischen zufälligen Zielwerten im Intervall $[0{,}75;\ 1{,}25]$ um ihren Nominalwert. Bei deaktiviertem Fehler hingegen sind die Faktoren konstant $1$, sodass die Reaktionskinetik unverändert bleibt. \par
+Der Prozess besitzt damit auch mit IDV(13) weder einen Trend noch ein Gedächtnis über den aktuellen Interpolationsabschnitt hinaus und stellt einen stationären stochastischen Prozess mit einer Korrelationszeit von wenigen Stunden dar. Vor dem Hintergrund von Abschnitt~\ref{sec:concept_drift} ist die Bezeichnung \emph{slow drift} daher irreführend. \ac{CD} setzt gemäß \eqref{eq:concept_drift} eine Veränderung der gemeinsamen Verteilung $P(X, y)$ voraus. Die durch IDV(13) induzierte Verteilung ist für Beobachtungsfenster oberhalb der Korrelationszeit jedoch zeitinvariant. Die Fluktuation verbreitert die Verteilung der betroffenen Prozessgrößen einmalig bei Aktivierung, verschiebt sie anschließend aber nicht weiter, sodass nach der Systematik gemäß Tabelle~\ref{tab:cd_definitionen} allenfalls eine abrupte Störung mit stationärem Charakter vorliegt. Das Attribut \emph{slow} bezieht sich lediglich auf die Zeitskala der Fluktuation, nicht auf eine Drift im verteilungstheoretischen Sinn. \par
+Für die Zielsetzung dieser Arbeit folgt daraus, dass der \ac{TEP} in seiner ursprünglichen Form keinen Fehler bereitstellt, der diese Eigenschaften erfüllt. Um den \ac{TEP} dennoch als Benchmark für die Drift-Erkennung und -Adaption nutzen zu können, wird das Simulationsmodell im Folgenden um eine Störgröße erweitert, die einen strukturierten, anhaltenden Drift der Reaktionskinetik nach dem Vorbild des synthetischen Datenstroms aus Abschnitt~\ref{sec:synthetischer_datensatz} erzeugt. \par
+% Absatz 2 — Wahl der drift-behafteten Größe:
+%   - welcher physikalische Parameter im C-Code zeitvariabel gemacht wird
+%     (z.B. Reaktionskinetik / Katalysatoraktivität / Wärmeübergang)
+%   - Begründung der Wahl (physikalische Plausibilität, Beobachtbarkeit in der Systemantwort)
+%
+% Absatz 3 — Struktur des Driftsignals c[k]:
+%   - Incremental + Sudden Drift analog Abschn.~\ref{sec:generieren_von_cd}
+%     (sägezahnartiges Muster, N_seg Segmente) -> Wiederverwendung derselben Definition
+%   - Parametrisierung (Steigung, Segmentgrenzen, Amplitude)
+%
+% Absatz 4 — Implementierung:
+%   - Eingriff in die S-Funktion / MultiLoop_mode3, Einbindung in die Simulationsschleife
+%   - Kopplung des Driftsignals an den gewählten Parameter
+%
+% \begin{figure}[tbp]
+%     \centering
+%     % \includesvg[width=\linewidth]{\graphdir tep_drift_signal.svg}
+%     \caption{Verlauf des im C-Code injizierten Driftsignals bzw.\ des betroffenen Parameters}
+%     \label{fig:tep_drift_signal}
+% \end{figure}
+% -> Abbildung im Text beschreiben (Verlauf, Segmente, Sudden/Incremental-Anteil)
+%
+\subsection{Generierung des Datenstroms} \label{sec:tep_generation}
+%
+Auf Basis des drift-behafteten Prozessmodells wird über die \textit{pyTEP}-Schnittstelle ein Datenstrom erzeugt, der als Grundlage der anschließenden Modellierung, Detektion und Adaption dient.
+%
+\begin{table}[tb]
 \centering
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{c l c c c c c c }
@@ -657,46 +707,6 @@ Der so erweiterte Prozess bildet die Grundlage der Verarbeitungskette aus Generi
 \caption{Process Setpoints for 6 different Modes}
 \label{tab:modes}
 \end{table}
-%
-\subsection{Concept Drift} \label{sec:tep_drift}
-%
-Da der \ac{TEP} als C-Code vorliegt, kann der \ac{CD} statt über die Prozesseingänge unmittelbar in der Prozessdynamik selbst realisiert werden, wodurch, wodurch ein bislang nicht abgebildeter, schleichender Fehlerfall entsteht.
-%
-% Absatz 1 — Motivation & Verortung:
-%   - Abgrenzung zu den vordefinierten IDV-Störungen (sprunghaft, extern eingespeist)
-%   - Warum ein drift-behafteter Parameter im Modellkern den realen Verschleiß besser abbildet
-%   - Bezug zum synthetischen CD-Signal aus Abschn.~\ref{sec:generieren_von_cd} (Konsistenz)
-%
-Unter den definierten Störfällen kommt Fehler IDV(13) der Zielsetzung dieser Arbeit auf den ersten Blick sehr nahe, da er in der Literatur als \emph{slow drift} der Reaktionskinetik bezeichnet wird \cite{downs.1993}. Bei dessen Aktivierung multipliziert das Modell die Raten der beiden Primärreaktionen \eqref{eq:chem_1} und \eqref{eq:chem_2} mit den zeitvarianten Störfaktoren \texttt{r1f} bzw. \texttt{r2f}, die durch je einen eigenen stochastischen Störprozess erzeugt werden. Jeder dieser Prozesse zieht in zufälligen Zeitabständen einen gleichverteilten Zielwert um den Nominalwert $1$ (Funktion \texttt{tesub5}) und interpoliert zwischen den Zielwerten mit kubischen Polynomen (Funktion \texttt{tesub8}), sodass sich ein glatter, zufällig schwankender Verlauf ergibt.
-Die Störfaktoren fluktuieren strikt begrenzt und symmetrisch zwischen zufälligen Zielwerten im Intervall $[0{,}75;\ 1{,}25]$ um ihren Nominalwert.
-Bei deaktiviertem Fehler hingegen sind die Faktoren konstant $1$, sodass die Reaktionskinetik unverändert bleibt. \par
-Der Prozess besitzt damit weder einen Trend noch ein Gedächtnis über den aktuellen Interpolationsabschnitt hinaus und stellt einen stationären stochastischen Prozess mit einer Korrelationszeit von wenigen Stunden dar. Vor dem Hintergrund von Abschnitt~\ref{sec:concept_drift} ist die Bezeichnung \emph{slow drift} daher irreführend: \ac{CD} setzt gemäß \eqref{eq:concept_drift} eine Veränderung der gemeinsamen Verteilung $P(X, y)$ voraus, die durch IDV(13) induzierte Verteilung ist für Beobachtungsfenster oberhalb der Korrelationszeit jedoch zeitinvariant. Die Fluktuation verbreitert die Verteilung der betroffenen Prozessgrößen einmalig bei Aktivierung, verschiebt sie anschließend aber nicht weiter, sodass nach der Systematik gemäß Tabelle~\ref{tab:cd_definitionen} allenfalls eine abrupte Störung mit stationärem Charakter vorliegt \cite{bayram.2022}. Das Attribut \emph{slow} bezieht sich lediglich auf die Zeitskala der Fluktuation, nicht auf eine Drift im verteilungstheoretischen Sinn. \par
-Für die Zielsetzung dieser Arbeit folgt daraus, dass der \ac{TEP} in seiner ursprünglichen Form keinen Fehler bereitstellt, der diese Eigenschaften erfüllt. Um den \ac{TEP} dennoch als Benchmark für die Drift-Erkennung und -Adaption nutzen zu können, wird das Simulationsmodell im Folgenden um eine Störgröße erweitert, die einen strukturierten, anhaltenden Drift der Reaktionskinetik nach dem Vorbild des synthetischen Datenstroms aus Abschnitt~\ref{sec:synthetischer_datensatz} erzeugt. \par
-% Absatz 2 — Wahl der drift-behafteten Größe:
-%   - welcher physikalische Parameter im C-Code zeitvariabel gemacht wird
-%     (z.B. Reaktionskinetik / Katalysatoraktivität / Wärmeübergang)
-%   - Begründung der Wahl (physikalische Plausibilität, Beobachtbarkeit in der Systemantwort)
-%
-% Absatz 3 — Struktur des Driftsignals c[k]:
-%   - Incremental + Sudden Drift analog Abschn.~\ref{sec:generieren_von_cd}
-%     (sägezahnartiges Muster, N_seg Segmente) -> Wiederverwendung derselben Definition
-%   - Parametrisierung (Steigung, Segmentgrenzen, Amplitude)
-%
-% Absatz 4 — Implementierung:
-%   - Eingriff in die S-Funktion / MultiLoop_mode3, Einbindung in die Simulationsschleife
-%   - Kopplung des Driftsignals an den gewählten Parameter
-%
-% \begin{figure}[tbp]
-%     \centering
-%     % \includesvg[width=\linewidth]{\graphdir tep_drift_signal.svg}
-%     \caption{Verlauf des im C-Code injizierten Driftsignals bzw.\ des betroffenen Parameters}
-%     \label{fig:tep_drift_signal}
-% \end{figure}
-% -> Abbildung im Text beschreiben (Verlauf, Segmente, Sudden/Incremental-Anteil)
-%
-\subsection{Generierung des Datenstroms} \label{sec:tep_generation}
-%
-Auf Basis des drift-behafteten Prozessmodells wird über die \textit{pyTEP}-Schnittstelle ein Datenstrom erzeugt, der als Grundlage der anschließenden Modellierung, Detektion und Adaption dient.
 %
 % Absatz 1 — Werkzeugkette & Betriebsmodus:
 %   - pyTEP als Python-Schnittstelle zu MATLAB/Simulink \cite{reinartz.2022}
