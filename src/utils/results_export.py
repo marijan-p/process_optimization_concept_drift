@@ -23,9 +23,11 @@ ohnehin fuehrt.
   und -Arrays -> native Typen/Listen, ``tuple`` -> ``list``, ``NaN``/``inf`` ->
   ``None`` (analog zu ``run_registry._canon``, aber JSON-tauglich statt Fehler).
 * **Provenienz** wird nicht mehr pro Notebook von Hand gesetzt, sondern von
-  :meth:`ResultDoc.save` kompakt aus ``cfg``/``variant`` abgeleitet
-  (``_provenance``-Block; abschaltbar via ``provenance=False``). Die volle
-  Provenienz (config, code_version, created) steht weiterhin in der Sidecar.
+  :meth:`ResultDoc.save` kompakt aus ``cfg`` abgeleitet (``_provenance``-Block;
+  abschaltbar via ``provenance=False``). Die volle Provenienz (config,
+  code_version, created) steht weiterhin in der Sidecar. Fallspezifische
+  Parameter gehoeren als benannte Sektion in ``cfg`` (``cfg.compose(...)``) und
+  sind damit Teil von ``id``.
 
 Konvention fuer die typisierten Setter (spiegelt ``MacroExport``):
     integer()  -> Ganzzahl (None/NaN -> None)
@@ -44,28 +46,6 @@ try:
     import numpy as _np
 except ImportError:  # pragma: no cover
     _np = None
-
-# variant_token aus der Registry uebernehmen, damit der Token im JSON *exakt* dem
-# der Sidecar/Manifest entspricht. Faellt auf eine lokale, identische Kopie
-# zurueck, falls run_registry nicht ueber den erwarteten Pfad importierbar ist
-# (die Notebooks nutzen mal ``from src.utils import run_registry``, mal ``import
-# run_registry``).
-try:  # pragma: no cover - importpfadabhaengig
-    from .run_registry import _variant_token as _variant_token
-except Exception:  # pragma: no cover
-    try:
-        from run_registry import _variant_token as _variant_token
-    except Exception:
-        import re as _re
-
-        def _variant_token(variant):
-            if not variant:
-                return None
-            def _fmt(v):
-                s = str(v.item() if _np is not None and isinstance(v, _np.generic) else v)
-                return _re.sub(r"[^0-9A-Za-z.+-]", "", s)
-            return "-".join(f"{k}{_fmt(variant[k])}" for k in sorted(variant))
-
 
 def _is_nan(x):
     return isinstance(x, float) and x != x
@@ -189,8 +169,8 @@ class ResultDoc:
         return dict(self._d)
 
     @staticmethod
-    def _provenance(cfg, variant, parents):
-        """Kompakter Provenienz-Block aus cfg/variant -- konsistent zur Sidecar."""
+    def _provenance(cfg, parents):
+        """Kompakter Provenienz-Block aus cfg -- konsistent zur Sidecar."""
         meta = {}
         rid = getattr(cfg, "id", None)
         bid = getattr(cfg, "base_id", None)
@@ -198,33 +178,30 @@ class ResultDoc:
             meta["id"] = rid
         if bid is not None:
             meta["base_id"] = bid
-        if variant is not None:
-            meta["variant"] = to_jsonable(variant)
-            tok = _variant_token(variant)
-            if tok is not None:
-                meta["variant_token"] = tok
+        sections = getattr(cfg, "sections", None)
+        if sections:
+            meta["sections"] = to_jsonable(dict(sections))
         if parents:
             meta["parents"] = to_jsonable(parents)
         return meta
 
-    def save(self, store, case, cfg, *, final, variant=None, parents=None,
+    def save(self, store, case, cfg, *, final, parents=None,
              provenance=True, echo=True):
         """Rendert und speichert via ``store.save_json(...)``; gibt den Pfad zurueck.
 
         ``store`` ist ein ``OutputStore`` (z. B. ``rr.synthetic_results_store``).
         Mit ``provenance=True`` (Default) wird ein kompakter ``_provenance``-Block
-        aus ``cfg``/``variant``/``parents`` vorangestellt, damit auch die stabile,
-        nachgelagert eingebundene JSON-Datei selbstbeschreibend bleibt (die
-        vollstaendige Provenienz liegt zusaetzlich in der Sidecar). ``parents``
-        wird an ``save_json`` durchgereicht und so in der Sidecar vermerkt.
+        aus ``cfg``/``parents`` vorangestellt, damit auch die stabile, nachgelagert
+        eingebundene JSON-Datei selbstbeschreibend bleibt (die vollstaendige
+        Provenienz liegt zusaetzlich in der Sidecar). ``parents`` wird an
+        ``save_json`` durchgereicht und so in der Sidecar vermerkt.
         """
         obj = self.render()
         if provenance:
-            meta = self._provenance(cfg, variant, parents)
+            meta = self._provenance(cfg, parents)
             if meta:
                 obj = {"_provenance": meta, **obj}
-        path, _ = store.save_json(obj, case, cfg, final=final,
-                                  variant=variant, parents=parents)
+        path, _ = store.save_json(obj, case, cfg, final=final, parents=parents)
         if echo:
             print(f"Umfassende Ergebnisse -> {path}")
         return path
@@ -282,20 +259,21 @@ if __name__ == "__main__":
     class _Cfg:
         id = "abcd1234"
         base_id = "0000ffff"
-    meta = ResultDoc._provenance(_Cfg(), {"idv": 5, "amp": 1.0}, {"model": "deadbeef"})
-    assert meta["id"] == "abcd1234" and meta["variant"] == {"idv": 5, "amp": 1.0}
+        sections = {"error": {"idv": 5, "amp": 1.0}}
+    meta = ResultDoc._provenance(_Cfg(), {"model": "deadbeef"})
+    assert meta["id"] == "abcd1234" and meta["sections"]["error"]["idv"] == 5
     assert meta["parents"] == {"model": "deadbeef"}
 
     # save() gegen Fake-Store
     class _Store:
         def __init__(self): self.saved = None
-        def save_json(self, obj, case, cfg, *, final, variant=None, parents=None):
-            self.saved = (obj, case, final, variant, parents)
+        def save_json(self, obj, case, cfg, *, final, parents=None):
+            self.saved = (obj, case, final, parents)
             return f"/tmp/{case}.json", None
 
     st = _Store()
     ResultDoc().integer("n_samples", 10).save(
-        st, "model_error", _Cfg(), final=True, variant={"idv": 5}, echo=False)
+        st, "model_error", _Cfg(), final=True, echo=False)
     obj = st.saved[0]
     assert "_provenance" in obj and obj["n_samples"] == 10
     json.dumps(obj)

@@ -584,11 +584,14 @@ class OutputStore:
     final=True schreibt die stabile Datei und markiert die Version als final,
     final=False archiviert nur.
 
+    Fallspezifische Parameter gehoeren als benannte Sektion in ``cfg``
+    (``cfg.compose(error=...)``) und sind damit Teil von ``id`` -- anders als bei
+    ``ArtifactStore``, wo ``variant`` zusaetzlich den Dateinamen praegt.
+
     Beispiel:
         from run_registry import plot_store
         store = plot_store(plot_dir)
-        store.save_figure(fig, "tep_detection_kswin", cfg, final=IS_FINAL,
-                          variant=error_variant)
+        store.save_figure(fig, "tep_detection_kswin", det_run, final=IS_FINAL)
     """
 
     def __init__(self, out_dir, prefix="", *, archive_subdir="archive", ledger=None):
@@ -637,7 +640,7 @@ class OutputStore:
             json.dump(index, f, indent=2, ensure_ascii=False)
         os.replace(tmp, mpath)
 
-    def publish(self, name, key, *, writer, final, variant=None, parents=None,
+    def publish(self, name, key, *, writer, final, parents=None,
                 stable_ext="pgf", archive_ext="png", meta=None, force=False):
         """Schreibt Archivkopie (nur bei neuer Konfiguration) und optional die stabile Datei.
 
@@ -654,7 +657,7 @@ class OutputStore:
             writer(ap)
         sc = {
             "name": name, "id": rid, "final": bool(final),
-            "variant": variant, "parents": parents, "provenance": prov,
+            "parents": parents, "provenance": prov,
             "stable_ext": stable_ext, "archive_ext": archive_ext,
             "archive": os.path.basename(ap),
             "created": datetime.datetime.now().isoformat(timespec="seconds"),
@@ -664,14 +667,14 @@ class OutputStore:
         with open(os.path.splitext(ap)[0] + ".json", "w", encoding="utf-8") as f:
             json.dump(sc, f, indent=2, ensure_ascii=False)
         self._update_manifest(name, rid, {k: sc[k] for k in
-            ("id", "final", "variant", "created", "archive")}, final)
+            ("id", "final", "created", "archive")}, final)
         sp = None
         if final:
             sp = self.stable_path(name, stable_ext)
             writer(sp)
         return sp, ap
 
-    def save_figure(self, fig, name, key, *, final, variant=None, parents=None,
+    def save_figure(self, fig, name, key, *, final, parents=None,
                     stable_ext="pgf", archive_ext="png", savefig_kwargs=None,
                     archive_kwargs=None, meta=None, force=False):
         base = {"transparent": True, "bbox_inches": "tight"}
@@ -681,25 +684,25 @@ class OutputStore:
                     and archive_kwargs is not None:
                 kw = dict(base, **archive_kwargs)
             fig.savefig(p, **kw)
-        return self.publish(name, key, writer=writer, final=final, variant=variant,
+        return self.publish(name, key, writer=writer, final=final,
                             parents=parents, stable_ext=stable_ext,
                             archive_ext=archive_ext, meta=meta, force=force)
 
-    def save_json(self, obj, name, key, *, final, variant=None, parents=None,
+    def save_json(self, obj, name, key, *, final, parents=None,
                   meta=None, force=False):
         def writer(p):
             with open(p, "w", encoding="utf-8") as f:
                 json.dump(obj, f, indent=2, ensure_ascii=False)
-        return self.publish(name, key, writer=writer, final=final, variant=variant,
+        return self.publish(name, key, writer=writer, final=final,
                             parents=parents, stable_ext="json", archive_ext="json",
                             meta=meta, force=force)
 
-    def save_text(self, text, name, key, *, final, ext="tex", variant=None,
+    def save_text(self, text, name, key, *, final, ext="tex",
                   parents=None, meta=None, force=False):
         def writer(p):
             with open(p, "w", encoding="utf-8") as f:
                 f.write(text)
-        return self.publish(name, key, writer=writer, final=final, variant=variant,
+        return self.publish(name, key, writer=writer, final=final,
                             parents=parents, stable_ext=ext, archive_ext=ext,
                             meta=meta, force=force)
 
@@ -759,6 +762,86 @@ def adopt_legacy(store, case, new_cfg, *, dropped=("gamma_tau", "K_p", "cd_band_
     return True
 
 
+def _available_sections(store, case, cfg, section, *, ext="pkl"):
+    """Alle Auspraegungen von ``section``, die auf ``cfg`` aufbauen (aus den Sidecars)."""
+    out = []
+    pat = os.path.join(store.data_dir, f"{store.prefix}_{case}_*.{ext}")
+    for p in sorted(glob.glob(pat)):
+        scp = store._sidecar_path(p)
+        if not os.path.exists(scp):
+            continue
+        with open(scp, encoding="utf-8") as f:
+            doc = json.load(f).get("config")
+        if doc is None:
+            continue
+        art = RunConfig.from_document(doc)
+        vals = art.sections.get(section)
+        if vals is not None and cfg.compose(**{section: vals}).id == art.id:
+            out.append(vals)
+    return out
+
+
+def load_section(store, case, cfg, section, values=None, *, ext="pkl", rename=True):
+    """Laedt ein fallspezifisches Artefakt, das ``cfg`` um genau eine Sektion ergaenzt.
+
+    Fallspezifische Parameter (z. B. der IDV des Fehlerfalls) gehoeren als benannte
+    Sektion in die Konfiguration -- ``cfg.compose(error={"idv": 29, "amp": 1.0})``.
+    Die Kennung ist damit aus ``cfg`` und den Werten *berechenbar*; ein separat
+    einzugebender run_id eruebrigt sich.
+
+    ``values``
+        Gibt die Sektion vor. Geladen wird direkt ueber die berechnete Kennung;
+        :meth:`ArtifactStore.load` prueft dabei die Sidecar-Konfiguration gegen
+        ``cfg``. Achtung: ``{"amp": 1}`` und ``{"amp": 1.0}`` sind verschiedene
+        Dokumente und ergeben verschiedene Kennungen -- schlaegt das Laden fehl,
+        nennt die Fehlermeldung die tatsaechlich vorhandenen Auspraegungen.
+    ``values=None``
+        Nimmt das neueste Artefakt des Falls und prueft, dass es ``cfg`` nur um
+        diese eine Sektion ergaenzt (faengt also einen Stand aus einem anderen
+        Lauf ab).
+
+    Gibt ``(objekt, konfiguration_mit_sektion)`` zurueck.
+    """
+    if values is not None:
+        art_cfg = cfg.compose(**{section: dict(values)})
+        try:
+            return store.load(case, art_cfg, ext=ext, rename=rename), art_cfg
+        except FileNotFoundError:
+            avail = _available_sections(store, case, cfg, section, ext=ext)
+            raise FileNotFoundError(
+                f"Kein {case!r} mit {section}={dict(values)} zu Konfiguration "
+                f"{cfg.id}. Vorhanden: {avail if avail else 'nichts'}") from None
+
+    rid = store.latest_id(case, ext=ext)
+    if rid is None:
+        raise FileNotFoundError(
+            f"Kein Artefakt fuer case={case!r} in {store.data_dir}")
+    obj = store.load(case, run_id=rid, ext=ext, rename=rename)
+    p, from_legacy = store.resolve(case, run_id=rid, ext=ext)
+    doc = None
+    if p is not None and not from_legacy:
+        scp = store._sidecar_path(p)
+        if os.path.exists(scp):
+            with open(scp, encoding="utf-8") as f:
+                doc = json.load(f).get("config")
+    if doc is None:
+        doc = dict(getattr(obj, "attrs", {}) or {}).get("config")
+    if doc is None:
+        raise ValueError(f"{case} {rid}: keine Konfiguration hinterlegt.")
+    art_cfg = RunConfig.from_document(doc)
+    vals = art_cfg.sections.get(section)
+    if vals is None:
+        raise ValueError(
+            f"{case} {rid} hat keine {section!r}-Sektion (alter Stand). Bitte das "
+            f"erzeugende Notebook einmal ausfuehren.")
+    if cfg.compose(**{section: vals}).id != art_cfg.id:
+        raise ValueError(
+            f"{case} {rid} baut nicht auf der geladenen Konfiguration {cfg.id} auf. "
+            f"Bitte {section}-Auspraegung explizit angeben oder das erzeugende "
+            f"Notebook neu ausfuehren.")
+    return obj, art_cfg
+
+
 if __name__ == "__main__":
     syn_cfg = {
         "seed": 44, "Ts": 1.0, "num_segments": 5, "cd_range": [-0.5, 0.5],
@@ -805,17 +888,15 @@ if __name__ == "__main__":
         # Modell: eigene, flache Kennung (m3, kollidiert nicht mit Legacy-Test unten)
         store.save({"m": 1}, "model", m3)
         assert store.load("model", m3) == {"m": 1}
-        # Legacy-Fallback
-        ls = synthetic_store(d)
-        with open(os.path.join(d, "data_deadbeef.pkl"), "wb") as f:
-            pickle.dump({"legacy": True}, f)
-        p, from_legacy = ls.resolve("data", run_id="deadbeef")
-        assert from_legacy and ls.load("data", run_id="deadbeef") == {"legacy": True}
-        # Legacy-Fallback fuer abgeleitetes Modell via base_id
+        # Daten-Artefakte kennen keine Legacy-Namen mehr (sauberer Schnitt)
+        ls = synthetic_data_store(d)
+        assert ls.legacy == {}
+        # Legacy-Fallback fuer abgeleitetes Modell via base_id (nur Modell-Store)
+        lm = synthetic_model_store(d)
         with open(os.path.join(d, f"model_{syn.base_id}.pkl"), "wb") as f:
             pickle.dump({"legacy_model": True}, f)
-        pm, ml = ls.resolve("model", m1)
-        assert ml and ls.load("model", m1, verify=False) == {"legacy_model": True}
+        pm, ml = lm.resolve("model", m1)
+        assert ml and lm.load("model", m1, verify=False) == {"legacy_model": True}
 
     # Getrennte Stores: Daten und Modelle in eigenen Verzeichnissen, gleicher Prefix
     with tempfile.TemporaryDirectory() as dd, tempfile.TemporaryDirectory() as dm:
@@ -831,13 +912,45 @@ if __name__ == "__main__":
         # Fall-Trennung: Modell-Store kennt keine Daten-Legacy und umgekehrt
         assert "train" not in mstore.legacy and "model" not in ds.legacy
 
-    # Legacy-Fallback greift je Store nur fuer die eigene Gruppe
+    # Legacy-Fallback greift je Store nur fuer die eigene Gruppe. Geprueft wird mit
+    # einer *abgeleiteten* Konfiguration: nur dort unterscheiden sich kanonischer
+    # Name (ueber id) und Legacy-Name (ueber base_id) ueberhaupt.
     with tempfile.TemporaryDirectory() as dm2:
-        m2 = tep_model_store(dm2)
+        mstore2 = tep_model_store(dm2)
+        tep_m = tep.compose(model={"arch": [5, 5, 1]})
         with open(os.path.join(dm2, f"tep_model_{tep.base_id}.pkl"), "wb") as f:
             pickle.dump({"legacy_model": True}, f)
-        assert m2.resolve("model", tep)[1]
-        assert tep_data_store(dm2).resolve("model", tep)[0] is None
+        assert mstore2.resolve("model", tep_m)[1]
+        assert tep_data_store(dm2).resolve("model", tep_m)[0] is None
+
+    # load_section: Kennung aus Basis + Sektion, mit und ohne Vorgabe
+    with tempfile.TemporaryDirectory() as d:
+        ds = tep_data_store(d)
+        e29 = tep.compose(error={"idv": 29, "amp": 1.0})
+        e13 = tep.compose(error={"idv": 13, "amp": 1.0})
+        ds.save({"e": 29}, "data_error", e29)
+        ds.save({"e": 13}, "data_error", e13)
+        # mit Vorgabe: Kennung berechnet, kein run_id noetig
+        obj, ec = load_section(ds, "data_error", tep, "error", {"idv": 29, "amp": 1.0})
+        assert obj == {"e": 29} and ec.id == e29.id and ec.base_id == tep.base_id
+        obj, ec = load_section(ds, "data_error", tep, "error", {"idv": 13, "amp": 1.0})
+        assert obj == {"e": 13} and ec.id == e13.id
+        # ohne Vorgabe: neuestes Artefakt, Zugehoerigkeit geprueft
+        obj, ec = load_section(ds, "data_error", tep, "error")
+        assert ec.sections["error"] in ({"idv": 29, "amp": 1.0}, {"idv": 13, "amp": 1.0})
+        # Tippfehler im Typ (1 statt 1.0) -> Fehlermeldung nennt die Auspraegungen
+        try:
+            load_section(ds, "data_error", tep, "error", {"idv": 29, "amp": 1})
+            raise AssertionError("haette fehlschlagen muessen")
+        except FileNotFoundError as exc:
+            assert "idv" in str(exc) and "29" in str(exc), str(exc)
+        # fremder Lauf -> abgelehnt
+        other = RunConfig({**tep_cfg, "seed": 7})
+        try:
+            load_section(ds, "data_error", other, "error")
+            raise AssertionError("haette fehlschlagen muessen")
+        except ValueError as exc:
+            assert "baut nicht auf" in str(exc)
 
     # OutputStore: Archiv-Dedup, final-Promotion, Sidecar/Manifest
     with tempfile.TemporaryDirectory() as d:
