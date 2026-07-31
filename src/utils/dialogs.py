@@ -3,6 +3,11 @@
 Fällt automatisch auf Konsolenausgabe zurück, wenn kein Display verfügbar ist.
 """
 
+# Notwendig, damit die Signaturen (str | None, list[tuple[str, str]] | None) auch
+# unter Python < 3.10 importierbar bleiben -- der TEP-Kernel ist aelter als die
+# uebrigen Umgebungen. Analog zu den anderen Modulen in src/.
+from __future__ import annotations
+
 import os
 import sys
 import tkinter as tk
@@ -305,6 +310,8 @@ def show_with_copy_button(title: str, message: str, copy_value: str,
                           wraplength: int = 500) -> None:
     """Zeigt Infotext mit Button, der copy_value in die Zwischenablage kopiert."""
     notify(title, message)
+    if not has_display():
+        return
 
     root = tk.Tk()
     root.title(title)
