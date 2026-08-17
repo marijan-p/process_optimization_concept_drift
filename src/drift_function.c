@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
--                     d r i f t _ f u n c t i o n s a w t o o t h . c                   -
+-                     d r i f t _ f u n c t i o n . c                   -
 ---------------------------------------------------------------------------
   Saegezahn-Driftsignal fuer den Concept-Drift-Fehler IDV(29) des TEP,
   strukturgleich zum synthetischen Driftsignal c[k]: innerhalb jedes
@@ -14,9 +14,6 @@
   seed und Segmentindex abgeleitet (splitmix64). Damit liefern Notebook
   (ctypes) und S-Function (per #include) unabhaengig von Solver-Schrittweite
   identische Verlaeufe.
-
-  Alternative ohne Sudden Drifts: drift_functions_triangle.c (identische
-  Signatur); Austausch ueber die #include-Zeile in temexd_mod_drift.c.
 
   Parameter:
     t       Zeit seit Drift-Aktivierung in h (t <= 0 -> 0)
