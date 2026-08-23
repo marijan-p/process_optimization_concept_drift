@@ -99,9 +99,21 @@ class MacroExport:
         self._lines.append(rf"\newcommand{{\{name}}}{{{body}}}")
         return self
 
-    def num(self, name, value, nd):
-        """Dezimalzahl mit deutschem Komma und ``nd`` Nachkommastellen."""
-        return self._emit(name, format_de(value, nd))
+    def num(self, name, value, nd, *, unit=None, si_command="SI"):
+        r"""Dezimalzahl mit deutschem Komma und ``nd`` Nachkommastellen.
+
+        Ist ``unit`` gesetzt (z. B. ``r"\percent"``), wird die Einheit wie bei
+        :meth:`param` direkt am Wert gespeichert: das Makro expandiert zu
+        ``\SI{<zahl>}{<unit>}`` (Kommando ueber ``si_command`` waehlbar). Die
+        Zahl wird dann mit Dezimalpunkt und stets ``nd`` Nachkommastellen
+        uebergeben, da siunitx das Dezimaltrennzeichen selbst setzt.
+        None/NaN -> ``--`` (ohne Einheit).
+        """
+        if unit is None:
+            return self._emit(name, format_de(value, nd))
+        if value is None or (isinstance(value, float) and math.isnan(value)):
+            return self._emit(name, "--")
+        return self._emit(name, rf"\{si_command}{{{value:.{nd}f}}}{{{unit}}}")
 
     def integer(self, name, value):
         """Ganzzahl; None/NaN -> '--'."""
