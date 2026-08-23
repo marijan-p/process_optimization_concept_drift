@@ -15,6 +15,15 @@ KANAELE (loest die Farbknappheit auf):
         adapted         = violett (nach Adaption)
   * Diskrete Signale -> gefuellte Marker (ts.scatter(role)); Linien bleiben den
     kontinuierlichen Groessen c[k] (drift_signal) und Setpoints vorbehalten.
+  * Groessenklasse -> KANAL: Markerform (orthogonal zur Farbe). Prozessgroessen
+    (Setpoint w, Ein-/Ausgang u, y) nutzen SIGNAL_MARKER (Kreis), modellabgeleitete
+    Groessen (Simulationsfehler e, Innovation nu, auch nach Adaption) nutzen
+    MODEL_MARKER (Fuenfeck). Damit tragen Farbe und Form zwei unabhaengige
+    Bedeutungen: Farbe == Driftzustand, Form == Art der dargestellten Groesse.
+    WIRKSAMKEIT: In den dichten Punktwolken (s=6, alpha=0.5) ist die Form nicht
+    aufgeloest -- sie wirkt dort ueber die Legende (daher LEGEND_MARKERSIZE) und
+    im Datenbereich nur in duenn besetzten Plots. Die Klassenzugehoerigkeit muss
+    deshalb zusaetzlich in Achsen- und Legendentext benannt werden.
   * Rauschen -> eigene Akzentfarbe, LOKAL: Wo rauschfrei UND verrauscht direkt
     verglichen werden (Rausch-Plot, nur drift-freie Signale), bekommt das
     verrauschte Signal die Rolle "noise" (grau). Bewusst lokal, da dort die
@@ -63,6 +72,20 @@ PALETTE = {
 }
 
 # --------------------------------------------------------------------------- #
+# 1b) Markerform als Kanal fuer die Groessenklasse (orthogonal zur Farbachse).
+#     Zwei disjunkte Formfamilien, damit sich Prozessgroesse und Modellgroesse
+#     auch bei identischer Farbe unterscheiden lassen. Das Fuenfeck ist bewusst
+#     gewaehlt: es hebt sich in der Legende klar vom Kreis ab, veraendert aber --
+#     anders als das Quadrat -- die Textur dichter Punktwolken nicht sichtbar.
+# --------------------------------------------------------------------------- #
+SIGNAL_MARKER = "o"        # Prozessgroessen: Setpoint w, Ein-/Ausgang u, y
+MODEL_MARKER  = "p"        # Modellgroessen: Fehler e, Innovation nu, adaptiert
+
+# Legenden-Markergroesse in Punkt. Der Default (rcParams lines.markersize = 6)
+# ist zu klein, als dass sich die Formfamilien im Druck unterscheiden liessen.
+LEGEND_MARKERSIZE = 9.5
+
+# --------------------------------------------------------------------------- #
 # 2) Semantische Rollen -> vollstaendiger Stil (Farbe + redundante Kanaele).
 #    Pro Rolle ist neben der Farbe auch der bevorzugte Linien-/Markerstil
 #    hinterlegt, damit "gleiche Groesse, anderer Zustand" sich auch ohne Farbe
@@ -76,7 +99,7 @@ ROLES = {
     # einzige Rolle fuer alle Adaptionsstrategien (keine Unterscheidung zwischen
     # blind/informed/combined), farblich von drift-frei und drift-behaftet
     # abgesetzt (violett). Setpoint nutzt schwarz, noise nutzt grau.
-    "adapted":        dict(color=PALETTE["purple"],     linestyle="--", marker="D",  alpha=1.0),
+    "adapted":        dict(color=PALETTE["purple"],     linestyle="--", marker=MODEL_MARKER, alpha=1.0),
     # --- treibendes Fuehrungssignal / Setpoint als Kontext ---------------- #
     "setpoint":       dict(color=PALETTE["black"],     linestyle="--", marker=None, alpha=1.0),
     # --- Driftursache ----------------------------------------------------- #
@@ -94,8 +117,9 @@ ROLES = {
 
 # Mehrere drift-behaftete Varianten EINER Groesse (z. B. PT1: T-, K-, T&K-Einfluss):
 # alle in derselben Farbe (drift_afflicted), Unterscheidung NUR ueber die
-# Markerform. Keine Dreiecke.
-DRIFT_VARIANT_MARKERS = ["o", "x", "D"]
+# Markerform. Keine Dreiecke. Die Varianten bleiben in der Formfamilie der
+# Prozessgroessen (rund/linear) -- das Fuenfeck ist der Modellklasse vorbehalten.
+DRIFT_VARIANT_MARKERS = ["o", "x", "+"]
 
 # Reine Kategorial-Liste fuer echte Nominalskalen ohne semantische Rolle.
 CATEGORICAL = [PALETTE["blue"], PALETTE["vermilion"], PALETTE["green"],
@@ -344,7 +368,10 @@ def error_timeseries(t, series, cd=None, *, ylabel="Norm. Fehler", xlabel=None,
         xs.append(t_arr[m]); ys.append(y[m]); cs.append(np.full(int(m.sum()), col))
     xs, ys, cs = np.concatenate(xs), np.concatenate(ys), np.concatenate(cs)
     o = rng.permutation(len(xs)) if len(items) > 1 else np.arange(len(xs))
-    ax.scatter(xs[o], ys[o], c=cs[o], s=s, alpha=alpha, zorder=3, rasterized=True)
+    # Alles, was diese Funktion zeichnet, ist eine modellabgeleitete Groesse ->
+    # Markerform der Modellklasse (vgl. MODEL_MARKER im Modulkopf).
+    ax.scatter(xs[o], ys[o], c=cs[o], s=s, alpha=alpha, marker=MODEL_MARKER,
+               zorder=3, rasterized=True)
 
     # --- Driftsignal auf der zweiten Ordinate --------------------------------- #
     ax2 = None
@@ -404,7 +431,11 @@ def error_timeseries(t, series, cd=None, *, ylabel="Norm. Fehler", xlabel=None,
     if legend:
         proxies = (legend_series if legend_series is not None
                    else [(role, lab) for _y, role, lab in items if lab])
-        handles = [Line2D([0], [0], marker="o", linestyle="", alpha=alpha,
+        # Legenden-Proxies bewusst deckend (nicht mit dem Scatter-alpha), sonst
+        # verschwimmt die Markerform vor dem Hintergrund und der Formkanal traegt
+        # genau dort nicht, wo er allein wirksam ist.
+        handles = [Line2D([0], [0], marker=MODEL_MARKER, linestyle="",
+                          markersize=LEGEND_MARKERSIZE,
                           color=(color(role) if role in ROLES else role), label=lab)
                    for role, lab in proxies]
         if ax2 is not None and cd_label:
