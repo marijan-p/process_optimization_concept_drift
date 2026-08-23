@@ -12,7 +12,7 @@
 %---------------------------------------------------------------------
 \section{Appendix A}\label{app:A}
 %
-Tabelle~\ref{tab:tep-stoerungen} listet die im Tennessee-Eastman-Prozess vordefinierten Prozessstörungen auf. Die Störungen IDV(1)--IDV(20) entstammen der ursprünglichen Prozessbeschreibung von \cite{downs.1993} und umfassen Sprünge, zufällige Schwankungen, eine langsame Drift sowie klemmende Ventile; IDV(16)--IDV(20) sind dabei nicht näher spezifiziert. Die Erweiterung um IDV(21)--IDV(28) nach \cite{bathelt.2015} ergänzt zusätzliche, als zufällige Schwankungen modellierte Temperatur- und Druckstörungen der Zulaufströme sowie der Kühlwasser-Umwälzeinheiten. Die Störung IDV(29) stellt die eigene Ergänzung dar. Sie modelliert eine Veränderung der Reaktionskinetik als Concept Drift und dient damit als Grundlage für die Generierung synthetischer Prozessdaten mit driftbehafteten Zusammenhängen.
+Tabelle~\ref{tab:tep-stoerungen} listet die im Tennessee-Eastman-Prozess vordefinierten Prozessstörungen auf. Die Störungen IDV(1)--IDV(20) entstammen der ursprünglichen Prozessbeschreibung von \cite{downs.1993} und umfassen Sprünge, zufällige Schwankungen, eine langsame Drift sowie klemmende Ventile; IDV(16)--IDV(20) sind dabei nicht näher spezifiziert. Die Erweiterung um IDV(21)--IDV(28) nach \cite{bathelt.2015} ergänzt zusätzliche, als zufällige Schwankungen modellierte Temperatur- und Druckstörungen der Zulaufströme sowie der Kühlwasser-Umwälzeinheiten. Die Störung IDV(29) stellt die eigene Ergänzung dar. Sie modelliert nach Abschnitt~\ref{sec:tep_drift} eine schleichende Kalibrierdrift des Strippertemperatursensors, die allein den aufgezeichneten Messwert verfälscht und den Prozess selbst unberührt lässt, und dient damit als Grundlage für einen Datenstrom mit driftbehafteten Zusammenhängen.
 %
 \begin{table}[htbp]
 \centering
@@ -52,7 +52,36 @@ IDV(25) & E-Zulaufdruck (Strom 3) & Zufällige Schwankung \\
 IDV(26) & A- und C-Zulaufdruck (Strom 4) & Zufällige Schwankung \\
 IDV(27) & Druckschwankung in der Kühlwasser-Umwälzeinheit des Reaktors & Zufällige Schwankung \\
 IDV(28) & Druckschwankung in der Kühlwasser-Umwälzeinheit des Kondensators & Zufällige Schwankung \\
-\textbf{IDV(29)} & \textbf{Reaktionskinetik} & \textbf{Concept Drift} \\
+\textbf{IDV(29)} & \textbf{Aufgezeichnete Strippertemperatur XMEAS(18)} & \textbf{Concept Drift} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%
+Tabelle~\ref{tab:modes_setpoints} führt die Setpoints auf, mit denen die sechs Betriebsmodi des \ac{TEP} gefahren werden. Sie gehören zum dezentralen Regelkonzept nach \cite{ricker.1996} und beschreiben den jeweils optimalen stationären Betriebspunkt nach \cite{ricker.1995}, übernommen in der Zusammenstellung von \cite{reinartz.2022}. Füllstände, Reaktordruck, Dampfventil und Rührerdrehzahl gehen als Schranken oder feste Vorgaben in die Optimierung ein und bleiben deshalb über alle Modi gleich, ebenso die Stellung des Recycle-Ventils außerhalb der Modi 3 und 6. Die drei letztgenannten Größen sind dabei keine Führungsgrößen, sondern Stellgrößen, die das Regelkonzept konstant hält. Dabei bezeichnet $y_\mathrm{AC}$ den Molanteil von A und C im Reaktorzulauf und $y_\mathrm{A}$ den darauf bezogenen Anteil von A.
+%
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Setpoints der sechs Betriebsmodi des Tennessee-Eastman-Prozesses nach \cite{ricker.1995, ricker.1996} in der Zusammenstellung von \cite{reinartz.2022}.}
+\label{tab:modes_setpoints}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l c c c c c c c}
+\toprule
+& & \textbf{Modus 1} & \textbf{Modus 2} & \textbf{Modus 3} & \textbf{Modus 4} & \textbf{Modus 5} & \textbf{Modus 6} \\
+\midrule
+Produktionsrate         & \si{\metre\cubed\per\hour} & 22,89  & 22,73  & 18,04  & 36,04  & 23,55  & 20,20  \\
+Stripper-Füllstand      & \si{\percent}              & 50     & 50     & 50     & 50     & 50     & 50     \\
+Separator-Füllstand     & \si{\percent}              & 50     & 50     & 50     & 50     & 50     & 50     \\
+Reaktorfüllstand        & \si{\percent}              & 65     & 65     & 65     & 65     & 65     & 65     \\
+Reaktordruck            & \si{\kilo\pascal}          & 2800   & 2800   & 2800   & 2800   & 2800   & 2800   \\
+Molanteil G im Produkt  & mol-\%                     & 53,80  & 11,66  & 90,09  & 53,35  & 11,65  & 90,07  \\
+$y_\mathrm{A}$          & \si{\percent}              & 63,137 & 64,196 & 62,110 & 61,940 & 64,030 & 61,468 \\
+$y_\mathrm{AC}$         & mol-\%                     & 51     & 54,24  & 47,43  & 58,76  & 54,32  & 48,79  \\
+Reaktortemperatur       & \si{\celsius}              & 122,9  & 124,2  & 121,9  & 128,2  & 124,6  & 123,0  \\
+Stellung Recycle-Ventil & \si{\percent}              & 1      & 1      & 77,62  & 1      & 1      & 71,166 \\
+Stellung Dampfventil    & \si{\percent}              & 1      & 1      & 1      & 1      & 1      & 1      \\
+Rührerdrehzahl          & \si{\percent}              & 100    & 100    & 100    & 100    & 100    & 100    \\
 \bottomrule
 \end{tabular}
 \end{table}

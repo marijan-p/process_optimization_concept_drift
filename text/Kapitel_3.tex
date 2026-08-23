@@ -14,7 +14,7 @@ Damit eine Datengrundlage diese generalisierende Rolle erfüllen kann, muss sie 
     Der Datensatz muss eine klare Unterscheidung zwischen Stellgrößen, Messgrößen und Störgrößen sowie eine von den Eingangsgrößen abhängige Zielgröße bereitstellen, um die Kausalität des Modells korrekt abzubilden.
 
     \item \textbf{Steuerbarkeit und Betriebspunktabdeckung} \newline
-    Die Führungsgrößen müssen aktiv ansteuerbar sein, um Betriebspunkte gezielt zu erzeugen, und es muss eine hinreichend große Anzahl unterschiedlicher, durch Stellgrößen definierter Betriebszustände vorliegen bzw. erzeugbar sein. Das ist essenziell, um eine statistische Versuchsplanung zu simulieren und eine robuste Aufteilung in Trainings-, Validierungs- und Testdaten zu ermöglichen.
+    Die Setpoints müssen aktiv ansteuerbar sein, um Betriebspunkte gezielt zu erzeugen, und es muss eine hinreichend große Anzahl unterschiedlicher, durch Stellgrößen definierter Betriebszustände vorliegen bzw. erzeugbar sein. Das ist essenziell, um eine statistische Versuchsplanung zu simulieren und eine robuste Aufteilung in Trainings-, Validierungs- und Testdaten zu ermöglichen.
 
     \item \textbf{Erfassbarkeit stationärer Betriebspunkte} \newline 
     Da das Modell auf stationären Betriebspunkten arbeitet, muss die Abtastrate ausreichend hoch sein, um stationäre Zustände zuverlässig von transienten Phasen trennen und je Betriebspunkt eine ausreichende Zahl an Messpunkten für die Extraktion bereitstellen zu können.
@@ -55,7 +55,7 @@ Einen typischer Mechanismus in der industriellen Praxis, der \ac{CD} hervorrufen
 %
 Das zeitabhängige Driftsignal $c[k]$ dient dabei als Grundlage für alle driftabhängigen Modifikationen des synthetischen Datenstroms. Es nimmt zu jedem Zeitschritt $k$ einen skalaren Wert an und beeinflusst sowohl die Parameter der $\mathrm{PT}_1$-Glieder als auch die Setpoints sowie den stationären Arbeitspunkt der Systemantwort. Die beiden genannten Drifttypen werden durch die Bildung von Segmenten kombiniert. Innerhalb jedes Segments nimmt $c[k]$ einen linearen Verlauf negativer Steigung an, was einen \emph{Incremental Drift} repräsentiert. An den Grenzen zwischen den Segmenten hingegen wird durch einen sprungartigen Übergang auf ein neues Ausgangsniveau ein \emph{Sudden Drift} erzeugt. Diese Struktur erzeugt ein sägezahnartiges Muster, das beide Driftformen miteinander kombiniert. \par
 %
-Formal erstreckt sich das Signal über eine Gesamtlänge von $K$ Zeitschritten. Die Wahl der Abtastfrequenz orientiert sich dabei am Ausgangsbeispiel der Mühle mit GPlink, das mit einer Frequenz von $\paramFs$ arbeitet. Die entsprechende Abtastzeit $T_s = \paramTs$ wird auf ein Kalenderjahr angewandt. Die Segmentierung dieses Zeitbereichs folgt einem festen Raster mit der nominellen Segmentdauer $T_{\mathrm{seg}} = \paramTseg$, die als Wartungs- beziehungsweise Kalibrierintervall zu verstehen ist. Im betrachteten Kalenderjahr liegen damit $\paramNSeg$ Driftsegmente vor. Da ein Wartungstermin in der Praxis um einige Tage schwankt, werden die inneren Segmentgrenzen $\tau_1 < \tau_2 < \cdots$ gegenüber dem Raster um maximal $\pm \gamma_{\tau} \cdot T_{\mathrm{seg}}/2$ zufällig verschoben, wobei $\gamma_{\tau}$ den Verschiebungsanteil bezeichnet. Zusammen mit dem festen Anfangspunkt $\tau_0 = 0$ und dem Ende des Zeitbereichs bei $K$ sind damit alle Segmentgrenzen definiert. \par
+Formal erstreckt sich das Signal über eine Gesamtlänge von $K$ Zeitschritten. Die Wahl der Abtastfrequenz orientiert sich dabei am Ausgangsbeispiel der Mühle mit GPlink, das mit einer Frequenz von $\paramFs$ arbeitet. Die entsprechende Abtastzeit $T_s = \paramTs$ wird auf ein Kalenderjahr angewandt, dessen Zeitschritte auf Zeitstempel ab dem 1.~Januar 1970 abgebildet werden, dem Nullpunkt der Unix-Zeit. Ein Kalenderbezug trägt für die Auswertung keine Information, weshalb der Nullpunkt der üblichen Zeitrechnung von Rechnersystemen als neutraler Beginn dient. Die Segmentierung dieses Zeitbereichs folgt einem festen Raster mit der nominellen Segmentdauer $T_{\mathrm{seg}} = \paramTseg$, die als Wartungs- beziehungsweise Kalibrierintervall zu verstehen ist. Im betrachteten Kalenderjahr liegen damit $\paramNSeg$ Driftsegmente vor. Da ein Wartungstermin in der Praxis um einige Tage schwankt, werden die inneren Segmentgrenzen $\tau_1 < \tau_2 < \cdots$ gegenüber dem Raster um maximal $\pm \gamma_{\tau} \cdot T_{\mathrm{seg}}/2$ zufällig verschoben, wobei $\gamma_{\tau}$ den Verschiebungsanteil bezeichnet. Zusammen mit dem festen Anfangspunkt $\tau_0 = 0$ und dem Ende des Zeitbereichs bei $K$ sind damit alle Segmentgrenzen definiert. \par
 %
 Innerhalb des $i$-ten Segments wird $c[k]$ durch lineare Interpolation (\emph{Incremental Drift}) vom Startniveau $c_i^{+}$ zum Zielniveau $c_i^{-}$ geformt:
 %
@@ -349,7 +349,7 @@ Ansätze dennoch vergleichbar. \par
     \label{fig:synthetic_data_model_error_cd}
 \end{figure}
 %
-Abbildung~\ref{fig:synthetic_data_model_error_cd} stellt für das \ac{MLP} (\subref{fig:synthetic_data_model_error_mlp}), den \ac{KF} (\subref{fig:synthetic_data_model_error_kf}) und den \ac{EKF} (\subref{fig:synthetic_data_model_error_ekf}) den normierten Simulationsfehler bzw. die normierte Innovation auf dem drift-freien (blau) und dem drift-behafteten (orange) Teststrom dar, jeweils überlagert mit dem Driftsignal $c[k]$ (grün). Auf dem drift-freien Datenstrom verbleiben die Fehler aller drei Modelle als mittelwertfreies, strukturloses Band um Null. Dies bestätigt die korrekte, drift-freie Initialisierung.
+Abbildung~\ref{fig:synthetic_data_model_error_cd} stellt für das \ac{MLP} (\subref{fig:synthetic_data_model_error_mlp}), den \ac{KF} (\subref{fig:synthetic_data_model_error_kf}) und den \ac{EKF} (\subref{fig:synthetic_data_model_error_ekf}) den normierten Simulationsfehler bzw. die normierte Innovation auf dem drift-freien (blau) und dem drift-behafteten (orange) Teststrom dar, jeweils überlagert mit dem Driftsignal $c[k]$ (grün). Modellabgeleitete Größen wie Simulationsfehler und Innovation tragen dabei durchgängig fünfeckige Marker, während für die Signale des Prozesses weiterhin Kreise verwendet werden. Die Farbe kennzeichnet damit den Driftzustand und die Markerform die Art der dargestellten Größe. Auf dem drift-freien Datenstrom verbleiben die Fehler aller drei Modelle als mittelwertfreies, strukturloses Band um Null. Dies bestätigt die korrekte, drift-freie Initialisierung.
 Auf dem drift-behafteten Datenstrom hingegen folgt der Fehlerverlauf bei allen drei Ansätzen der Sägezahnstruktur des Driftsignals. Der \emph{Incremental Drift} innerhalb der Segmente äußert sich in einem mit dem Driftbetrag $|c[k]|$ systematisch anwachsenden Fehlerbetrag, während der \emph{Sudden Drift} an der Segmentgrenze einen sprunghaften Wechsel des Fehlerniveaus verursacht. Dementsprechend korreliert der Betrag des Fehlers im drift-behafteten Fall mit dem Betrag des Driftsignals, und die zuvor um Null zentrierten Residuen nehmen einen systematischen Bias an. 
 Quantitativ bestätigt sich diese Beobachtung: Der \ac{RMSE} des Fehlers bzw. der Innovation steigt bei allen drei Modellen vom drift-freien zum drift-behafteten Fall deutlich an (siehe Tabelle~\ref{tab:synthetic_data_model_error_stats}). Die Degradation betrifft damit alle drei Modellklassen. Dass der Anstieg beim \ac{MLP} betragsmäßig am größten ausfällt, spiegelt dabei keine grundsätzlich schlechtere Modellgüte wider, sondern den Umstand, dass der Drift die Betriebspunkte weit über den drift-freien Trainingsbereich hinaus verschiebt. Das \ac{MLP} als strukturfreies Black-Box-Modell kann diesen Bereich nicht mehr abbilden, während \ac{KF} und \ac{EKF} die bekannte Systemstruktur explizit ausnutzen und den Verlauf dadurch weiter fortschreiben. \par
 Worin sich die drei Ansätze hingegen unterscheiden, ist die Zusammensetzung dieses Fehleranstiegs, die sich anhand der visuellen Darstellung sowie der Kennzahlen in Tabelle~\ref{tab:synthetic_data_model_error_stats} erkennen lässt. 
@@ -627,10 +627,11 @@ Das \ac{TEP} besteht aus fünf systemischen Hauptkomponenten, die sequenziell mi
     Ein Teil der nicht kondensierten Dämpfe aus dem Separator wird abgesaugt, um zu verhindern, dass sich inerte Stoffe und Nebenprodukte im Prozess ansammeln. Die restlichen Dämpfe des Separators werden zusammen mit denen des Strippers durch den \textbf{Kompressor} geleitet, der sie weiter im Recyclingkreislauf zurück in den Reaktor führt. Durch die Rückführung der nicht umgesetzten Stoffe wird eine Steigerung der Gesamteffizienz erreicht.
 \end{itemize}
 %
-Der \ac{TEP} verfügt über 41 Messgrößen und 12 Stellgrößen, wobei der Großteil der Stellgrößen der Ventilsteuerung dient. Die Messgrößen werden dabei als \texttt{XMEAS(1)} bis \texttt{XMEAS(41)} bezeichnet. \newline
-Es gibt sechs primäre Betriebsmodi, die durch unterschiedliche Produktmassenverhältnisse von $G$ und $H$ und durch Produktionsraten vorgegeben sind. 
+Der \ac{TEP} verfügt über 41 Messgrößen \texttt{XMEAS(1)} bis \texttt{XMEAS(41)} und 12 Stellgrößen \texttt{XMV(1)} bis \texttt{XMV(12)}, wobei der Großteil der Stellgrößen der Ventilsteuerung dient. In der ursprünglichen Form von Downs und Vogel ist der Prozess ungeregelt und im offenen Betrieb instabil, sodass er bereits nach kurzer Zeit in eine Sicherheitsabschaltung läuft. Downs und Vogel geben bewusst keine Regelstrategie vor, sondern stellen deren Entwurf als eigentliche Aufgabe des Benchmarks \cite{downs.1993}. Ebenso geben sie zwar sechs primäre Betriebsmodi vor, die über das Massenverhältnis der Produkte $G$ und $H$ sowie über die Produktionsrate definiert sind, legen damit jedoch keine Betriebspunkte fest. Ein Modus ist als Anforderung aus der Nachfrage zu verstehen, die der Prozess auf ganz unterschiedlichen stationären Zuständen erfüllen kann. \par
 %
-Ursprünglich wurde das Modell des \ac{TEP} von \cite{downs.1993} als FORTRAN-Quellcode veröffentlicht. Später wurde dieser Quellcode in C-Code konvertiert, um ihn als S-Funktion in MATLAB\textsuperscript{\textregistered}/Simulink\textsuperscript{\textregistered} verwenden zu können. Dieser Code ist im \textit{Tennessee Eastman Challenge Archive} zu finden, welches einige weitere Simulator-Versionen enthält, darunter Ansätze zu Model Predictive Control und dezentralen Steuerungsstrategien, die zwischen 1993 und 1996 vorgestellt wurden \cite{ricker.2005}. Die aktuelle Version des C-Codes ist das Ergebnis einer Überarbeitung von Bathelt et al., die notwendig war, da die Simulations-Engine von Simulink und die ursprüngliche Struktur des Modells nicht mehr zusammenpassten \cite{bathelt.2015}. Im Zuge dieser Überarbeitung wurden die ursprünglich $20$ Störungsszenarien um acht zusätzliche Störungen erweitert \cite{bathelt.2015}. Tabelle~\ref{tab:tep-stoerungen} im Anhang listet alle Prozessstörungen auf. Zur Simulation in Simulink existiert außerdem das Python-Paket \textit{pyTEP}, das eine Open-Source-Schnittstelle zwischen Simulink und Python bereitstellt und so die Steuerung der Simulation über Python ermöglicht, bei der Prozesseingaben verändert und komplexe Szenarien konfiguriert werden können \cite{reinartz.2022}. Die Daten lassen sich so unter anderem als Pandas DataFrames speichern. Dass der Prozess in dieser Form als Quellcode vorliegt, eröffnet zugleich die Möglichkeit, gezielt in die Prozessdynamik einzugreifen. \par
+Sowohl die nicht festgelegten Betriebspunkte als auch die fehlende Regelstrategie adressiert Ricker. Er bestimmt zunächst zu den sechs Modi die optimalen Betriebspunkte, also diejenigen stationären Zustände, welche die jeweilige Vorgabe zu den geringsten Betriebskosten erfüllen \cite{ricker.1995}, und entwirft darauf aufbauend ein dezentrales Regelkonzept, das den Prozess in einem solchen Punkt hält und Störungen ausregelt \cite{ricker.1996}. Das in dieser Arbeit verwendete Simulationsmodell beruht auf diesem Konzept. Die Stellgrößen werden dadurch von den Reglern gestellt und nur noch aufgezeichnet, während der Betrieb über Setpoints geführt wird. Diese entsprechen in ihrer Rolle den Setpoints der Mühle aus Abschnitt~\ref{sec:stellgroessen}, werden also exogen vorgegeben und anschließend ausgeregelt, und ihre Kombination bildet den Betriebspunkt. \par
+%
+Ursprünglich wurde das Modell des \ac{TEP} von \cite{downs.1993} als FORTRAN-Quellcode veröffentlicht. Später wurde dieser Quellcode in C-Code konvertiert, um ihn als S-Funktion in MATLAB\textsuperscript{\textregistered}/Simulink\textsuperscript{\textregistered} verwenden zu können. Dieser Code ist im \textit{Tennessee Eastman Challenge Archive} zu finden, welches einige weitere Simulator-Versionen enthält, darunter das zuvor genannte dezentrale Regelkonzept sowie Ansätze zu Model Predictive Control \cite{ricker.2005}. Die aktuelle Version des C-Codes ist das Ergebnis einer Überarbeitung von Bathelt et al., die notwendig war, da die Simulations-Engine von Simulink und die ursprüngliche Struktur des Modells nicht mehr zusammenpassten \cite{bathelt.2015}. Im Zuge dieser Überarbeitung wurden die ursprünglich $20$ Störungsszenarien um acht zusätzliche Störungen erweitert \cite{bathelt.2015}. Tabelle~\ref{tab:tep-stoerungen} im Anhang listet alle Prozessstörungen auf. Zur Simulation in Simulink existiert außerdem das Python-Paket \textit{pyTEP}, das eine Open-Source-Schnittstelle zwischen Simulink und Python bereitstellt und so die Steuerung der Simulation über Python ermöglicht, bei der Prozesseingaben verändert und komplexe Szenarien konfiguriert werden können \cite{reinartz.2022}. Die Daten lassen sich so unter anderem als Pandas DataFrames speichern. Dass der Prozess in dieser Form als Quellcode vorliegt, eröffnet zugleich die Möglichkeit, gezielt in die Prozessdynamik einzugreifen. \par
 %
 In seiner ursprünglichen Konzeption ist der \ac{TEP} nicht als Grundlage für die Untersuchung von \ac{CD} vorgesehen. Downs und Vogel definieren einen festen Katalog vordefinierter Störungen (IDV), die typische Fehlerfälle wie sprunghafte Änderungen der Zulaufzusammensetzung oder Ventilblockaden abbilden, einen kontinuierlichen, schleichenden \ac{CD} der hier betrachteten Art jedoch nicht umfassen \cite{downs.1993}. 
 Dem \ac{TEP} liegt jedoch ein deterministisches dynamisches Prozessmodell zugrunde. Dessen stochastische Anteile lassen sich kontrolliert parametrieren, und als Simulation eines realen industriellen Prozesses bleibt er zugleich anwendungsnah. 
@@ -655,7 +656,7 @@ Das Driftsignal ist dabei strukturgleich zum synthetischen Signal $c[k]$ aus Abs
 Innerhalb eines Segments fällt es gemäß Gleichung \eqref{eq:cd_incremental} jedoch weiterhin linear von einem Niveau eines oberen Bandes auf ein Niveau eines unteren Bandes ab. An der Segmentgrenze springt es auf das Startniveau des folgenden Segments, sodass beide Drifttypen aus Abbildung~\ref{fig:phenomenon} auch im \ac{TEP} abgebildet sind.
 Die Segmentgrenzen folgen demselben Raster der nominellen Segmentdauer $T_{\mathrm{seg}}$ mit unveränderter zufälliger Verschiebung. Da der \ac{TEP} über einen frei gewählten Zeitraum statt über ein Kalenderjahr simuliert wird, ergibt sich hier lediglich die Segmentzahl aus der Simulationsdauer. Alle Zufallsniveaus werden deterministisch aus einem Seed und dem Segmentindex abgeleitet, womit das Signal zustandslos und unabhängig von der Schrittweite des Solvers reproduzierbar ist. \par
 %
-Die Segmentdauer $T_{\mathrm{seg}}$ wird aus dem synthetischen Fall übernommen. Nach unten ist sie dadurch begrenzt, dass sich der Kalibrierfehler während des Anfahrens und Haltens eines Betriebspunkts nur unwesentlich ändern darf, damit jeder Betriebspunkt einen einzelnen Driftpegel abbildet. Der Driftkoeffizient $\kappa_m$ ist so bemessen, dass die Verschiebung des Prädiktionsfehlers deutlich über dem Rauschen des Modells innerhalb eines Betriebspunkts liegt, der Kalibrierfehler mit einem Spitzenwert von zehn Prozent aber klein genug bleibt, um nicht bereits durch einen Plausibilitätsabgleich mit den übrigen Messgrößen aufzufallen. \par
+Die Segmentdauer $T_{\mathrm{seg}}$ wird aus dem synthetischen Fall übernommen. Nach unten ist sie dadurch begrenzt, dass sich der Kalibrierfehler während des Anfahrens und Haltens eines Betriebspunkts nur unwesentlich ändern darf, damit jeder Betriebspunkt einen einzelnen Driftpegel abbildet. Der Driftkoeffizient $\kappa_m$ ist so bemessen, dass die Verschiebung des Prädiktionsfehlers deutlich über dem Rauschen des Modells innerhalb eines Betriebspunkts liegt, der Kalibrierfehler in der Spitze aber unter der prozessbedingten Streuung der Strippertemperatur bleibt. \par
 %
 Der Eingriff in den Quelltext beschränkt sich auf die Auswertung des Faktors $1 + \kappa_m \cdot c(t)$ als \texttt{driftf} in einer separaten Datei und dessen Multiplikation an der Zuweisung von \texttt{XMEAS(18)}, wie in Listing~\ref{lst:tep_sensordrift} dargestellt.
 %
@@ -670,38 +671,96 @@ Da die Multiplikation mit dem Drifteinfluss erst nach der Bildung des Prozesswer
 %
 \subsection{Generierung des Datenstroms} \label{sec:tep_generation}
 %
-Auf Basis des drift-behafteten Prozessmodells wird über die \textit{pyTEP}-Schnittstelle ein Datenstrom erzeugt, der als Grundlage der anschließenden Modellierung, Detektion und Adaption dient.
+\input{\resultsdir tep_generation.tex}
+%
+Auf Basis des drift-behafteten Prozessmodells wird über die \textit{pyTEP}-Schnittstelle ein Datenstrom erzeugt, der als Grundlage der anschließenden Modellierung, Detektion und Adaption dient. Das Paket kapselt das Simulink-Modell hinter einer Python-Schnittstelle \cite{reinartz.2022}, sodass die eigentliche Simulation weiterhin in MATLAB\textsuperscript{\textregistered}/Simulink\textsuperscript{\textregistered} abläuft und Python allein die Ablaufsteuerung übernimmt. Über die Schnittstelle lässt sich der Simulator in seinen Ausgangszustand zurücksetzen, es lassen sich einzelne Setpoints über eine wählbare Dauer rampen, Störungen aktivieren und die Simulation über ein vorgegebenes Zeitintervall vorantreiben. Nach jedem dieser Intervalle stehen Messgrößen, Stellgrößen, Setpoints, Betriebskosten und Störungszustände als DataFrames bereit und können so zu einem fortlaufenden Datensatz zusammengeführt werden. \par
+%
+Der in Abschnitt~\ref{sec:tep_drift} beschriebene Eingriff liegt im C-Quelltext des Prozessmodells und ist damit Teil der übersetzten S-Funktion. Für die Werkzeugkette folgt daraus, dass \texttt{IDV(29)} über denselben Aufruf angesprochen wird wie die etablierten Störungen und sich der drift-behaftete Lauf vom nominalen allein durch das gesetzte Störungsargument unterscheidet. Eine Änderung am Drift erfordert eine Neuübersetzung des Modells, nicht aber eine Anpassung der Ablaufsteuerung. 
+Die Anbindung erfordert daneben kleinere Eingriffe im Paket selbst. Ergänzt werden \texttt{IDV(29)} in der auf achtundzwanzig Einträge ausgelegten Störungsliste samt zugehöriger Initialisierung sowie die mitzuübersetzenden Quelldateien des Drifts. Hinzu kommt eine heraufgesetzte maximale Simulationsdauer, da die Voreinstellung unterhalb der benötigten Laufzeit liegt. \par
+%
+% TODO angepasste pyTEP-Version als Branch auf GitHub veroeffentlichen und hier referenzieren
+%
+Anders als beim synthetischen Datenstrom aus Abschnitt~\ref{sec:synthetischer_datensatz}, dessen Erzeugung vollständig im Skript formuliert ist, wird hier lediglich die Anregung des Prozesses vorgegeben. Prozessantwort und Zielgröße entstehen im Simulator. Wie der \ac{TEP} jedoch unter Sicherstellung des Betriebs angeregt werden soll um einen geigneten Datensatz für die Zwecke dieser Arbeit zu erzeugen, ist Kern dieses Abschnitts.  
+Den Rahmen der Simulation bilden dabei die sechs Betriebsmodi des \ac{TEP}, die Downs und Vogel über das Massenverhältnis der beiden Produkte und die Produktionsrate festlegen (siehe Tabelle~\ref{tab:modes}) \cite{downs.1993}. Die ersten drei Modi geben feste Raten vor, während die übrigen drei die jeweils höchste erreichbare Rate fahren. Da der Prozess vollständig geregelt ist, wird ein Modus nicht unmittelbar über die zwölf Stellgrößen des Prozessmodells gesetzt, sondern über zwölf Setpoints, die die Schnittstelle durch \texttt{pyTEP} freigibt. Ihre Kombination definiert einen Betriebspunkt. Der Simulator startet im stationären Optimum des ersten Modus. \par
+%
+Tabelle~\ref{tab:modes} nennt die Kenngrößen, über die die sechs Modi definiert sind. Der zugehörige Satz aus zwölf Setpoints gehört zum dezentralen Regelkonzept von Ricker \cite{ricker.1996}, das auch dem hier verwendeten Simulationsmodell zugrunde liegt, und beschreibt den jeweils optimalen stationären Betriebspunkt \cite{ricker.1995}. Übernommen sind die Werte in der Zusammenstellung von Reinartz et al. \cite{reinartz.2022} und in Tabelle~\ref{tab:modes_setpoints} im Anhang aufgeführt. Über alle Modi gleich bleiben dabei Füllstände, Reaktordruck, Dampfventil und Rührerdrehzahl, sodass die Modusidentität im Wesentlichen von Produktionsrate, Produktzusammensetzung und Reaktortemperatur getragen wird. \par
 %
 \begin{table}[tb]
 \centering
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{c l c c c c c c }
+\begin{tabular}{l c c}
 \toprule
-& & \textbf{Mode 1} & \textbf{Mode 2} & \textbf{Mode 3} & \textbf{Mode 4} & \textbf{Mode 5} & \textbf{Mode 6} \\
+& \textbf{Massenverhältnis G/H} & \textbf{Produktionsrate in \si{\kilo\gram\per\hour}} \\
 \midrule
-\multirow{3}{*}{\rotatebox{90}{Products}} 
-& G/H mass ratio & 50/50 & 10/90 & 90/10 & 50/50 & 10/90 & 90/10 \\
-& Production rate G & 7038 \(\frac{\text{kg}}{\text{h}}\) & 1408 \(\frac{\text{kg}}{\text{h}}\) & 10000 \(\frac{\text{kg}}{\text{h}}\) & max & max & max \\
-& Production rate H & 7038 \(\frac{\text{kg}}{\text{h}}\) & 12669 \(\frac{\text{kg}}{\text{h}}\) & 1111 \(\frac{\text{kg}}{\text{h}}\) & max & max & max \\
-\midrule
-\multirow{11}{*}{\rotatebox{90}{Setpoints}} 
-& Production & 22.89 & 22.73 & 18.04 & 36.04 & 23.55 & 20.20 \\
-& Stripper level & 50 & 50 & 50 & 50 & 50 & 50 \\
-& Separator level & 50 & 50 & 50 & 50 & 50 & 50 \\
-& Reactor level & 65 & 65 & 65 & 65 & 65 & 65 \\
-& Reactor pressure & 2800 & 2800 & 2800 & 2800 & 2800 & 2800 \\
-& Mol \% G & 53.80 & 11.66 & 90.09 & 53.35 & 11.65 & 90.07 \\
-& yA & 63.137 & 64.196 & 62.110 & 61.940 & 64.030 & 61.468 \\
-& yAC & 51 & 54.24 & 47.43 & 58.76 & 54.32 & 48.79 \\
-& Reactor temperature & 122.9 & 124.2 & 121.9 & 128.2 & 124.6 & 123.0 \\
-& Recycle valve pos. & 1 & 1 & 77.62 & 1 & 1 & 71.166 \\
-& Steam valve pos. & 1 & 1 & 1 & 1 & 1 & 1 \\
-& Agitator setting & 100 & 100 & 100 & 100 & 100 & 100 \\
+Modus 1 & 50/50 & 14076   \\
+Modus 2 & 10/90 & 14076   \\
+Modus 3 & 90/10 & 11111   \\
+Modus 4 & 50/50 & maximal \\
+Modus 5 & 10/90 & maximal \\
+Modus 6 & 90/10 & maximal \\
 \bottomrule
 \end{tabular}
-\caption{Process Setpoints for 6 different Modes}
+\caption{Kenngrößen der sechs Betriebsmodi des \ac{TEP} nach \cite{downs.1993}}
 \label{tab:modes}
 \end{table}
+%
+In die Simulation gehen alle sechs Modi ein. Die Abdeckung unterschiedlicher, über die Setpoints gezielt erzeugbarer Betriebspunkte zählt zu den in Kapitel~\ref{cap:generalisierung} formulierten Voraussetzungen an die Datengrundlage und war für die Wahl des \ac{TEP} als Benchmark-Prozess maßgeblich. Ein einzelner Modus deckt nur einen schmalen Ausschnitt des Betriebsbereichs ab, während der Datenstrom die Bandbreite abbilden soll, in der sich ein Modell im Betrieb bewähren muss. Hinzu kommt, dass der Kalibrierfehler aus Abschnitt~\ref{sec:tep_drift} multiplikativ wirkt und sein absoluter Beitrag damit vom Betriebspunkt abhängt. \par
+%
+Die sechs Modi aus Tabelle~\ref{tab:modes} allein genügen der erforderlichen Betriebspunktabdeckung nicht. Daher wird jeder Modus zu einer Schar benachbarter Betriebspunkte ausgedehnt. Als Rahmen dient das Fenster von $±15\%$ je Setpoint, das Reinartz et al. in Schritten von $5 \%$ abtasten \cite{reinartz.2022}. Dieser Rahmen wird übernommen, das Raster der Abtastung dagegen ersetzt. Die Grenzen sind dabei als Prozentsatz des Modusnennwerts festgelegt und nicht als fester Absolutbetrag, sodass die Auslenkung über die Modi hinweg vergleichbar bleibt, obwohl die Setpoints in unterschiedlichen Größenordnungen liegen. Zulässig ist jede Kombination, die in allen zwölf Größen innerhalb dieser Grenzen liegt, also ein eng begrenzter Ausschnitt des Setpoint-Raums um den Nennwert des Modus. Das entspricht dem Stellgrößenraum aus Abschnitt~\ref{sec:stellgroessen}, hier jedoch lokal um einen bekannten Betriebspunkt statt über den gesamten Stellbereich. \par
+%
+Zwei Einschränkungen ergeben sich jedoch aus dem Prozess. Setpoints, deren Nennwert bereits am Rand des Stellbereichs liegt, werden nur nach unten variiert, was die Rührerdrehzahl bei voller Leistung sowie die nahezu geschlossenen Ventile betrifft. Zudem bleibt das Fenster bewusst eng, da der \ac{TEP} über Sicherheitsabschaltungen verfügt und eine Kombination weit ab vom optimalen Betriebspunkt zum Abbruch der Simulation führen kann. \par
+%
+Das Fenster wird nach dem Latin-Hypercube-Ansatz abgetastet, wie er im Mühlen-Anwendungsfall in Abschnitt~\ref{sec:datenselektion} und beim synthetischen Datenstrom in Abschnitt~\ref{sec:datensynthese_modellierung} zum Einsatz kommt. Das Verfahren unterteilt jede der zwölf Achsen in gleich große Intervalle und belegt jedes davon genau einmal, sodass jeder Setpoint seinen Bereich unabhängig von der Zahl der Punkte gleichmäßig abdeckt. \par
+%
+Die gleichmäßige Belegung der einzelnen Achsen schließt jedoch nicht aus, dass die Punkte im Raum ungünstig liegen können und sich einzelne Paare unnötig nahe sind. Daher wird nicht eine einzelne Ziehung verwendet, sondern aus einer größeren Zahl unabhängiger Ziehungen diejenige genutzt, deren kleinster Punktabstand am größten ausfällt. Dieses Maximin-Kriterium bevorzugt Versuchspläne, die das Fenster gleichmäßig ausfüllen, und vermeidet Häufungen, die einen Teil des Betriebsbereichs unbelegt ließen. \par
+%
+Jeder Modus erhält einen eigenen Versuchsplan in seinem Fenster, ergänzt um den unveränderten Nennwert als Bezugspunkt. Daraus ergeben sich \paramPointsPerMode{} Punkte je Modus und insgesamt \paramCandidates{} Kandidaten. \par
+%
+Alle zwölf Setpoints werden gemeinsam über eine Rampendauer von \paramRampH{} auf ihre Zielwerte geführt, da ein Sprung die Regelung an ihre Grenzen bringt und eine Sicherheitsabschaltung auslösen kann. Anschließend bleibt der Betriebspunkt stehen, bis die Ausgleichsvorgänge abgeklungen sind und der Prozess einen quasi-stationären Zustand erreicht hat. \par
+%
+Zwischen zwei Punkten kehren die Setpoints über eine weitere Rampe in den Ausgangszustand zurück. Jeder Betriebspunkt wird damit aus demselben Zustand angefahren und weite Sprünge zwischen entfernt liegenden Punkten bleiben aus. Ein Punkt belegt so einen Block von \paramBlockH{}. Dieser Block ist vergleichsweise kurz gegenüber der Segmentdauer des Drifts aus Abschnitt~\ref{sec:tep_drift}, sodass jeder Betriebspunkt näherungsweise einem einzelnen Driftpegel zugeordnet bleibt. \par
+%
+Ein Punkt aus dem Versuchsplan ist nicht zwangsläufig fahrbar. Das Simulationsmodell in Simulink überwacht Reaktordruck, Reaktortemperatur sowie die Füllstände in Reaktor, Separator und Stripper und bricht die Simulation ab, sobald eine dieser Größen ihre Schranke verlässt. Die Schranken sind im Quelltext des Modells hinterlegt und werden von dort übernommen, sodass zur Prüfung dieselben Grenzen herangezogen werden wie es der Simulator tut. \par
+%
+Ein Abbruch mitten im fortlaufenden Datenstrom ist dabei besonders ungünstig, da der Strom an dieser Stelle endet und mit dem Neustart des Simulators auch der Driftverlauf zurückgesetzt wird. Jeder Kandidat wird deshalb in einem Vorlauf einzeln geprüft. Als fahrbar gilt ein Punkt dann, wenn der Block ohne Abschaltung zu Ende läuft. \par
+%
+Der Vorlauf ist zugleich der Kampagnenlauf, der die Trainingsdaten für das später folgende Modell bereitstellt. Jeder fahrbare Block wird aufgezeichnet, sodass ein Bestand einzeln angefahrener Betriebspunkte entsteht, die alle aus demselben Ausgangszustand hervorgehen. \par
+%
+Von den \paramCandidates{} Kandidaten erweisen sich \genFeasible{} Punkte als fahrbar. Die Ausbeute fällt je Modus dabei unterschiedlich aus. Modus $1$ ist der Auslegungspunkt des Prozesses und zugleich der Ausgangszustand, aus dem jeder Block angefahren wird, und liegt deutlich über den übrigen, deren stärker verschobene Setpoints häufiger in eine Abschaltung führen. Da ein Betriebspunkt nur als Ganzes verwertbar ist, geht diese Ausbeute unmittelbar in den Umfang des späteren Datenstroms ein. \par
+%
+Die fahrbaren Punkte werden anschließend zu einem fortlaufenden Datenstrom aneinandergereiht, der einen Produktionsbetrieb über mehrere Jahre nachbildet. Ihre Reihenfolge wird zufällig gezogen. Dieser Lauf findet ohne den Einfluss eines Drifts statt und dient so als drift-freie Referenz für den Fehlerfall. \par
+%
+Im fortlaufenden Betrieb hat sich jedoch gezeigt, dass ein Teil der Punkte trotz des Vorlaufs ausfällt, da die Betriebspunkte hier nicht aus dem Ausgangszustand, sondern aus dem Zustand des vorangegangenen Blocks angefahren werden. Der Lauf wird deshalb ein zweites Mal ohne die ausgefallenen Punkte gefahren und liefert so einen durchgehenden Strom aus \genRunPoints{} Betriebspunkten über rund \genRunYears{} Jahre. Die Simulationszeit wird dabei auf Zeitstempel abgebildet, wie in Abschnitt~\ref{sec:syn_drift} beschrieben. \par
+%
+Die Zahl der dabei angefahrenen Betriebspunkte geht über das hinaus, was für einen Prozess dieser Art üblich ist, und ist in der Literatur zum \ac{TEP} in dieser Breite nicht zu finden. Sie ist hier jedoch nötig, damit die Datengrundlage der Betriebspunktvielfalt des Mühlen-Anwendungsfalls entspricht und die angestrebte Generalisierung trägt. \par
+%
+Der Fehlerlauf wiederholt dieselbe Folge von Betriebspunkten mit aktivierter Störung \texttt{IDV(\paramDriftIDV)}. Der Simulator wird dafür neu aufgesetzt, sodass beide Läufe aus demselben Zustand starten. Da der Kalibrierdrift den Prozess nicht berührt, sind beide Läufe prozessseitig identisch. \par
+%
+Die Amplitude des Drifts liegt zwischen zwei Schranken. Nach unten muss die von ihm verursachte Verschiebung des Prädiktionsfehlers deutlich über dem Rauschen des Modells innerhalb eines Betriebspunkts liegen, damit der Drift überhaupt erkennbar wird. Nach oben muss der Kalibrierfehler als schleichende Dekalibrierung eines Thermoelements plausibel bleiben. Mit $\paramDriftAmp{}$ erreicht der Kalibrierfehler einen Spitzenwert von $\genCalPeakPct$ beziehungsweise $\genCalPeakK$, während die erwartete Verschiebung des Prädiktionsfehlers um den Faktor $\genShiftOverNoise{}$ über dem Rauschen liegt. \par
+%
+Damit liegen drei Datensätze vor. Die Kampagne aus einzeln angefahrenen Betriebspunkten dient dem Training, der nominale Lauf als drift-freie Referenz und der Fehlerlauf als drift-behafteter Strom, der über seine Laufzeit knapp zehn Driftperioden durchläuft. \par
+%
+Abbildung~\ref{fig:tep_stream} zeigt einen Ausschnitt über vier Betriebspunkte. (\subref{fig:tep_stream_point}) stellt den Setpoint der Produktionsrate zwei Messgrößen gegenüber: die Strippertemperatur und das Spülventil. Erkennbar sind das Anfahren über die Rampe, das hinterlegte Haltefenster mit dem quasi-stationären Verlauf und die Rückkehr in den Ausgangszustand. (\subref{fig:tep_stream_drift}) zeigt die Strippertemperatur im Drift-freien sowie im Drift-behafteten Fall zusammen mit dem Driftsignal. Die Abweichung zwischen beiden Läufen folgt dem Verlauf des Driftsignals einschließlich seines Sprungs an der Segmentgrenze. \par
+%
+\begin{figure}[tbp]
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \input{\plotdir tep_stream_point.pgf}
+        \caption{Betriebspunkte}
+        \label{fig:tep_stream_point}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \input{\plotdir tep_stream_drift.pgf}
+        \caption{Drift}
+        \label{fig:tep_stream_drift}
+    \end{subfigure}
+
+    \caption{Ausschnitt des erzeugten Datenstroms über vier Betriebspunkte.}
+    \label{fig:tep_stream}
+\end{figure}
 %
 % Absatz 1 — Werkzeugkette & Betriebsmodus:
 %   - pyTEP als Python-Schnittstelle zu MATLAB/Simulink \cite{reinartz.2022}
