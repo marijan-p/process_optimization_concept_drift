@@ -1,0 +1,27 @@
+{
+  "stages": {
+    "tep:production": {
+      "id": "6fe76fde",
+      "base_id": "30098669",
+      "parents": {},
+      "updated": "2026-08-19T15:21:42"
+    },
+    "tep:error": {
+      "id": "a568acfa",
+      "base_id": "30098669",
+      "parents": {
+        "tep:production": "6fe76fde"
+      },
+      "updated": "2026-08-20T10:45:15"
+    },
+    "tep:model": {
+      "id": "5d29a9f2",
+      "base_id": "30098669",
+      "parents": {
+        "tep:production": "6fe76fde",
+        "tep:error": "a568acfa"
+      },
+      "updated": "2026-08-17T10:27:05"
+    }
+  }
+}

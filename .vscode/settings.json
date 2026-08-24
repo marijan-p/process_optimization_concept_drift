@@ -1,7 +1,13 @@
 {
     "latex-workshop.latex.recipes": [
         {
-            "name": "xe->biber->xe->xe",
+            "name": "xelatex (fast)",
+            "tools": [
+                "xelatex"
+            ]
+        },
+        {
+            "name": "xe->biber->xe->xe (full)",
             "tools": [
                 "xelatex",
                 "biber",
@@ -10,6 +16,7 @@
             ]
         }
     ],
+    "latex-workshop.latex.autoBuild.run": "onSave",
     "latex-workshop.latex.tools": [
         {
             "name": "xelatex",
