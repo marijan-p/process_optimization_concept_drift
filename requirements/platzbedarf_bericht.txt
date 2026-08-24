@@ -1,0 +1,100 @@
+Repo: C:\git\process_optimization_concept_drift
+==============================================================================
+
+Ledger: ipynb\synthetic_data\run_ledger.json
+  syn:adaptation         id=694e5392  base=55c4dfbd  eltern=syn:model=e7f8df2f
+  syn:data               id=55c4dfbd  base=55c4dfbd  eltern=-
+  syn:detections         id=c2e5a2e7  base=55c4dfbd  eltern=syn:model=e7f8df2f
+  syn:model              id=e7f8df2f  base=55c4dfbd  eltern=syn:data=55c4dfbd
+  4 Kennungen insgesamt
+
+==============================================================================
+ORDNER
+==============================================================================
+Ordner                               GB  Dateien     GB final      GB Rest
+data                            270.954      563        4.416      266.538
+    synthetic_data              264.085      457
+    tep                           6.868      105
+    mill_data                     0.001        1
+models                            0.260      404        0.003        0.258
+plots                             0.134      839        0.003        0.131
+    (direkt)                      0.078       51
+    archive                       0.056      788
+results                           0.000      170        0.000        0.000
+    archive                       0.000      156
+    (direkt)                      0.000       14
+graphics                          0.005       10        0.000        0.005
+text                              0.007       40        0.000        0.007
+    (direkt)                      0.006       17
+    Literatur                     0.000        4
+    Titel                         0.000       11
+    Styles                        0.000        4
+    Anhang                        0.000        2
+    Abkuerzungsverzeichnis        0.000        2
+src                               0.000        9        0.000        0.000
+    (direkt)                      0.000        4
+    utils                         0.000        5
+ipynb                             0.006       14        0.000        0.006
+    (direkt)                      0.004        3
+    synthetic_data                0.001        5
+    tep                           0.000        6
+------------------------------------------------------------------------------
+SUMME                           271.367     2049        4.421      266.946
+
+==============================================================================
+DATEITYPEN
+==============================================================================
+  .pkl            271.213 GB      481 Dateien
+  .pgf              0.076 GB       34 Dateien
+  .png              0.058 GB      412 Dateien
+  .ipynb            0.006 GB       11 Dateien
+  .pdf              0.006 GB        2 Dateien
+  .svg              0.005 GB        8 Dateien
+  .json             0.002 GB      973 Dateien
+  .csv              0.001 GB        1 Dateien
+  .tex              0.000 GB       97 Dateien
+  .gz               0.000 GB        1 Dateien
+  .py               0.000 GB        7 Dateien
+  .bcf              0.000 GB        1 Dateien
+  .log              0.000 GB        1 Dateien
+  .dll              0.000 GB        1 Dateien
+  .bib              0.000 GB        3 Dateien
+
+==============================================================================
+GROESSTE DATEIEN
+==============================================================================
+            4.259 GB  data\synthetic_data\syn_data_raw_05d263ac.pkl
+  FINAL     4.259 GB  data\synthetic_data\syn_data_raw_55c4dfbd.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_3d16c559.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_a97ae0ef.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_0b573db8.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_1ac71874.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_62aa77ab.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_8bbbf3f2.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_bf1faebd.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_2cba12b3.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_7de9338a.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_98d90147.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_9e85c252.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_f365737f.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_00443c62.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_0421b5ff.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_05cdc62b.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_05de2382.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_07f93ff1.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_12733f45.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_1ab84c96.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_1cc51280.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_2591ef58.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_2d0df119.pkl
+            4.259 GB  data\synthetic_data\syn_data_raw_38a04b86.pkl
+
+==============================================================================
+EINORDNUNG
+==============================================================================
+  Ohne data/:                        0.413 GB
+  data/ gesamt:                    270.954 GB
+  davon laut Ledger final:           4.421 GB
+
+  Zum Fertigschreiben reicht der Teil ohne data/ plus models/.
+  Alles in data/ ist eine Frage der Reproduzierbarkeit, nicht des Schreibens.
