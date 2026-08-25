@@ -46,6 +46,7 @@ slprj/
 *.snm
 *.vrb
 *.xdv
+svg-inkscape/
 # Kompiliertes PDF – auskommentieren, wenn du es versionieren willst:
 # *.pdf
 
