@@ -58,9 +58,9 @@ models/
 
 # Falls plots/ und results/ komplett reproduzierbar sind und NICHT
 # ins Repo sollen, stattdessen einkommentieren (überschreibt oben):
-graphics/
-plots/
-results/
+# graphics/
+# plots/
+# results/
 
 # Große / rohe Datensätze – je nach Größe ausschließen:
 data/mill_data/
