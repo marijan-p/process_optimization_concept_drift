@@ -1,0 +1,216 @@
+%% Creator: Matplotlib, PGF backend
+%%
+%% To include the figure in your LaTeX document, write
+%%   \input{<filename>.pgf}
+%%
+%% Make sure the required packages are loaded in your preamble
+%%   \usepackage{pgf}
+%%
+%% Also ensure that all the required font packages are loaded; for instance,
+%% the lmodern package is sometimes necessary when using math font.
+%%   \usepackage{lmodern}
+%%
+%% Figures using additional raster images can only be included by \input if
+%% they are in the same directory as the main LaTeX file. For loading figures
+%% from other directories you can use the `import` package
+%%   \usepackage{import}
+%%
+%% and then include the figures with
+%%   \import{<path to file>}{<filename>.pgf}
+%%
+%% Matplotlib used the following preamble
+%%   \def\mathdefault#1{#1}
+%%   \everymath=\expandafter{\the\everymath\displaystyle}
+%%   
+%%   \ifdefined\pdftexversion\else  % non-pdftex case.
+%%     \usepackage{fontspec}
+%%     \setmainfont{DejaVuSerif.ttf}[Path=\detokenize{C:/git/process_optimization_concept_drift/venv_311/Lib/site-packages/matplotlib/mpl-data/fonts/ttf/}]
+%%     \setsansfont{DejaVuSans.ttf}[Path=\detokenize{C:/git/process_optimization_concept_drift/venv_311/Lib/site-packages/matplotlib/mpl-data/fonts/ttf/}]
+%%     \setmonofont{DejaVuSansMono.ttf}[Path=\detokenize{C:/git/process_optimization_concept_drift/venv_311/Lib/site-packages/matplotlib/mpl-data/fonts/ttf/}]
+%%   \fi
+%%   \makeatletter\@ifpackageloaded{underscore}{}{\usepackage[strings]{underscore}}\makeatother
+%%
+\begingroup%
+\makeatletter%
+\begin{pgfpicture}%
+\pgfpathrectangle{\pgfpointorigin}{\pgfqpoint{1.848662in}{1.343460in}}%
+\pgfusepath{use as bounding box, clip}%
+\begin{pgfscope}%
+\pgfsetbuttcap%
+\pgfsetmiterjoin%
+\pgfsetlinewidth{0.000000pt}%
+\definecolor{currentstroke}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{currentstroke}%
+\pgfsetstrokeopacity{0.000000}%
+\pgfsetdash{}{0pt}%
+\pgfpathmoveto{\pgfqpoint{-0.000000in}{-0.000000in}}%
+\pgfpathlineto{\pgfqpoint{1.848662in}{-0.000000in}}%
+\pgfpathlineto{\pgfqpoint{1.848662in}{1.343460in}}%
+\pgfpathlineto{\pgfqpoint{-0.000000in}{1.343460in}}%
+\pgfpathlineto{\pgfqpoint{-0.000000in}{-0.000000in}}%
+\pgfpathclose%
+\pgfusepath{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsetbuttcap%
+\pgfsetmiterjoin%
+\pgfsetlinewidth{0.000000pt}%
+\definecolor{currentstroke}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{currentstroke}%
+\pgfsetstrokeopacity{0.000000}%
+\pgfsetdash{}{0pt}%
+\pgfpathmoveto{\pgfqpoint{0.303410in}{0.303410in}}%
+\pgfpathlineto{\pgfqpoint{1.748662in}{0.303410in}}%
+\pgfpathlineto{\pgfqpoint{1.748662in}{1.243460in}}%
+\pgfpathlineto{\pgfqpoint{0.303410in}{1.243460in}}%
+\pgfpathlineto{\pgfqpoint{0.303410in}{0.303410in}}%
+\pgfpathclose%
+\pgfusepath{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfpathrectangle{\pgfqpoint{0.303410in}{0.303410in}}{\pgfqpoint{1.445252in}{0.940050in}}%
+\pgfusepath{clip}%
+\pgfsetbuttcap%
+\pgfsetroundjoin%
+\definecolor{currentfill}{rgb}{0.835294,0.368627,0.000000}%
+\pgfsetfillcolor{currentfill}%
+\pgfsetlinewidth{1.003750pt}%
+\definecolor{currentstroke}{rgb}{0.835294,0.368627,0.000000}%
+\pgfsetstrokecolor{currentstroke}%
+\pgfsetdash{}{0pt}%
+\pgfsys@defobject{currentmarker}{\pgfqpoint{-0.029463in}{-0.029463in}}{\pgfqpoint{0.029463in}{0.029463in}}{%
+\pgfpathmoveto{\pgfqpoint{0.000000in}{-0.029463in}}%
+\pgfpathcurveto{\pgfqpoint{0.007814in}{-0.029463in}}{\pgfqpoint{0.015308in}{-0.026358in}}{\pgfqpoint{0.020833in}{-0.020833in}}%
+\pgfpathcurveto{\pgfqpoint{0.026358in}{-0.015308in}}{\pgfqpoint{0.029463in}{-0.007814in}}{\pgfqpoint{0.029463in}{0.000000in}}%
+\pgfpathcurveto{\pgfqpoint{0.029463in}{0.007814in}}{\pgfqpoint{0.026358in}{0.015308in}}{\pgfqpoint{0.020833in}{0.020833in}}%
+\pgfpathcurveto{\pgfqpoint{0.015308in}{0.026358in}}{\pgfqpoint{0.007814in}{0.029463in}}{\pgfqpoint{0.000000in}{0.029463in}}%
+\pgfpathcurveto{\pgfqpoint{-0.007814in}{0.029463in}}{\pgfqpoint{-0.015308in}{0.026358in}}{\pgfqpoint{-0.020833in}{0.020833in}}%
+\pgfpathcurveto{\pgfqpoint{-0.026358in}{0.015308in}}{\pgfqpoint{-0.029463in}{0.007814in}}{\pgfqpoint{-0.029463in}{0.000000in}}%
+\pgfpathcurveto{\pgfqpoint{-0.029463in}{-0.007814in}}{\pgfqpoint{-0.026358in}{-0.015308in}}{\pgfqpoint{-0.020833in}{-0.020833in}}%
+\pgfpathcurveto{\pgfqpoint{-0.015308in}{-0.026358in}}{\pgfqpoint{-0.007814in}{-0.029463in}}{\pgfqpoint{0.000000in}{-0.029463in}}%
+\pgfpathlineto{\pgfqpoint{0.000000in}{-0.029463in}}%
+\pgfpathclose%
+\pgfusepath{stroke,fill}%
+}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.369103in}{0.479669in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.434796in}{0.479669in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.500489in}{0.479669in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.566183in}{0.479669in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.631876in}{0.479669in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.697569in}{0.479669in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.763263in}{0.479669in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.828956in}{0.626552in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.894649in}{0.773435in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{0.960342in}{0.920318in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.026036in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.091729in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.157422in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.223116in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.288809in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.354502in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.420195in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.485889in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.551582in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.617275in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsys@transformshift{1.682969in}{1.067200in}%
+\pgfsys@useobject{currentmarker}{}%
+\end{pgfscope}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{textcolor}%
+\pgfsetfillcolor{textcolor}%
+\pgftext[x=1.026036in,y=0.247854in,,top]{\color{textcolor}{\sffamily\fontsize{11.000000}{13.200000}\selectfont\catcode`\^=\active\def^{\ifmmode\sp\else\^{}\fi}\catcode`\%=\active\def%{\%}Zeit $t$}}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{textcolor}%
+\pgfsetfillcolor{textcolor}%
+\pgftext[x=0.247854in,y=0.773435in,,bottom,rotate=90.000000]{\color{textcolor}{\sffamily\fontsize{11.000000}{13.200000}\selectfont\catcode`\^=\active\def^{\ifmmode\sp\else\^{}\fi}\catcode`\%=\active\def%{\%}Wert}}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsetrectcap%
+\pgfsetmiterjoin%
+\pgfsetlinewidth{0.803000pt}%
+\definecolor{currentstroke}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{currentstroke}%
+\pgfsetdash{}{0pt}%
+\pgfpathmoveto{\pgfqpoint{0.303410in}{0.303410in}}%
+\pgfpathlineto{\pgfqpoint{0.303410in}{1.243460in}}%
+\pgfusepath{stroke}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsetrectcap%
+\pgfsetmiterjoin%
+\pgfsetlinewidth{0.803000pt}%
+\definecolor{currentstroke}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{currentstroke}%
+\pgfsetdash{}{0pt}%
+\pgfpathmoveto{\pgfqpoint{0.303410in}{0.303410in}}%
+\pgfpathlineto{\pgfqpoint{1.748662in}{0.303410in}}%
+\pgfusepath{stroke}%
+\end{pgfscope}%
+\end{pgfpicture}%
+\makeatother%
+\endgroup%

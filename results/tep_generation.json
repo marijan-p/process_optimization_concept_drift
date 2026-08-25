@@ -1,0 +1,121 @@
+{
+  "_provenance": {
+    "id": "a568acfa",
+    "base_id": "30098669",
+    "sections": {
+      "run": {
+        "t_run": 19728.0,
+        "passes": 2
+      },
+      "error": {
+        "idv": 29,
+        "amp": 0.3
+      }
+    },
+    "parents": {
+      "campaign": "30098669",
+      "production": "6fe76fde"
+    }
+  },
+  "n_modes": 6,
+  "n_points_per_mode": 50,
+  "n_candidates": 300,
+  "magnitude_range": [
+    -0.15,
+    0.15
+  ],
+  "block_hours": {
+    "ramp": 48.0,
+    "soak": 96.0
+  },
+  "n_feasible": 137,
+  "feasible_share": 0.457,
+  "yield_per_mode": {
+    "0": {
+      "feasible": 35,
+      "tested": 50,
+      "share": 0.7
+    },
+    "1": {
+      "feasible": 21,
+      "tested": 50,
+      "share": 0.42
+    },
+    "2": {
+      "feasible": 23,
+      "tested": 50,
+      "share": 0.46
+    },
+    "3": {
+      "feasible": 23,
+      "tested": 50,
+      "share": 0.46
+    },
+    "4": {
+      "feasible": 16,
+      "tested": 50,
+      "share": 0.32
+    },
+    "5": {
+      "feasible": 19,
+      "tested": 50,
+      "share": 0.38
+    }
+  },
+  "campaign_points": 137,
+  "campaign_rows": 263177,
+  "run_points": 121,
+  "run_rows": 348481,
+  "run_hours": 17424.0,
+  "run_years": 1.989,
+  "run_points_per_mode": {
+    "0": 35,
+    "1": 21,
+    "2": 16,
+    "3": 20,
+    "4": 16,
+    "5": 13
+  },
+  "dropped_in_sequence": [
+    5,
+    23,
+    89,
+    93,
+    116,
+    117,
+    134,
+    146,
+    158,
+    173,
+    191,
+    206,
+    237,
+    260,
+    269,
+    272
+  ],
+  "n_resets": 0,
+  "n_aborts": 0,
+  "reserve_min": 0.087,
+  "drift_amplitude": {
+    "idv": 29,
+    "amp": 0.3,
+    "signal_peak": 0.4584133341591925,
+    "signal_rms": 0.2250714702900861,
+    "peak_pct": 13.752400024775774,
+    "peak_k": 8.278944814915016,
+    "rms_pct": 6.752144108702582,
+    "rms_k": 4.064790753438954,
+    "expected_shift": 29.709434078291363,
+    "shift_over_noise": 8.252620577303157
+  },
+  "driftf": {
+    "min": 0.8624511175452296,
+    "max": 1.1469716318402217,
+    "c_min": -0.4584962748492346,
+    "c_max": 0.48990543946740556,
+    "n_segments": 12,
+    "n_periods": 9.945205479452055,
+    "cref_rms": 0.026424596966326933
+  }
+}

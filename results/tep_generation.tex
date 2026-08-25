@@ -1,0 +1,60 @@
+% Automatisch erzeugt aus tep_generation.ipynb - nicht manuell editieren
+
+% Parameter (Hash-relevant, Versuchsplan)
+\newcommand{\paramModes}{6}
+\newcommand{\paramPointsPerMode}{50}
+\newcommand{\paramCandidates}{300}
+\newcommand{\paramSetpointSpan}{\SI{15}{\percent}}
+\newcommand{\paramRampH}{\SI{48}{\hour}}
+\newcommand{\paramSoakH}{\SI{96}{\hour}}
+\newcommand{\paramBlockH}{\SI{144}{\hour}}
+\newcommand{\paramDriftIDV}{29}
+\newcommand{\paramDriftAmp}{\tfrac{3}{10}}
+\newcommand{\paramDriftPeriod}{\SI{1752}{\hour}}
+
+% Umfang der Datensaetze
+\newcommand{\genFeasible}{137}
+\newcommand{\genFeasibleShare}{\SI{46}{\percent}}
+\newcommand{\genCampaignPoints}{137}
+\newcommand{\genCampaignRows}{263177}
+\newcommand{\genRunPoints}{121}
+\newcommand{\genRunRows}{348481}
+\newcommand{\genRunHours}{\SI{17424}{\hour}}
+\newcommand{\genRunYears}{1{,}99}
+\newcommand{\genDropped}{16}
+\newcommand{\genResets}{0}
+\newcommand{\genAborts}{0}
+\newcommand{\genMinPointsPerMode}{13}
+
+% Ausbeute und Belegung je Betriebsmodus
+\newcommand{\genFeasibleModeOne}{35}
+\newcommand{\genYieldModeOne}{\SI{70}{\percent}}
+\newcommand{\genPointsModeOne}{35}
+\newcommand{\genFeasibleModeTwo}{21}
+\newcommand{\genYieldModeTwo}{\SI{42}{\percent}}
+\newcommand{\genPointsModeTwo}{21}
+\newcommand{\genFeasibleModeThree}{23}
+\newcommand{\genYieldModeThree}{\SI{46}{\percent}}
+\newcommand{\genPointsModeThree}{16}
+\newcommand{\genFeasibleModeFour}{23}
+\newcommand{\genYieldModeFour}{\SI{46}{\percent}}
+\newcommand{\genPointsModeFour}{20}
+\newcommand{\genFeasibleModeFive}{16}
+\newcommand{\genYieldModeFive}{\SI{32}{\percent}}
+\newcommand{\genPointsModeFive}{16}
+\newcommand{\genFeasibleModeSix}{19}
+\newcommand{\genYieldModeSix}{\SI{38}{\percent}}
+\newcommand{\genPointsModeSix}{13}
+
+% Kalibrierung der Fehleramplitude
+\newcommand{\genSignalPeak}{0{,}46}
+\newcommand{\genSignalRms}{0{,}23}
+\newcommand{\genCalPeakPct}{\SI{13.8}{\percent}}
+\newcommand{\genCalPeakK}{\SI{8.3}{\kelvin}}
+\newcommand{\genCalRmsPct}{\SI{6.8}{\percent}}
+\newcommand{\genCalRmsK}{\SI{4.1}{\kelvin}}
+\newcommand{\genExpectedShift}{30}
+\newcommand{\genShiftOverNoise}{8{,}3}
+
+% Absicherung
+\newcommand{\genMinReserve}{0{,}09}

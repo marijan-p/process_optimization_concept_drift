@@ -1,0 +1,66 @@
+{
+  "_provenance": {
+    "id": "5d29a9f2",
+    "base_id": "30098669",
+    "sections": {
+      "run": {
+        "t_run": 19728.0,
+        "passes": 2
+      },
+      "model": {
+        "arch": [
+          12,
+          12,
+          1
+        ],
+        "act": "tanh",
+        "opt": "adam",
+        "epochs": 200,
+        "batch": 200,
+        "patience": 20,
+        "val_split": 0.15,
+        "seed": 42,
+        "window_size": 10,
+        "features": [
+          "Stripper Temp",
+          "Purge valve",
+          "Component E to Reactor",
+          "Product Sep Temp",
+          "MolePctGSP"
+        ],
+        "val_mode": "ramp",
+        "sensor_feature": "Stripper Temp",
+        "n_campaign": 30
+      },
+      "error": {
+        "idv": 29,
+        "amp": 0.3
+      }
+    }
+  },
+  "n_test": 348481,
+  "n_error": 348481,
+  "models": {
+    "Alle": {
+      "rmse_free": 0.026421440747128405,
+      "rmse_fault": 0.050501994514400135,
+      "std_free": 0.026377221561563254,
+      "bias_fault": 0.00878992347613795,
+      "std_fault": 0.0497311642254245
+    },
+    "Ungesehen": {
+      "rmse_free": 0.0294866219513759,
+      "rmse_fault": 0.052983293775573766,
+      "std_free": 0.029382341511596004,
+      "bias_fault": 0.011374691168907653,
+      "std_fault": 0.05174790643224832
+    },
+    "Gesehen": {
+      "rmse_free": 0.010073951116230467,
+      "rmse_fault": 0.04070006389488352,
+      "std_free": 0.009915744610316251,
+      "bias_fault": -0.00020878165608276673,
+      "std_fault": 0.040699528391219535
+    }
+  }
+}

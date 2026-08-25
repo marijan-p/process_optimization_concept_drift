@@ -1,0 +1,56 @@
+{
+  "_provenance": {
+    "id": "e7f8df2f",
+    "base_id": "55c4dfbd",
+    "sections": {
+      "model": {
+        "arch": [
+          32,
+          32,
+          1
+        ],
+        "act": "tanh",
+        "opt": "adam",
+        "epochs": 500,
+        "batch": 32,
+        "val_split": 0.2,
+        "seed": 42,
+        "window_size": 60,
+        "features": [
+          "u1_noise_filt",
+          "u2_noise_filt"
+        ]
+      }
+    }
+  },
+  "n_samples": 525600,
+  "models": {
+    "MLP": {
+      "rmse_driftfree": 0.06484287892702625,
+      "rmse_drift": 15.090483288162623,
+      "std_driftfree": 0.06444541083481245,
+      "bias_drift": 4.491871168276935,
+      "std_drift": 14.406449225187929,
+      "corr_base": 0.011910812448921497,
+      "corr_abs": 0.45372923518257147
+    },
+    "KF": {
+      "rmse_driftfree": 0.008984479255169427,
+      "rmse_drift": 0.015088696381943798,
+      "std_driftfree": 0.008984440092357344,
+      "bias_drift": -0.0008056394838263048,
+      "std_drift": 0.015067173043692832,
+      "corr_base": -0.0008179825243915312,
+      "corr_abs": 0.11948487543867842
+    },
+    "EKF": {
+      "rmse_driftfree": 0.06124646967003202,
+      "rmse_drift": 0.1567683107098679,
+      "std_driftfree": 0.06124465947310892,
+      "bias_drift": -0.0006973653457654171,
+      "std_drift": 0.15676675962843725,
+      "corr_base": -0.001631448611926948,
+      "corr_abs": 0.2916744401411257
+    }
+  }
+}
