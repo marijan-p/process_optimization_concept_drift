@@ -30,11 +30,40 @@ import os
 import pickle
 import re
 import subprocess
+import sys
 
 try:
     import numpy as _np
 except ImportError:
     _np = None
+
+try:
+    import pandas as _pd
+except ImportError:
+    _pd = None
+
+
+def _load_pickle(path):
+    """Laedt ein Artefakt und faengt die pandas-Versionsgrenze ab.
+
+    In venv_37 (pandas 1.3.5) geschriebene DataFrames legen die Block-Platzierung
+    als ``slice`` ab; ab pandas 2.0 verlangt ``new_block`` ein ``BlockPlacement``,
+    und ``pickle.load`` scheitert mit TypeError. ``pd.read_pickle`` bringt einen
+    Kompatibilitaets-Unpickler mit, der das repariert -- auch fuer DataFrames
+    innerhalb eines dicts, und unter Erhalt von attrs, dtypes und Index-Typ.
+
+    Nur ein Fallback: der Normalfall bleibt ``pickle.load``, und ohne pandas
+    (oder bei einem TypeError anderer Herkunft) wird der Fehler durchgereicht.
+    Die Richtung ist einbahnig -- in pandas 3 geschriebene Pickles sind in
+    pandas 1.3.5 nicht lesbar.
+    """
+    with open(path, "rb") as f:
+        try:
+            return pickle.load(f)
+        except TypeError:
+            if _pd is None:
+                raise
+    return _pd.read_pickle(path)
 
 
 def _canon(obj):
@@ -97,6 +126,30 @@ def _git_version(path):
         return out.stdout.strip() or None
     except Exception:
         return None
+
+
+def _run_env():
+    """Beschreibt die Umgebung, in der ein Artefakt entstanden ist.
+
+    Fragt nur bereits importierte Module ab -- kein zusaetzlicher Import, und es
+    steht genau der Stapel drin, der beim Speichern in Gebrauch war. Das Ergebnis
+    landet im Sidecar unter "env" und geht *nicht* in die Kennung ein: die
+    Kennungen sind umgebungsunabhaengig (geprueft unter py3.10/pandas 1.3.5 sowie
+    py3.11/pandas 2.3.1 und 3.0.5). Sonst unterscheidet aber nichts ein in
+    venv_37 erzeugtes Artefakt von einem aus venv_311.
+    """
+    try:
+        env = {"venv": os.path.basename(sys.prefix),
+               "python": ".".join(str(v) for v in sys.version_info[:3])}
+        for name in ("numpy", "pandas", "scipy", "matplotlib", "sklearn",
+                     "tensorflow", "keras", "frouros", "optuna"):
+            mod = sys.modules.get(name)
+            ver = getattr(mod, "__version__", None) if mod is not None else None
+            if ver:
+                env[name] = str(ver)
+        return env
+    except Exception:
+        return {}
 
 
 class RunConfig:
@@ -240,6 +293,7 @@ class ArtifactStore:
             "config": cfg.document,
             "created": datetime.datetime.now().isoformat(timespec="seconds"),
             "code_version": _git_version(self.data_dir),
+            "env": _run_env(),
             "extra": meta or {},
         }
 
@@ -283,8 +337,7 @@ class ArtifactStore:
             raise FileNotFoundError(
                 f"Kein Artefakt fuer case={case!r}, id="
                 f"{run_id or (cfg.id if cfg else '?')}, variant={variant} in {self.data_dir}")
-        with open(p, "rb") as f:
-            obj = pickle.load(f)
+        obj = _load_pickle(p)
         if verify and cfg is not None and not from_legacy:
             scp = self._sidecar_path(p)
             if os.path.exists(scp):
@@ -346,8 +399,7 @@ class ArtifactStore:
         dst = self.path(case, new_cfg, variant=variant, ext=ext)
         if os.path.exists(dst):
             return dst  # bereits uebertragen (idempotent)
-        with open(src, "rb") as f:
-            obj = pickle.load(f)
+        obj = _load_pickle(src)
         p = self.save(obj, case, new_cfg, variant=variant, ext=ext)  # attrs/Sidecar/Manifest neu
         if not keep_old and os.path.realpath(src) != os.path.realpath(p):
             os.remove(src)
