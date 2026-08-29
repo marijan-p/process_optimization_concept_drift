@@ -1,0 +1,18 @@
+# .venv_tep - Direktabhaengigkeiten
+#
+# Gepflegte Liste. Grundlage sind die import-Zeilen von ipynb/tep/tep_generation.ipynb
+# und src/utils/*, nicht ein pip freeze. Die vollstaendige Huelle steht in venv_tep.txt.
+#
+# Warum Python 3.7.9 festliegt: MATLAB R2020b unterstuetzt 2.7, 3.6, 3.7 und 3.8.
+# Die Engine kommt aus der MATLAB-Installation, nicht aus PyPI.
+
+ipykernel==6.16.2      # Kernel fuer VS Code
+matplotlib==3.5.3      # Abbildungen stream_point und stream_drift
+numpy==1.21.6
+pandas==1.3.5          # schreibt die Pickles, die .venv liest
+scipy==1.7.3
+seaborn==0.12.2        # nur fuer thesis_style.violin_box, siehe requirements/README.md
+
+# Nicht aus PyPI, in dieser Reihenfolge nach den Wheels oben:
+#   matlabengineforpython==R2020b
+#   pytep==0.0.2 (editierbar aus C:\git\pytep)
