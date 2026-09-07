@@ -378,9 +378,16 @@ def error_timeseries(t, series, cd=None, *, ylabel="Norm. Fehler", xlabel=None,
     if cd is not None:
         cd = np.asarray(cd, dtype=float)
         ax2 = ax.twinx()
-        cut = np.flatnonzero(np.diff(cd) > 0) + 1
+        # Getrennt wird nur an echten Ruecksprungen des Saegezahns. Ein gemessenes
+        # Driftsignal rauscht, sodass ein Kriterium diff > 0 tausende Segmente und
+        # damit ein unlesbar grosses PGF erzeugen wuerde.
+        _amp = float(np.nanmax(cd) - np.nanmin(cd)) if np.isfinite(cd).any() else 0.0
+        cut = np.flatnonzero(np.diff(cd) > 0.25 * _amp) + 1 if _amp > 0 else np.array([], dtype=int)
         for a, b in zip(np.r_[0, cut], np.r_[cut, len(cd)]):
-            ax2.plot(t_arr[a:b], cd[a:b], **line("drift_signal", linewidth=cd_linewidth))
+            # rasterized wie beim Scatter: bei langen Stroemen haette die Linie
+            # sonst hunderttausende Vektorpunkte.
+            ax2.plot(t_arr[a:b], cd[a:b], rasterized=True,
+                     **line("drift_signal", linewidth=cd_linewidth))
         ax2.set_ylabel(cd_label)
         ax2.spines["right"].set_visible(True)
         ax2.spines["top"].set_visible(False)

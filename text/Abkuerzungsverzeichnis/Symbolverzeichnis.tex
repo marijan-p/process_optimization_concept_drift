@@ -40,7 +40,7 @@
     $\zeta_{\mathrm{p}},\ \zeta_{\mathrm{m}}$  & Prozess- bzw.\ Messrauschen des KF/EKF \\
     $\theta$                                   & Modellparameter \\                       % Initialisierung $\theta_0$
     $\kappa,\ \kappa_w$                        & Driftkoeffizient am Ausgang bzw.\ Setpoint \\
-    $\lambda$                                  & Schwellenwert \\                         % $\lambda_{\mathrm{bin}}$ Binarisierung, $\lambda_{\mathrm{ret}}$ Nachtraining, $\lambda$ KSWIN
+    $\lambda$                                  & Schwellenwert \\                         % $\lambda_{\mathrm{bin}}$ Binarisierung, $\lambda_{\mathrm{ret}}$ Nachtraining, $\lambda_{\mathrm{rec}}$ Recurrence-Selektor, $\lambda$ KSWIN
     $\hat{\mu}_W$                              & empirischer Fenstermittelwert (ADWIN) \\
     $\nu_j$                                    & normiertes Gewicht der Rauschkomponente \\
     $\rho$                                     & Recall der Sudden Drifts \\
@@ -53,10 +53,10 @@
 \noindent\textit{Indizes und Zählgrößen}
 \begin{longtable}{@{}p{0.20\textwidth}p{0.74\textwidth}@{}}
     $n_{\ast}$ & Dimension, Ordnung oder Länge
-    %: $n_x, n_y, n_u$ (Signaldimensionen), $n_\theta$ (Parameterdimension), $n_a, n_b$ (Modellordnung), $n, n_0, n_1$ (ADWIN-Fenster), $n_{\mathrm{w}}$ (Adaptionsfenster), $n_{\mathrm{tol}}$ (Toleranzfenster), $n_{-}, n_{+}$ (Nachtrainingsfenster)
+    %: $n_x, n_y, n_u$ (Signaldimensionen), $n_\theta$ (Parameterdimension), $n_a, n_b$ (Modellordnung), $n, n_0, n_1$ (ADWIN-Fenster), $n_{\mathrm{w}}$ (Adaptionsfenster), $n_{\mathrm{p}}$ (Adaptionsperiode), $n_{\mathrm{h}}$ (Rückblickhorizont des Recurrence-Selektors), $n_{\mathrm{tol}}$ (Toleranzfenster), $n_{-}, n_{+}$ (Nachtrainingsfenster)
     \\
     $N_{\ast}$ & Anzahl
-    %: $N$ (Stichproben), $N_{\mathrm{in}}$ (Eingangskanäle), $N_{\mathrm{q}}$ (Rauschquellen), $N_c$ (Änderungsindizes), $N_{\mathrm{seg}}$ (Segmente), $N_{\mathrm{sd}}$ (Sudden Drifts), $N_{\mathrm{fa}}$ (Fehlalarme), $N_{\mathrm{train}}$ (Nachtrainings), $N_{\mathrm{chunk}}$ (Chunks) 
+    %: $N$ (Stichproben), $N_{\mathrm{in}}$ (Eingangskanäle), $N_{\mathrm{q}}$ (Rauschquellen), $N_c$ (Änderungsindizes), $N_{\mathrm{seg}}$ (Segmente), $N_{\mathrm{sd}}$ (Sudden Drifts), $N_{\mathrm{fa}}$ (Fehlalarme), $N_{\mathrm{train}}$ (Nachtrainings), $N_{\mathrm{chunk}}$ (Chunks), $N_{\mathrm{rec}}$ (zurückgeholte Punkte) 
     \\
     weitere    & $k$ (Zeitschritt), $i, j$ (Laufindizes), $_d$ (Detektion), $_w$ (Setpoint), $_{\mathrm{p}}/_{\mathrm{m}}$ (Prozess/Messung), $_s$ (Abtastung), $_{\mathrm{a}}$ (Adaption), $_{\min}/_{\max}$ (Extrema) \\
 \end{longtable}
