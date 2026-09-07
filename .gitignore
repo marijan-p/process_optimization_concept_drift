@@ -5,7 +5,8 @@ __pycache__/
 *.so
 
 # Virtual environments
-.venv/
+# .venv*/ deckt .venv und .venv_tep ab, .venv/ allein tut das nicht.
+.venv*/
 venv/
 env/
 ENV/
@@ -75,3 +76,6 @@ data/syn/
 Thumbs.db
 Desktop.ini
 *.swp
+
+_carryover
+_claude_output
