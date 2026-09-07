@@ -1,0 +1,70 @@
+%This is a template file for use of iopjournal.cls
+
+\documentclass[anonymous]{iopjournal}	% [anonymous] provides output without author names, affiliations or acknowledgments to facilitate double-anonymous peer-review
+
+%---------------------------------------------------------------
+% Literatur
+%---------------------------------------------------------------
+\usepackage[
+  backend=biber,
+  style=numeric-comp,
+  sorting=none
+]{biblatex}
+\addbibresource{references.bib}
+
+\begin{document}
+
+\articletype{Paper} %	 e.g. Paper, Letter, Topical Review...
+
+\title{Replace this text with the article title}
+
+\author{Pascal Marijan$^1$\orcid{0009-0008-1678-8038}, Tatjana Legler$^1$\orcid{0000-0002-7297-0845} and Martin Ruskowski$^{1,*}$\orcid{0000-0002-6534-9057}}
+
+\affil{$^1$Chair of Machine Tools and Control Systems, Department of Mechanical and Process Engineering, RPTU Kaiserslautern-Landau, Kaiserslautern, Germany}
+
+% \affil{$^2$Department, Institution, City, Country}
+
+\affil{$^*$Author to whom any correspondence should be addressed.}
+
+\email{pascal.marijan@rptu.de}
+
+\keywords{sample term, sample term, sample term}
+
+%
+\input{abstract}   % Abstract
+\input{sec_introduction}
+\input{sec_related_work}          % Related Work
+\input{sec_background}            % Background
+\input{sec_drift_injection}       % Injecting real concept drift into the TEP
+\input{sec_generation_modelling}  % Data stream generation and modeling
+\input{sec_evaluation}            % Evaluation and results
+\input{sec_conclusion}
+
+%
+% Each of the commands below will create an unnumbered section with the appropriate heading.
+% Remove any sections that are not relevant for your article.
+% All sections except suppdata will be removed if the [anonymous] option is used.
+% See iopjournal-guidelines.pdf for more information.
+%
+
+\ack{Sample text inserted for demonstration.}
+
+\funding{Sample text inserted for demonstration.}
+% This section is a list of funder names and grant numbers
+
+\roles{Sample text inserted for demonstration.}
+% List author names and the contributions made to the article, using terms from the NISO Contributor Roles Taxonomy (CRediT) https://credit.niso.org
+
+\data{Sample text inserted for demonstration.}
+% For more information on IOP Publishing's research data policy see: https://publishingsupport.iopscience.iop.org/questions/research-data/
+
+\suppdata{Sample text inserted for demonstration.}
+
+
+\section*{References}
+
+\printbibliography[heading=none]
+
+\end{document}
+
+

@@ -1,0 +1,26 @@
+%!TEX root = iopjournal.tex
+%
+% Injecting real concept drift into the TEP
+%
+% Erster eigener Beitrag. Die IDV(13)-Analyse steht bewusst hier und nicht im
+% Background: sie ist ein eigener Befund und begruendet, dass es IDV(29) braucht.
+%
+% Inhalt (Vorschlag):
+%   - IDV(13): r1f/r2f via tesub5/tesub8, stationaer und ohne Trend -> kein CD
+%   - Wahl des Angriffspunkts: Anlagenphysik wird ausgeregelt und bleibt im
+%     Messvektor sichtbar -> nur Covariate Shift; die Sensorik liegt ausserhalb
+%     dieses Wirkungskreises
+%   - IDV(29): multiplikativer Kalibrierfehler 1 + kappa_m * c(t) auf XMEAS(18);
+%     Begruendung ueber die drei Eigenschaften (aufgezeichnet, kein Regelkreis,
+%     nicht in der Kostenformel) -> Verschiebung von P(y|X)
+%   - Driftsignal c(t): zustandslos als geschlossener Ausdruck in t, weil ode45
+%     mit veraenderlicher Schrittweite rechnet; Segmentraster, Sudden und
+%     Incremental Drift in einem Signal
+%   - Eingriff im Quelltext (Listing aus temexd_mod.c)
+%
+% Vgl. Dissertation: sec:tep_drift
+%
+
+\section{Injecting real concept drift into the Tennessee Eastman process} \label{sec:drift_injection}
+
+

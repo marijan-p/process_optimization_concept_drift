@@ -1,0 +1,74 @@
+%!TEX root = iopjournal.tex
+%
+% Related Work
+%
+% Outline (four parts, settled 04.09.2026). The TEP comes last so that the
+% funnel narrows monotonically -- model class, application studies, requirement
+% on the data basis, the one candidate that meets it, what it still lacks --
+% and so that sections 2 and 3 run in the same order, concept drift first and
+% the TEP last, with section 3 handing the plant straight to section 4.
+%
+% Each part closes with the residue it leaves open. The sum of the residues is
+% the gap that IDV(29) fills.
+%
+%   2.1 Adaptive soft sensors in the process industry
+%       - the model class the cost surrogate belongs to; the established
+%         adaptation mechanisms (moving window, recursive schemes, just-in-time
+%         learning, ensembles) and their precondition, a label available online
+%         [kadlec.2009, kadlec.2011]
+%       - TODO a recent survey on adaptive soft sensors (2020 onwards); in
+%         neither references.bib nor diss.bib
+%       - Residue: the causes listed there are all on the process side, the
+%         measurement chain does not appear among them
+%
+%   2.2 Concept drift detection and adaptation in industrial applications
+%       - studies, not methods: electroslag remelting [bayram.2022b] and the own
+%         grinding plant [marijan.2025]; the application side is predominantly
+%         classification [lu.2018, bayram.2022 as the frame]
+%       - TODO two or three further industrial case studies
+%       - Residue: onset and extent of the drift are unknown, so detectors can
+%         only be compared with one another rather than measured
+%
+%   2.3 Benchmark streams with a known drift ground truth
+%       - synthetic generators: exact drift onset, no plant physics
+%       - real-world streams: physics, but no ground truth [souza.2020]
+%       - regression streams are the exception in both camps [webb.2016]
+%       - TODO generator and framework literature (MOA, river, SEA / rotating
+%         hyperplane / Agrawal); in neither bib file
+%       - Residue, phrased as a demand rather than a conclusion, so that 2.4
+%         reads as the answer to it: what is required is a simulated plant that
+%         carries plant physics and a defined drift onset at the same time
+%
+%   2.4 The Tennessee Eastman process as a benchmark
+%       - history, model revisions and control concepts [downs.1993, ricker.1995,
+%         ricker.1996, ricker.2005, bathelt.2015, reinartz.2022]
+%       - what the TEP is actually used for: fault detection and diagnosis; the
+%         standardised public reference data is cut for classification
+%         [reinartz.2021]
+%       - TODO three to five TEP fault-detection and -diagnosis works (PCA/DPCA,
+%         deep learning). This is the largest of the four gaps, diss.bib holds
+%         none of them
+%       - the disturbance catalogue is characterised as a FAULT catalogue only;
+%         IDV(13) at most in a subordinate clause as the single candidate
+%         labelled "slow drift". The analysis stays in sec_drift_injection --
+%         do not pre-empt the own finding here
+%       - closing paragraph = the gap: the TEP meets every requirement derived
+%         in the introduction except the drift itself
+%
+% Boundary to the background: related work reports STUDIES and DATA HOLDINGS,
+% the background DEFINITIONS and MECHANICS. [gama.2004, baena.2006, bifet.2007,
+% raab.2020, widmer.1996, moreno-torres.2012] belong to section 3, and so does
+% the TEP as a plant -- components, control concept, cost function.
+%
+% Cf. dissertation: chapter 2 and sec:TEP
+%
+
+\section{Related Work} \label{sec:related_work}
+
+\subsection{Adaptive soft sensors in the process industry} \label{subsec:soft_sensors}
+
+\subsection{Concept drift detection and adaptation in industrial applications} \label{subsec:cd_industrial}
+
+\subsection{Benchmark streams with a known drift ground truth} \label{subsec:benchmarks}
+
+\subsection{The Tennessee Eastman process as a benchmark} \label{subsec:tep_benchmark}

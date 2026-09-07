@@ -1,0 +1,97 @@
+%!TEX root = iopjournal.tex
+%
+% Introduction
+%
+% Outline (10 points, in this order). Citation keys in brackets are the ones
+% settled for this section; keys marked TODO still have to be carried over from
+% text/Literatur/diss.bib.
+%
+%   1. Problem: data-driven operating-point optimisation in the process industry,
+%      where a regression model estimates operating cost from a few process
+%      variables and serves as the surrogate that is optimised. Structurally this
+%      is a soft sensor, a model estimating a quantity that is not measured
+%      directly from routinely recorded process variables [kadlec.2009].
+%      No citation for neural networks as non-linear regressors -- textbook
+%      knowledge. marijan.2026 is the model comparison and does not fit here
+%   2. The model degrades during continuous operation, because the mapping learned
+%      from the training data is assumed to stay valid online while the process
+%      generating the data changes [kadlec.2011]. This is also where our own
+%      Note that the causes listed
+%      there are all on the process side (raw materials, fouling, abrasion,
+%      catalyst activity, product grades, environment), the sensor is not among
+%      them -- this is picked up again in point 8
+%   3. Concept drift as the formal frame: a change of the joint distribution
+%      P(X, y); only a shift of P(y | X) invalidates the learned mapping, whereas
+%      a pure covariate shift leaves it valid [gama.2014, bayram.2022].
+%      Kept short on purpose. The origin of the term, the hidden-context reading
+%      via [kadlec.2011] and the formal definitions belong in the background,
+%      the introduction only needs the distinction that point 8 relies on
+%   4. Sensor ageing is a mechanism that produces exactly this shift, since
+%      fouling and decalibration corrupt the recorded value between limited
+%      calibration intervals while the plant itself is unchanged.
+%      Deliberately phrased as an ASSUMPTION motivating the injected fault, not
+%      as an empirical claim about industrial practice -- it carries no citation
+%   5. The motivation implies requirements on the data basis rather than a
+%      critique of foreign benchmarks: operating points that can be commanded,
+%      a drift-free reference run paired with the drift-afflicted one, a target
+%      available throughout, and public reproducibility. Streams that meet this
+%      and carry a known ground truth of the changes are scarce [souza.2020].
+%      A few studies do treat drift on real plants, our own grinding-mill work
+%      [marijan.2025] and the electroslag remelting case of [bayram.2022b] among
+%      them, but in each the true onset and extent of the drift are unknown, so
+%      detection and adaptation can only be judged indirectly. That is the
+%      argument for turning to a benchmark process
+%   6. The TEP as the candidate that meets these requirements: controlled
+%      non-linear plant simulation, six operating modes, operating cost as
+%      target, source code available [TODO downs.1993, ricker.1995, ricker.1996,
+%      bathelt.2015, reinartz.2022]. Its standardised public reference data is
+%      built for fault detection and decision support [reinartz.2021], so the
+%      one requirement left open is the drift itself
+%   7. IDV(13), although labelled "slow drift", stays stationary and trendless and
+%      therefore does not satisfy the definition (first own finding)
+%      [TODO downs.1993]
+%   8. An attack point in the plant physics does not help either, because the
+%      decentralised control pushes any lasting disturbance into the recorded
+%      measurement vector, which leaves a covariate shift. The measurement chain
+%      lies outside that loop, which is where the soft-sensor literature does not
+%      look (cf. the list of causes in point 2)
+%   9. Contribution:
+%       (i)   IDV(29), a multiplicative calibration drift on the stripper
+%             temperature XMEAS(18), anchored in the C source of the simulator
+%       (ii)  paired nominal and drift-afflicted runs over the same sequence of
+%             operating points, plus a campaign run as the training design
+%       (iii) a reference evaluation of established detectors and adaptation
+%             strategies on this stream, with code and data made public
+%  10. Structure of the article
+%
+% Cf. dissertation: chapter 1, introduction to chapter 3, sec:concept_drift,
+% sec:TEP, sec:tep_drift, sec:tep_generation
+%
+% For the adaptation section, not the introduction: [kadlec.2011], p. 3, warns
+% against adapting a soft sensor while the hardware sensor delivers faulty
+% measurements. Our case differs because the label stays clean and only a feature
+% is corrupted -- address this actively rather than waiting for a referee.
+%
+
+\section{Introduction}
+
+Machine learning is widely applied in industrial settings, where sensor signals serve as the foundation for data-driven process modeling and optimization. In energy-intensive branches of the process industry, the operating point at which a plant is run determines how much energy is consumed per unit of product and therefore carries a direct economic weight. Optimizing this operating point requires a model that relates the variables under operational control to the resulting cost of operation. Such a model is commonly realized as a non-linear regression on recorded sensor data, for which neural networks are a frequent choice. It estimates a quantity that is not accessible to direct measurement from variables that are recorded routinely, and in this respect it belongs to the class of data-driven soft sensors that have become established in the process industry~\cite{kadlec.2009}. Once trained, the model is evaluated across the accessible operating range and the point of lowest cost is selected. \par
+%
+This model is based on the assumption that the relationship between the recorded variables and cost, as observed during the training phase, remains valid as long as the model is applied. However, in industrial operation, this assumption does not hold indefinitely. Plants are subject to changes due to wear and tear on mechanical components, fluctuations in the quality of raw materials, changes in catalyst activity, and changes in environmental conditions, to name a few examples. Each of these factors alters the relation the model has learned~\cite{kadlec.2011}. Such changes affect the process itself, so that the mapping from the recorded variables to the cost becomes time variant and the performance of a static model deteriorates over the course of its online operation. Restoring the model requires either a new experimental campaign, which occupies the plant, or a mechanism that adapts the model while production continues. \par
+%
+This type of deterioration is referred to as concept drift, i.e., a change over time in the joint distribution of the measured variables and the target. However, not every such change has the same effect. A shift that simply moves the observed variables to a different region of the input space leaves the mapping between them and the target variable valid, whereas a change in how the target depends on those variables invalidates this mapping. The latter case, real concept drift, is what a model cannot survive without adaptation~\cite{gama.2014, bayram.2022a}. 
+Sensor aging produces exactly this kind of shift independently of the plant, since factors such as fouling and decalibration corrupt the recorded value between limited calibration intervals, while the process itself remains unchanged. \par
+Although a few studies have examined drift in real-world plants, among them the case of electroslag remelting~\cite{bayram.2022b} and a grinding plant~\cite{marijan.2025}, the actual onset and extent of the drift remain unknown, meaning that detection and adaptation can only be evaluated indirectly. A benchmark process avoids this limitation since it can define the ground truth of drift already by design rather than deriving it only after the occurrence. However, data streams that offer this capability while also being publicly available and reproducible are rare~\cite{souza.2020}. Therefore, a process is required in which operating points can be specified, a drift-free reference run can be paired with the run affected by drift, and a target remains available at all times. \par
+The Tennessee Eastman Process (TEP) is a controlled, non-linear plant simulation that meets these requirements. It defines six operating modes, provides operating cost as an explicit target, and its source code is publicly available~\cite{downs.1993, ricker.1995, ricker.1996, bathelt.2015, reinartz.2022}. Its standardized public reference data, however, is built for fault detection and decision support~\cite{reinartz.2021}, so the one requirement it does not yet meet is the drift itself. \par
+Based on its name, \emph{Slow-Drift}, \texttt{IDV(13)} initially appears to be a suitable candidate. Further examination reveals, however, that it is a stationary, trendless deviation and therefore does not meet the criteria of a concept drift in the technical sense~\cite{downs.1993}.
+An attack point in the plant physics does not help either, since the decentralized control transfers any lasting disturbance into the manipulated variables. These are recorded alongside the measurements, and the operating cost follows deterministically from that same vector, so that the learned mapping remains valid and only the position of the data in the input space moves. The measurement chain, in contrast, lies outside this control loop, so that a drift acting on it changes what the model is given without changing the plant behind it. \par
+This work closes that gap with the following contributions:
+%
+\begin{itemize}
+\item[(i)] \texttt{IDV(29)}, a multiplicative calibration drift on the stripper temperature \texttt{XMEAS(18)}, anchored in the C source of the TEP simulator;
+\item[(ii)] paired nominal and drift-afflicted runs over the same sequence of operating points, together with a campaign run used as the training design;
+\item[(iii)] a reference evaluation of established detectors and adaptation strategies on this stream.
+\end{itemize}
+%
+The remainder of this article is structured as follows. Section~\ref{sec:related_work} reviews the related work on concept drift and the TEP. Section~\ref{sec:background} covers the necessary background. Section~\ref{sec:drift_injection} describes how IDV(29) injects a real concept drift into the TEP. Section~\ref{sec:generation_modelling} details the generation and modeling of the resulting data streams. Section~\ref{sec:evaluation} presents the evaluation of established detectors and adaptation strategies on this stream, before Section~\ref{sec:conclusion} concludes the article. \par
+

@@ -1,0 +1,24 @@
+%!TEX root = iopjournal.tex
+%
+% Data stream generation and modeling
+%
+% Inhalt (Vorschlag):
+%   Datenstrom
+%     - pyTEP als Ablaufsteuerung; noetige Anpassungen am Paket fuer IDV(29)
+%     - sechs Betriebsmodi, Setpoints nach Ricker/Reinartz -> Betriebspunkte
+%     - Ausdehnung jedes Modus zu einer Schar: +/-15 % Fenster, Latin Hypercube,
+%       Maximin-Kriterium, Randbedingungen der Stellbereiche
+%     - Blockstruktur: Rampe, Halten, Rueckkehr in den Ausgangszustand
+%     - Fahrbarkeitspruefung im Vorlauf (Sicherheitsabschaltungen), Ausbeute je Modus
+%     - drei Datensaetze: Kampagne (Training), nominaler Lauf, Fehlerlauf
+%     - Bemessung der Driftamplitude zwischen Rauschgrenze und Plausibilitaet
+%   Modellierung
+%     - Feature-Auswahl aus der Kostenrechnung; Rolle der Strippertemperatur
+%     - MLP, Vorverarbeitung, Validierung auf den Anfahrrampen
+%
+% Vgl. Dissertation: sec:tep_generation und sec:tep_modellierung
+%
+
+\section{Data stream generation and modeling} \label{sec:generation_modelling}
+
+
