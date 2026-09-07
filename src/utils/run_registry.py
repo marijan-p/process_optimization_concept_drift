@@ -25,6 +25,7 @@ Beispiel:
 import datetime
 import glob
 import hashlib
+import pathlib
 import json
 import os
 import pickle
@@ -64,6 +65,34 @@ def _load_pickle(path):
             if _pd is None:
                 raise
     return _pd.read_pickle(path)
+
+
+# --------------------------------------------------------------------------- #
+# Selbstauskunft: erkennt ein veraltetes Modul im laufenden Kernel
+# --------------------------------------------------------------------------- #
+try:
+    MODULE_SHA = hashlib.sha1(
+        pathlib.Path(__file__).resolve().read_bytes()).hexdigest()[:8]
+except Exception:
+    MODULE_SHA = None
+
+
+def assert_current():
+    """Prueft, ob das geladene Modul noch der Quelldatei entspricht.
+
+    Ein Jupyter-Kernel haelt bereits importierte Module fest; ``import
+    run_registry`` ist dann ein No-op. ``MODULE_SHA`` wird beim Import aus der
+    Datei berechnet und hier gegen einen frischen Blick darauf gehalten.
+    Analog zu ``drift_detection.assert_current``.
+    """
+    if MODULE_SHA is None:
+        return None
+    disk = hashlib.sha1(pathlib.Path(__file__).resolve().read_bytes()).hexdigest()[:8]
+    if disk != MODULE_SHA:
+        raise RuntimeError(
+            f"run_registry.py auf der Platte ({disk}) weicht vom geladenen Modul "
+            f"({MODULE_SHA}) ab -- veralteter Kernel. Kernel neu starten.")
+    return MODULE_SHA
 
 
 def _canon(obj):
@@ -669,6 +698,22 @@ class OutputStore:
     def archive_path(self, name, rid, ext):
         return os.path.join(self.archive_dir, f"{self._name(name)}_{rid}.{ext}")
 
+    @staticmethod
+    def sidecar_path(archive_path):
+        """Sidecar-Pfad einer Archivkopie: ``<stamm>.<endung>.json``.
+
+        Die Endung steht bewusst im Namen. Frueher hiess der Sidecar
+        ``<stamm>.json`` -- und damit genauso wie die Archivkopie eines
+        JSON-Ergebnisdokuments, das sein eigener Sidecar dann ueberschrieb.
+        Zusaetzlich publizieren die Notebooks unter demselben ``name`` sowohl
+        ein ``.json``-Ergebnis als auch eine ``.tex``-Makrodatei; deren Sidecar
+        traf ebenfalls die JSON-Archivkopie. Von allen Laeufen vor dem
+        2026-09-02 ist das Ergebnisdokument im Archiv deshalb verloren, es
+        steht dort ein Sidecar. Die stabilen Dateien in ``out_dir`` waren nie
+        betroffen.
+        """
+        return archive_path + ".json"
+
     def _manifest_path(self):
         mname = f"{self.prefix}_outputs_manifest.json" if self.prefix else "outputs_manifest.json"
         return os.path.join(self.archive_dir, mname)
@@ -716,7 +761,7 @@ class OutputStore:
             "code_version": _git_version(self.out_dir),
             "extra": meta or {},
         }
-        with open(os.path.splitext(ap)[0] + ".json", "w", encoding="utf-8") as f:
+        with open(self.sidecar_path(ap), "w", encoding="utf-8") as f:
             json.dump(sc, f, indent=2, ensure_ascii=False)
         self._update_manifest(name, rid, {k: sc[k] for k in
             ("id", "final", "created", "archive")}, final)
@@ -1011,7 +1056,8 @@ if __name__ == "__main__":
                              final=False, stable_ext="pgf", archive_ext="png")
         assert sp is None and os.path.exists(ap)
         assert not os.path.exists(out.stable_path("fig", "pgf"))
-        assert os.path.exists(os.path.splitext(ap)[0] + ".json")
+        assert os.path.exists(out.sidecar_path(ap))
+        assert not os.path.exists(os.path.splitext(ap)[0] + ".json")  # alter Name
         calls = []
         out.publish("fig", syn, writer=calls.append, final=False, archive_ext="png")
         assert calls == []  # gleiche Konfiguration -> keine zweite Archivkopie
@@ -1023,6 +1069,14 @@ if __name__ == "__main__":
         assert ap3 != ap and out.final_id("fig") == m1.id  # neue Konfiguration uebernimmt final
         out.save_json({"metric": 1}, "res", syn, final=True)
         assert os.path.exists(out.stable_path("res", "json"))
+        # Archivkopie eines JSON-Ergebnisses ueberlebt ihren eigenen Sidecar ...
+        _rap = out.archive_path("res", syn.id, "json")
+        with open(_rap, encoding="utf-8") as f:
+            assert json.load(f) == {"metric": 1}
+        # ... und auch eine zweite Publikation unter demselben Namen als .tex
+        out.save_text("% makros", "res", syn, final=True)
+        with open(_rap, encoding="utf-8") as f:
+            assert json.load(f) == {"metric": 1}
 
     # OutputStore mit Prefix: praefigiert Datei- und Manifest-Namen
     with tempfile.TemporaryDirectory() as d:

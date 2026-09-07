@@ -22,6 +22,14 @@ schleife (:func:`run_adaptation`) mit vier Strategien:
   * ``combined`` – informed plus die passive Komponente als Backstop fuer
                    verpasste Detektionen
 
+Quer zu den Strategien steht der Datenselektor (``selector``): ``sequence``
+trainiert auf dem zusammenhaengenden Fenster, ``recurrence`` holt zusaetzlich
+Punkte aus der Vergangenheit zurueck, deren Fehler unter dem aktuellen Modell
+nahe am aktuellen Fehler liegt (Masterarbeit Abschn. 5.5.3,
+``Err_cur - delta <= Err_old <= Err_cur + delta``). Eine Strategie mit
+Recurrence-Selektor wird ueber das Suffix ``_rec`` angesprochen
+(``"blind_rec"``), vgl. :func:`split_strategy`.
+
 Das Modul ist bewusst datensatz-agnostisch: ``run_adaptation`` arbeitet auf
 beliebigen Feature-/Label-Arrays ``(X, y)`` und einem beliebigen kompilierten
 Keras-Modell und laesst sich damit auch auf weitere Szenarien (z. B. den
@@ -47,6 +55,8 @@ Voraussetzung: ``tensorflow``/``keras`` (lazy importiert) sowie ``frouros``
 
 from __future__ import annotations
 
+import hashlib
+import pathlib
 from typing import Dict, List, Sequence, Tuple
 
 import numpy as np
@@ -54,7 +64,12 @@ import numpy as np
 import drift_detection as dd
 
 __all__ = [
+    "assert_current",
+    "adapt_space_id",
     "ADAPTATION_MODES",
+    "SELECTORS",
+    "REC_SUFFIX",
+    "split_strategy",
     "FREEZE_CHOICES",
     "SCALE_KEYS",
     "clone_compiled",
@@ -74,13 +89,65 @@ __all__ = [
     "resolve_cooldown",
 ]
 
+try:
+    MODULE_SHA = hashlib.sha1(
+        pathlib.Path(__file__).resolve().read_bytes()).hexdigest()[:8]
+except Exception:          # eingefroren, kein Dateizugriff -- dann kein Abgleich
+    MODULE_SHA = None
+
+
+def assert_current():
+    """Prueft, ob das geladene Modul noch der Quelldatei entspricht.
+
+    Ein Jupyter-Kernel haelt bereits importierte Module fest; ``import
+    drift_adaptation`` ist dann ein No-op und eine Aenderung an der Datei bleibt
+    wirkungslos. Analog zu ``drift_detection.assert_current``.
+    """
+    if MODULE_SHA is None:
+        return None
+    disk = hashlib.sha1(pathlib.Path(__file__).resolve().read_bytes()).hexdigest()[:8]
+    if disk != MODULE_SHA:
+        raise RuntimeError(
+            f"drift_adaptation.py auf der Platte ({disk}) weicht vom geladenen "
+            f"Modul ({MODULE_SHA}) ab -- veralteter Kernel. Kernel neu starten "
+            "und, falls schon getunt wurde, einmal mit FORCE_RECOMPUTE = True "
+            "durchlaufen.")
+    return MODULE_SHA
+
+
+def adapt_space_id(n: int = 8) -> str:
+    """Kennung des Optuna-Suchraums aus dem GELADENEN Code-Objekt.
+
+    Geht in die Cache-Schluessel des Adaptions-Notebooks ein. Ohne sie bleibt
+    eine geaenderte Grenze in ``_suggest_adapt_params`` folgenlos, weil der
+    Schluessel gleich bleibt und das alte Tuning aus dem Cache kommt. Bewusst
+    aus ``__code__`` und nicht aus der Quelldatei -- ein veralteter Kernel
+    wuerde sonst die neue Datei melden und den alten Code ausfuehren.
+    """
+    assert_current()
+    return dd._space_id_of(_suggest_adapt_params, n)
+
+
 # Unterstuetzte Adaptionsstrategien (Reihenfolge wie in der Auswertung).
 ADAPTATION_MODES = ("baseline", "blind", "informed", "combined")
 
+# Datenselektoren fuer das Nachtraining (quer zu den Strategien).
+SELECTORS = ("sequence", "recurrence")
+REC_SUFFIX = "_rec"
+
 # Zaehlparameter, die bei einem Wechsel der Abtastrate mitskaliert werden muessen.
 SCALE_KEYS = ("window_prev", "window_post", "blind_window", "blind_period",
+              "rec_horizon", "rec_max",
               "det_window", "det_min_num_instances", "det_num_test_instances",
               "det_min_window_size", "det_min_num_misclassified_instances")
+
+
+def split_strategy(name: str) -> Tuple[str, str]:
+    """``"blind_rec"`` -> ``("blind", "recurrence")``, ``"blind"`` -> ``("blind", "sequence")``."""
+    name = name.lower()
+    if name.endswith(REC_SUFFIX):
+        return name[:-len(REC_SUFFIX)], "recurrence"
+    return name, "sequence"
 
 
 # ===========================================================================
@@ -203,14 +270,41 @@ class StreamingDetector:
 # punktweisen Schemas aus updater.ContinousUpdater / adaptation_base bei
 # praktikabler Laufzeit)
 # ===========================================================================
+def _recall_indices(model, X, y, a, b, *, err_tol, horizon, max_points,
+                    norm_mean, norm_std):
+    """Recurrence-Selektor: Indizes vergangener Punkte [a - horizon, a), deren
+    normierter Fehler unter dem AKTUELLEN Modell hoechstens ``err_tol`` vom
+    mittleren Fehler des aktuellen Fensters [a, b) abweicht (Masterarbeit
+    Abschn. 5.5.3). Bei mehr als ``max_points`` Treffern werden die im Fehler
+    naechstliegenden behalten. Kausal: nur Punkte vor ``a``."""
+    lo = max(0, a - horizon)
+    if lo >= a:
+        return np.empty(0, int)
+    e_cur = (y[a:b] - np.asarray(model(X[a:b], training=False)).ravel() - norm_mean) / norm_std
+    e_old = (y[lo:a] - np.asarray(model(X[lo:a], training=False)).ravel() - norm_mean) / norm_std
+    d = np.abs(e_old - float(np.mean(e_cur)))
+    sel = np.flatnonzero(d <= err_tol)
+    if max_points and len(sel) > max_points:
+        sel = sel[np.argsort(d[sel], kind="stable")[:max_points]]
+    return lo + np.sort(sel)
+
+
 def run_adaptation(base, X, y, *, mode, detector=None,
                    lr=3e-3, epochs=9, freeze=(True, False, False), reset=False,
                    cooldown=0, blind_window=44, blind_period=None,
                    window_prev=300, window_post=300, reject=False,
+                   selector=None, err_tol=1.0, rec_horizon=0, rec_max=0,
                    chunk=144, norm_mean=0.0, norm_std=1.0, seed=None, verbose=False):
     """Chunk-weises, prequentielles Online-Adaptionsschema (test-then-train).
 
-    mode : {"baseline", "blind", "informed", "combined"}.
+    mode : {"baseline", "blind", "informed", "combined"}, optional mit Suffix
+        ``_rec`` (setzt ``selector="recurrence"``, vgl. :func:`split_strategy`).
+    selector : {"sequence", "recurrence"}; ``None`` -> aus ``mode`` abgeleitet.
+        ``recurrence`` ergaenzt jedes Trainingsfenster um Punkte aus den letzten
+        ``rec_horizon`` Punkten davor, deren Fehler unter dem aktuellen Modell
+        hoechstens ``err_tol`` (in Einheiten des normierten Fehlers) vom
+        mittleren Fehler des Fensters abweicht, hoechstens ``rec_max`` Stueck
+        (0 = unbegrenzt). Fensterbildung und Zeitplan bleiben unveraendert.
 
     Jeder Punkt wird praediziert, BEVOR er in ein Nachtraining einfliesst;
     Trainingsfenster reichen nie ueber das Chunk-Ende hinaus (kausal, keine
@@ -254,14 +348,20 @@ def run_adaptation(base, X, y, *, mode, detector=None,
     Modell-/Detektions-Notebooks.
 
     Returns dict: preds, errors (roh), errors_norm, train_steps, detect_steps,
-    reject_steps (verworfene Nachtrainings; Teilmenge von train_steps).
+    reject_steps (verworfene Nachtrainings; Teilmenge von train_steps),
+    recall_counts (je Nachtraining die Zahl zurueckgeholter Punkte; nur
+    ``recurrence``, sonst leer).
     """
+    mode, _sel = split_strategy(mode)
+    selector = (selector or _sel).lower()
+    if selector not in SELECTORS:
+        raise ValueError(f"selector={selector!r}, erwartet {SELECTORS}")
     n = len(X)
     # Einmaliges Kompilieren mit Lernrate + Freeze-Muster (konstant je Lauf) ->
     # die Nachtrainings unten loesen kein Graph-Retracing mehr aus.
     model = clone_compiled(base, lr=lr, freeze=freeze)
     preds = np.empty(n, np.float32)
-    train_steps, detect_steps, reject_steps = [], [], []
+    train_steps, detect_steps, reject_steps, recall_counts = [], [], [], []
     last_train = -(10 ** 18)   # Refraktaerzeit-Tracker (Sofort-Trainings)
     active_until = -1          # Ende der laufenden Nachfuehrphase (informed)
     period = int(blind_period) if blind_period else int(chunk)
@@ -310,13 +410,24 @@ def run_adaptation(base, X, y, *, mode, detector=None,
 
         # 4) Inkrementelles Nachtraining auf den gesammelten Fenstern;
         #    mit reject wird ein Update verworfen, das den Fehler auf dem
-        #    eigenen Trainingsfenster nicht senkt (vgl. reject_mse, origin)
+        #    eigenen Trainingsfenster nicht senkt (vgl. reject_mse, origin).
+        #    Der Recurrence-Selektor ergaenzt das Fenster um zurueckgeholte
+        #    Punkte; Validierung und Fensterlogik bleiben auf [a, b).
         for (a, b) in train_windows:
+            X_tr, y_tr = X[a:b], y[a:b]
+            if selector == "recurrence":
+                idx = _recall_indices(model, X, y, a, b, err_tol=err_tol,
+                                      horizon=rec_horizon, max_points=rec_max,
+                                      norm_mean=norm_mean, norm_std=norm_std)
+                recall_counts.append(int(len(idx)))
+                if len(idx):
+                    X_tr = np.concatenate([X[idx], X_tr])
+                    y_tr = np.concatenate([y[idx], y_tr])
             if reject:
                 w_prev = model.get_weights()
                 p0 = np.asarray(model(X[a:b], training=False)).ravel()
                 mse_prev = float(np.mean((y[a:b] - p0) ** 2))
-            model = incremental_fit(model, X[a:b], y[a:b], epochs=epochs,
+            model = incremental_fit(model, X_tr, y_tr, epochs=epochs,
                                     freeze=list(freeze), reset=reset, seed=seed)
             train_steps.append(int(b))
             if reject:
@@ -333,7 +444,7 @@ def run_adaptation(base, X, y, *, mode, detector=None,
     errors_norm = (errors - norm_mean) / norm_std
     return dict(preds=preds, errors=errors, errors_norm=errors_norm,
                 train_steps=train_steps, detect_steps=detect_steps,
-                reject_steps=reject_steps)
+                reject_steps=reject_steps, recall_counts=recall_counts)
 
 
 # ===========================================================================
@@ -478,24 +589,27 @@ def _suggest_adapt_params(strategy: str, trial, chunk: int = 144,
     offenen Fehlerstrom kalibriert und dort systematisch fehlangepasst). Die
     Refraktaerzeit wird als Vielfaches der stationaeren Phasendauer (cooldown_x)
     optimiert, da sie sich als detektorspezifischer Haupthebel erwiesen hat.
+    Mit Suffix ``_rec`` kommen die Parameter des Recurrence-Selektors hinzu
+    (``err_tol`` in Einheiten des normierten Fehlers, ``rec_horizon`` und
+    ``rec_max`` in Punkten der Tuning-Aufloesung).
     """
-    strategy = strategy.lower()
+    strategy, selector = split_strategy(strategy)
     det_name = (det_name or "").upper()
     freeze_choices = list(FREEZE_CHOICES)
     if strategy in ("informed", "combined"):
         freeze_choices = [c for c in freeze_choices if c != "TTF"]
     params = dict(
         lr=trial.suggest_float("lr", 1e-4, 1.5e-2, log=True),
-        epochs=trial.suggest_int("epochs", 1, 20),
+        epochs=trial.suggest_int("epochs", 1, 30),
         freeze=FREEZE_CHOICES[trial.suggest_categorical("freeze", freeze_choices)],
         reset=trial.suggest_categorical("reset", [False, True]),
     )
     if strategy in ("blind", "combined"):
-        params["blind_window"] = trial.suggest_int("blind_window", 15, 100)
+        params["blind_window"] = trial.suggest_int("blind_window", 15, 400)
         params["blind_period"] = trial.suggest_int("blind_period", chunk, 30 * chunk)
     if strategy in ("informed", "combined"):
-        params["window_prev"] = trial.suggest_int("window_prev", 5, 100)
-        params["window_post"] = trial.suggest_int("window_post", 5, 100)
+        params["window_prev"] = trial.suggest_int("window_prev", 5, 300)
+        params["window_post"] = trial.suggest_int("window_post", 5, 300)
         params["cooldown_x"] = trial.suggest_float("cooldown_x", 0.0, 60.0)
         if det_name == "KSWIN":
             _mi = trial.suggest_int("det_min_num_instances", 50, 400)
@@ -524,8 +638,13 @@ def _suggest_adapt_params(strategy: str, trial, chunk: int = 144,
                 "det_min_num_misclassified_instances", 20, 200)
             params["det_err_threshold"] = trial.suggest_float("det_err_threshold", 0.5, 2.5)
         elif det_name == "RMSE":
-            params["det_window"] = trial.suggest_int("det_window", 15, 100)
+            params["det_window"] = trial.suggest_int("det_window", 5, 100)
             params["det_threshold"] = trial.suggest_float("det_threshold", 0.5, 3.0)
+    if selector == "recurrence":
+        params["selector"] = "recurrence"
+        params["err_tol"] = trial.suggest_float("err_tol", 0.05, 3.0, log=True)
+        params["rec_horizon"] = trial.suggest_int("rec_horizon", chunk, 365 * chunk, log=True)
+        params["rec_max"] = trial.suggest_int("rec_max", 15, 400)
     return params
 
 
@@ -538,7 +657,8 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
 
     Parameters
     ----------
-    strategy : {"blind", "informed", "combined"} (``baseline`` hat nichts zu tunen).
+    strategy : {"blind", "informed", "combined"}, optional mit Suffix ``_rec``
+        (``baseline`` hat nichts zu tunen).
     base : kompiliertes Keras-Basismodell (wird je Trial geklont).
     X, y : Feature-/Label-Arrays des (ggf. downgesampelten) Tuning-Stroms.
     fixed : nicht getunte Argumente fuer run_adaptation
@@ -559,6 +679,7 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
     import optuna   # lazy: Modul bleibt ohne Optuna importierbar
 
     strategy = strategy.lower()
+    mode, _ = split_strategy(strategy)
     n = len(X)
     chunk = int(fixed.get("chunk", 144))
     n_units = int(np.ceil(n / chunk))
@@ -569,13 +690,13 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
 
     # Welche Detektorparameter mitgetunt werden, haengt vom Detektortyp ab
     det_name = (getattr(detector_factory(), "name", None)
-                if (strategy in ("informed", "combined") and detector_factory is not None)
+                if (mode in ("informed", "combined") and detector_factory is not None)
                 else None)
 
     def objective(trial):
         params = _suggest_adapt_params(strategy, trial, chunk=chunk, det_name=det_name)
         detector = (detector_factory()
-                    if (strategy in ("informed", "combined") and detector_factory is not None)
+                    if (mode in ("informed", "combined") and detector_factory is not None)
                     else None)
         detector, params = apply_det_params(detector, params)
         params = resolve_cooldown(params, t_stat)
@@ -634,7 +755,7 @@ def crosscheck_candidates(base, X, y, *, best_params: dict, fixed: dict,
         candidates["tpe_best"] = dict(best_params[mode])
     # union: Vereinigung der Einzeloptima (informed + passive Komponente)
     bl, inf = best_params.get("blind"), best_params.get("informed")
-    if mode == "combined" and bl and inf:
+    if split_strategy(mode)[0] == "combined" and bl and inf:
         candidates["union"] = {**bl, **inf,
                                "blind_window": bl["blind_window"],
                                "blind_period": bl["blind_period"]}

@@ -41,7 +41,7 @@ Die Generalisierung erfolgt in zwei Stufen zunehmender Realitätsnähe. Zunächs
 %
 Als erster Schritt zur Generalisierung wird ein synthetischer Datenstrom erzeugt, der unter kontrollierten Bedingungen die Erprobung des Adaptionsansatzes bei \ac{CD} ermöglicht. Dabei sollen die wesentlichen Eigenschaften prozesstechnischer Messdaten synthetisch nachgebildet werden. 
 Abbildung~\ref{fig:datenstromsynthese} gibt einen Überblick über die zugrunde liegende Simulationsstrategie. Die drei Hauptkomponenten - die exogenen Setpoints, die Aktuatordynamik und die Systemantwort - werden dabei von \ac{CD} beeinflusst, dessen Modellierung in Abschnitt~\ref{sec:syn_drift} beschrieben wird. Darauf aufbauend wird in Abschnitt~\ref{sec:generieren_von_setpoints} die Erzeugung stückweise konstanter exogener Setpoints erläutert. Diese durchlaufen $\mathrm{PT}_1$-Glieder, die als Spezialfall der in Abschnitt~\ref{sec:systemidentifikation} eingeführten Zustandsraumdarstellung die Trägheit der Aktuatoren nachbilden. Deren Modellierung ist in Abschnitt~\ref{sec:simulation_signal_input} ausgeführt. Das heterogene Rauschmodell, beschrieben in Abschnitt~\ref{sec:hinzufügen_von_rauschen}, überlagert die erzeugten Signale additiv als Beobachtungsrauschen und wirkt damit unabhängig vom \ac{CD}. Die rauschfreien Aktuatorsignale dienen als Eingang eines Wiener-Modells, das eine gewichtete Summation, ein weiteres $\mathrm{PT}_1$-Glied zur Abbildung der Prozessträgheit und eine statische Nichtlinearität in Serie schaltet; sein Ausgang $y$ bildet die beobachtete Systemantwort. Das Wiener-Modell wird in Abschnitt~\ref{sec:systemantwort} näher spezifiziert und auf den vorliegenden Fall angewandt. Die gesamte Datenstromsynthese wurde in Python implementiert.
-Der erzeugte Datenstrom bildet die Grundlage der anschließenden Verarbeitungskette aus Modellierung, Detektion und Adaption. Zunächst wird der synthetische Prozess in Abschnitt~\ref{sec:datensynthese_modellierung} modelliert, wobei ein \ac{MLP} sowie ein Kalman- und ein Extended-Kalman-Filter gegenübergestellt werden. Aufbauend auf dem Simulationsfehler des \ac{MLP} behandelt Abschnitt~\ref{sec:datensynthese_drift_erkennung} die Detektion des \ac{CD}. Abschnitt~\ref{sec:datensynthese_drift_adaption} schließt die Kette mit der Adaption des Modells an den drift-behafteten Prozess ab.
+Der erzeugte Datenstrom bildet die Grundlage der anschließenden Verarbeitungskette aus Modellierung, Detektion und Adaption. Zunächst wird der synthetische Prozess in Abschnitt~\ref{sec:syn_modellierung} modelliert, wobei ein \ac{MLP} sowie ein Kalman- und ein Extended-Kalman-Filter gegenübergestellt werden. Aufbauend auf dem Simulationsfehler des \ac{MLP} behandelt Abschnitt~\ref{sec:datensynthese_drift_erkennung} die Detektion des \ac{CD}. Abschnitt~\ref{sec:datensynthese_drift_adaption} schließt die Kette mit der Adaption des Modells an den drift-behafteten Prozess ab.
 %
 \begin{figure}[bt!]
     \centering
@@ -260,7 +260,7 @@ Gaussian-Mixture-Dichte bezeichnet. \par
 %
 Abbildung~\ref{fig:wiener_output} zeigt exemplarisch den Verlauf der verrauschten drift-freien Systemantwort $y[k]$ sowie der verrauschten drift-behafteten Systemantwort $\tilde{y}[k]$ in einem Zeitfenster um einen \emph{Sudden drift}. Die Linearkombination der beiden Eingangssignale erfolgt dabei mit den Gewichtungskoeffizienten $\alpha_1 = \paramAlphaOne$, $\alpha_2 = \paramAlphaTwo$ und $\beta = \paramBeta$, der Driftkoeffizient beträgt $\kappa_y = \paramKappaY$ und die Zeitkonstante der Prozessdynamik $T_y = \paramTy$. Die systematische Verschiebung des Ausgangsniveaus, die durch den direkten Drifteinfluss sowie die veränderte $\mathrm{PT}_1$-Dynamik verursacht wird, ist dabei gut zu erkennen. 
 %
-\subsection{Modellierung} \label{sec:datensynthese_modellierung}
+\subsection{Modellierung} \label{sec:syn_modellierung}
 %
 \input{\resultsdir syn_model_error.tex}
 %
@@ -380,9 +380,9 @@ Erwartungsgemäß können auch die Filterverfahren den Drift mit ihrer quasi-sta
 %
 \input{\resultsdir syn_detection.tex}
 %
-Zur Detektion des in Abschnitt \ref{sec:syn_drift} generierten \ac{CD} werden die in Abschnitt~\ref{sec:drift_erkennung} eingeführten Performance-basierten Drift-Detektoren herangezogen. Als Eingangssignal der Detektion dient der normierte Simulationsfehler des in Abschnitt \ref{sec:datensynthese_modellierung} eingeführten MLP, dessen Architektur auch im ausgehenden Anwendungsfall der Mühle verwendet wird. Konkret kommen als Detektionsverfahren die beiden Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN} sowie die beiden auf statistischer Prozesskontrolle beruhenden Verfahren \ac{DDM} und \ac{EDDM} zum Einsatz. \par
+Zur Detektion des in Abschnitt \ref{sec:syn_drift} generierten \ac{CD} werden die in Abschnitt~\ref{sec:drift_erkennung} eingeführten Performance-basierten Drift-Detektoren herangezogen. Als Eingangssignal der Detektion dient der normierte Simulationsfehler des in Abschnitt \ref{sec:syn_modellierung} eingeführten MLP, dessen Architektur auch im ausgehenden Anwendungsfall der Mühle verwendet wird. Konkret kommen als Detektionsverfahren die beiden Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN}, die beiden auf statistischer Prozesskontrolle beruhenden Verfahren \ac{DDM} und \ac{EDDM} sowie ein Schwellwert-Detektor zum Einsatz. Letzterer bildet die Performance-basierte Erkennung in ihrer einfachsten Form ab, indem er anschlägt, sobald der über ein gleitendes Fenster berechnete \ac{RMSE} des Simulationsfehlers einen Schwellwert überschreitet. Er kommt damit ohne statistischen Test und ohne Warnstufe aus und dient als Referenz, an der sich der Mehraufwand der übrigen vier Verfahren messen lassen muss. \par
 %
-Wie bereits in Abschnitt~\ref{sec:drift_erkennung} beschrieben, verarbeiten die Fenster-basierten Verfahren eine kontinuierliche Größe und verwenden daher hier den Betrag des Simulationsfehlers $|e[k]|$. \ac{DDM} und \ac{EDDM} hingegen basieren auf Fehlerraten und sind ursprünglich auf binäre Fehlersignale ausgelegt, wie sie bei Klassifikationsaufgaben durch korrekte oder falsche Modellentscheidungen entstehen. Ein solches binäres Fehlersignal existiert für die vorliegende Regressionsaufgabe jedoch nicht, sodass der kontinuierliche Fehler vor der Auswertung binarisiert werden muss. Dazu wird ein Schwellenwert $\lambda_{\mathrm{bin}}$ eingeführt, der den Fehler in einen korrekten ($|e[k]| \le \lambda_{\mathrm{bin}}$) und einen fehlerhaften Zustand ($|e[k]| > \lambda_{\mathrm{bin}}$) übersetzt. Da der Fehler in Abschnitt~\ref{sec:datensynthese_modellierung} auf Einheitsvarianz normiert wurde, entspricht der Schwellenwert einem Vielfachen der Standardabweichung. \par
+Wie bereits in Abschnitt~\ref{sec:drift_erkennung} beschrieben, verarbeiten die Fenster-basierten Verfahren eine kontinuierliche Größe und verwenden daher hier, ebenso wie der Schwellwert-Detektor, den Betrag des Simulationsfehlers $|e[k]|$. \ac{DDM} und \ac{EDDM} hingegen basieren auf Fehlerraten und sind ursprünglich auf binäre Fehlersignale ausgelegt, wie sie bei Klassifikationsaufgaben durch korrekte oder falsche Modellentscheidungen entstehen. Ein solches binäres Fehlersignal existiert für die vorliegende Regressionsaufgabe jedoch nicht, sodass der kontinuierliche Fehler vor der Auswertung binarisiert werden muss. Dazu wird ein Schwellenwert $\lambda_{\mathrm{bin}}$ eingeführt, der den Fehler in einen korrekten ($|e[k]| \le \lambda_{\mathrm{bin}}$) und einen fehlerhaften Zustand ($|e[k]| > \lambda_{\mathrm{bin}}$) übersetzt. Da der Fehler in Abschnitt~\ref{sec:syn_modellierung} auf Einheitsvarianz normiert wurde, entspricht der Schwellenwert einem Vielfachen der Standardabweichung. \par
 %
 Ein wesentlicher Unterschied zum Mühlen-Anwendungsfall besteht darin, dass der synthetische Datenstrom die Drift-Zeitpunkte als \emph{Ground Truth} bereitstellt. Aus $c[k]$ werden dazu zwei Referenzgrößen abgeleitet: die Menge der \emph{Sudden Drifts} als Indizes der sprungartigen Anstiege an den Segmentgrenzen sowie eine Unterscheidung zwischen drift-aktiven und drift-inaktiven Phasen. Obwohl sich $c[k]$ kontinuierlich verändert, gilt ein Zeitschritt als drift-inaktiv (bzw.\ \emph{stabil}), wenn die Driftamplitude unter $10\,\%$ ihres Maximalwerts bleibt:
 %
@@ -394,19 +394,34 @@ Ein wesentlicher Unterschied zum Mühlen-Anwendungsfall besteht darin, dass der 
 andernfalls gilt der Zeitschritt als drift-aktiv. Auf dieser Grundlage wird die Detektionsgüte über drei Kennzahlen erfasst: 
 %
 \begin{itemize}
-    \item der \emph{Recall} $\rho$ der Sudden Drifts, also der Anteil der erkannten Sudden Drifts (innerhalb eines Toleranzfensters von $n_{\mathrm{tol}} = \paramNTol$ Abtastschritten) 
+    \item der \emph{Recall} $\rho$ der Sudden Drifts, also der Anteil der erkannten Sudden Drifts innerhalb eines Toleranzfensters von $n_{\mathrm{tol}} = \paramNTol$ Abtastschritten
     \item der mittlere \emph{Detektionsverzug} $\bar{d}$ zwischen Sprung und zugehöriger Detektion
-    \item die Zahl $N_{\mathrm{fa}}$ der \emph{Fehlalarme} in stabilen Phasen
+    \item die Zahl $N_{\mathrm{fa}}$ der \emph{Fehlalarme} \\
+    Der weit überwiegende Teil des Stroms ist nach \eqref{eq:drift_aktiv} drift-behaftet. Gezählt wird daher jede Detektion, die keinem Sudden Drift zugeordnet werden kann. Das Toleranzfenster umfasst dabei $\paramNTolPct\,\%$ des mittleren Abstands zweier Sudden Drifts.
 \end{itemize}
 %
 Diese drei Kennzahlen werden zu einer skalaren Zielfunktion
 %
 \begin{equation}
-    J_{\mathrm{d}} = \omega_{\rho} \, (1 - \rho) + \omega_{d} \, \frac{\bar{d}}{n_{\mathrm{tol}}} + \omega_{\mathrm{fa}} \, \frac{N_{\mathrm{fa}}}{N_{\mathrm{sd}}}
+    J_{\mathrm{d}} = \omega_{\rho} \, (1 - \rho)
+    + \omega_{d} \, \frac{\bar{d}}{n_{\mathrm{tol}}}
+    + \omega_{\mathrm{fa}} \, \min\!\left(1, \;
+      \frac{\log_{10}\!\left(1 + N_{\mathrm{fa}} / N_{\mathrm{sd}}\right)}{D}\right)
     \label{eq:detektion_score}
 \end{equation}
 %
-zusammengefasst, wobei $N_{\mathrm{sd}}$ die Zahl der Sudden Drifts bezeichnet. Die Gewichte werden mit $\omega_{\rho} = 3{,}0$, $\omega_{d} = 0{,}3$ und $\omega_{\mathrm{fa}} = 0{,}05$ so gewählt, dass eine vollständige Detektion der Sudden Drifts gegenüber Verzug und Fehlalarmen priorisiert wird. \par
+zusammengefasst, wobei $N_{\mathrm{sd}}$ die Zahl der Sudden Drifts bezeichnet. Die Gewichte werden mit $\omega_{\rho} = \paramWRecall$, $\omega_{d} = \paramWDelay$ und $\omega_{\mathrm{fa}} = \paramWFa$ so gewählt, dass eine vollständige Detektion der Sudden Drifts gegenüber Verzug und Fehlalarmen priorisiert wird. Der Fehlalarmterm ist logarithmisch gestaltet und über $D = \paramFaDecades$ so gestreckt, dass er zwischen einigen wenigen und einigen tausend Fehlalarmen den gesamten Wertebereich abdeckt. \par
+%
+Der Recall allein ist als Gütemaß nicht aussagekräftig, solange die Zahl der Detektionen nicht mitbetrachtet wird. Ein Detektor, der hinreichend häufig meldet, erreicht bereits durch Zufall einen hohen Recall, ohne dass seine Meldungen mit Sprüngen zusammenhängen. Als Bezugsgröße dient deshalb das Zufallsniveau, also der Recall, den eine gleichverteilt zufällige Folge von $N_{\mathrm{det}}$ Detektionen auf einem Datenstrom der Länge $N$ im Erwartungswert erreicht,
+%
+\begin{equation}
+    \rho_{\mathrm{zuf}} = 1 - \exp\!\left(- \frac{N_{\mathrm{det}} \, n_{\mathrm{tol}}}{N}\right) \; .
+    \label{eq:detektion_zufallsniveau}
+\end{equation}
+%
+Der Abstand zwischen Recall und Zufallsniveau zeigt damit an, ob eine Detektion tatsächlich Informationen über den Zeitpunkt eines Sprungs trägt. Zusätzlich wird der Anteil der Detektionen innerhalb eines Toleranzfensters als \emph{Präzision} angegeben. Beide Größen gehen nicht in die Zielfunktion ein, sondern dienen als Einordnung der Ergebnisse. \par
+%
+Die Parameter der fünf Detektoren werden mit dem Optimierungsverfahren \texttt{Optuna} gegen $J_{\mathrm{d}}$ eingestellt. Um den Rechenaufwand zu begrenzen, wird der Datenstrom dafür um den Faktor $\paramDownsample$ ausgedünnt, wobei das Toleranzfenster im gleichen Verhältnis verkürzt wird. Die so gefundenen Kandidaten sind somit auf einem verkürzten Datenstrom bewertet. Daher werden die $\paramTopK$ besten Kandidaten je Detektor anschließend auf dem vollständigen Datenstrom nachgerechnet. Diese Nachrechnung entscheidet über die endgültige Parametrierung. \par
 %
 \begin{figure}[tbp]
     \centering
@@ -419,13 +434,6 @@ zusammengefasst, wobei $N_{\mathrm{sd}}$ die Zahl der Sudden Drifts bezeichnet. 
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{\plotdir syn_detection_adwin.pgf}
-        \caption{\ac{ADWIN}}
-        \label{fig:synthetic_data_detection_adwin}
-    \end{subfigure}
-
-    \begin{subfigure}[t]{\textwidth}
-        \centering
         \input{\plotdir syn_detection_ddm.pgf}
         \caption{\ac{DDM}}
         \label{fig:synthetic_data_detection_ddm}
@@ -433,66 +441,73 @@ zusammengefasst, wobei $N_{\mathrm{sd}}$ die Zahl der Sudden Drifts bezeichnet. 
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{\plotdir syn_detection_eddm.pgf}
-        \caption{\ac{EDDM}}
-        \label{fig:synthetic_data_detection_eddm}
+        \input{\plotdir syn_detection_rmse.pgf}
+        \caption{Schwellwert-Detektor}
+        \label{fig:synthetic_data_detection_rmse}
     \end{subfigure}
-    \caption{Erkannte Drifts verschiedener Detektionsmethoden auf dem normierten Simulationsfehler im Vergleich zum Driftsignal $c[k]$}
+    \caption{Erkannte Drifts ausgewählter Detektionsmethoden auf dem normierten Simulationsfehler im Vergleich zum Driftsignal $c[k]$}
     \label{fig:synthetic_data_detection_comparison}
 \end{figure}
 %
-Abbildung~\ref{fig:synthetic_data_detection_comparison} stellt die erkannten Drifts der vier Parameter-optimierten Detektoren (\subref{fig:synthetic_data_detection_kswin}) \ac{KSWIN}, (\subref{fig:synthetic_data_detection_adwin}) \ac{ADWIN}, (\subref{fig:synthetic_data_detection_ddm}) \ac{DDM} und (\subref{fig:synthetic_data_detection_eddm}) \ac{EDDM} dem Driftsignal $c[k]$ gegenüber. Die zugehörigen Kennzahlen fasst Tabelle~\ref{tab:synthetic_data_detection_stats} zusammen. Ausgewertet wird der gesamte Datenstrom über ein Kalenderjahr, der an seinen Segmentgrenzen vier Sudden Drifts aufweist (vgl. Abbildung \ref{fig:synthetic_concept_drift}). Die Abbildung zeigt davon exemplarisch die ersten sechs Monate.
-Eine Besonderheit der Fenster-basierten Verfahren ist, dass sie den fortlaufenden \emph{Incremental Drift} innerhalb eines Segments nicht als einmaliges Ereignis, sondern kontinuierlich als wiederholte Verteilungsänderung detektieren. Dies führt zu einer dichten Folge von Detektionen über die gesamte aktive Driftphase. Für die grafische Darstellung wird daher für \ac{KSWIN} und \ac{ADWIN} eine Refraktärzeit von $\paramRefract$ Abtastschritten eingeführt, innerhalb derer nach einer Detektion weitere Detektionen unterdrückt werden. \ac{DDM} und \ac{EDDM} bleiben davon unberührt. Die in Tabelle~\ref{tab:synthetic_data_detection_stats} dargestellten Kennzahlen sind jedoch auf der vollständigen Detektionsfolge ohne Refraktärzeit berechnet. \par
+Abbildung~\ref{fig:synthetic_data_detection_comparison} stellt die erkannten Drifts mit den Parameter-optimierten Detektoren dem Driftsignal $c[k]$ gegenüber. Zu sehen ist dabei \ac{KSWIN} als Fenster-basiertes Verfahren (\subref{fig:synthetic_data_detection_kswin}), \ac{DDM} als Fehlerraten-basiertes Verfahren (\subref{fig:synthetic_data_detection_ddm}) sowie der Schwellwert-Detektor (\subref{fig:synthetic_data_detection_rmse}). \ac{ADWIN} und \ac{EDDM} verhalten sich qualitativ wie ihre Pendants derselben Detektor-Klasse. Die zugehörigen Kennzahlen fasst Tabelle~\ref{tab:synthetic_data_detection_stats} zusammen. Ausgewertet wird der gesamte Datenstrom über ein Kalenderjahr, der an seinen Segmentgrenzen vier Sudden Drifts aufweist (vgl. Abbildung \ref{fig:synthetic_concept_drift}). Die Abbildung zeigt davon exemplarisch die ersten sechs Monate.
+Eine Eigenschaft der Fenster-basierten Verfahren und des Schwellwert-Detektors ist, dass sie den fortlaufenden \emph{Incremental Drift} innerhalb eines Segments nicht als einmaliges Ereignis, sondern kontinuierlich als wiederholte Verteilungsänderung detektieren. Dies führt zu einer dichten Folge von Detektionen über die gesamte aktive Driftphase. Für die grafische Darstellung wird daher für diese drei Verfahren eine Refraktärzeit von $\paramRefract$ Abtastschritten eingeführt, innerhalb derer nach einer Detektion weitere Detektionen unterdrückt werden. \ac{DDM} und \ac{EDDM} bleiben davon unberührt. Die in Tabelle~\ref{tab:synthetic_data_detection_stats} dargestellten Kennzahlen sind jedoch auf der vollständigen Detektionsfolge ohne Refraktärzeit berechnet. \par
 %
 Auswertend lässt sich festhalten, dass \ac{KSWIN} und \ac{ADWIN} sämtliche Segmentsprünge zuverlässig und mit geringem Verzug erkennen (vgl. Tabelle~\ref{tab:synthetic_data_detection_stats}). Zugleich zeichnen sie den fortlaufenden Incremental Drift nach, was sich ohne Refraktärzeit in einer Vielzahl von Einzeldetektionen äußert. Mit Refraktärzeit reduziert sich diese auf wenige Detektionen, die die aktiven Drifts zuverlässig markieren. Diese hohe Sensitivität geht jedoch mit vergleichsweise vielen Fehlalarmen in stabilen Phasen gemäß \eqref{eq:drift_aktiv} einher. \par
 %
-\ac{DDM} und \ac{EDDM} verhalten sich demgegenüber deutlich konservativer. Beide erfassen sämtliche Segmentsprünge, markieren den fortlaufenden Incremental Drift jedoch deutlich spärlicher und lösen in stabilen Phasen gemäß \eqref{eq:drift_aktiv} keine Fehlalarme aus. Dieses Verhalten ist eine unmittelbare Folge der Binarisierung: Da nur Fehlerbeträge oberhalb von $\lambda_{\mathrm{bin}}$ einfließen, reagieren beide Verfahren vorrangig auf ausgeprägte Fehlerexkursionen und bleiben gegenüber schwächeren Änderungen vergleichsweise unempfindlich. Ihre Fehlalarmfreiheit erkaufen sie jedoch mit einem deutlich höheren Detektionsverzug als die Fenster-basierten Verfahren. \par
+\ac{DDM} und \ac{EDDM} verhalten sich demgegenüber deutlich konservativer. Beide erfassen sämtliche Segmentsprünge, markieren den fortlaufenden Incremental Drift jedoch deutlich spärlicher und melden über den gesamten Strom nur wenige Dutzend Male. Dieses Verhalten ist eine unmittelbare Folge der Binarisierung. Da nur Fehlerbeträge oberhalb von $\lambda_{\mathrm{bin}}$ einfließen, reagieren beide Verfahren vorrangig auf ausgeprägte Fehlerverläufe und bleiben gegenüber schwächeren Änderungen vergleichsweise unempfindlich. Ihre sparsame Meldung geht im Vergleich zu den Fenster-basierten Verfahren mit einem deutlich höheren Detektionsverzug einher. \par
+%
+Der Schwellwert-Detektor ordnet sich zwischen beiden Klassen ein. Er reagiert wie die Fenster-basierten Verfahren unmittelbar auf den steigenden Fehlerbetrag und meldet daher über die aktiven Driftphasen hinweg wiederholt, bleibt dabei aber deutlich sparsamer, weil sein gleitendes Fenster erst bei anhaltend erhöhtem Fehler anschlägt. In den stabilen Phasen gemäß \eqref{eq:drift_aktiv} meldet er, wie \ac{DDM} und \ac{EDDM}, überhaupt nicht. Sein Detektionsverzug liegt entsprechend zwischen dem der beiden Klassen. \par
 %
 \begin{table}[tbp]
 \centering
-\caption{Kennzahlen der vier Drift-Detektoren auf dem normierten Simulationsfehler des drift-behafteten Stroms}
+\caption{Kennzahlen der fünf Drift-Detektoren auf dem normierten Simulationsfehler des drift-behafteten Stroms}
 \label{tab:synthetic_data_detection_stats}
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccc}
 \toprule
-\textbf{Detektor} & Recall $\rho$ & Verzug $\bar{d}$ & Fehlalarme $N_{\mathrm{fa}}$ & Detektionen \\
+\textbf{Detektor} & Recall $\rho$ & Zufallsniveau $\rho_{\mathrm{zuf}}$ & Verzug $\bar{d}$ & Fehlalarme $N_{\mathrm{fa}}$ & Detektionen \\
 \midrule
-\ac{KSWIN} & $\driftKSWINRecall$ & $\driftKSWINDelay$ & $\driftKSWINFalse$ & $\driftKSWINDrifts$ \\
-\ac{ADWIN} & $\driftADWINRecall$ & $\driftADWINDelay$ & $\driftADWINFalse$ & $\driftADWINDrifts$ \\
-\ac{DDM}   & $\driftDDMRecall$   & $\driftDDMDelay$   & $\driftDDMFalse$   & $\driftDDMDrifts$   \\
-\ac{EDDM}  & $\driftEDDMRecall$  & $\driftEDDMDelay$  & $\driftEDDMFalse$  & $\driftEDDMDrifts$  \\
+\ac{KSWIN} & $\driftKSWINRecall$ & $\driftKSWINChance$ & $\driftKSWINDelay$ & $\driftKSWINFalse$ & $\driftKSWINDrifts$ \\
+\ac{ADWIN} & $\driftADWINRecall$ & $\driftADWINChance$ & $\driftADWINDelay$ & $\driftADWINFalse$ & $\driftADWINDrifts$ \\
+\ac{DDM}   & $\driftDDMRecall$   & $\driftDDMChance$   & $\driftDDMDelay$   & $\driftDDMFalse$   & $\driftDDMDrifts$   \\
+\ac{EDDM}  & $\driftEDDMRecall$  & $\driftEDDMChance$  & $\driftEDDMDelay$  & $\driftEDDMFalse$  & $\driftEDDMDrifts$  \\
+Schwellwert & $\driftRMSERecall$ & $\driftRMSEChance$  & $\driftRMSEDelay$  & $\driftRMSEFalse$  & $\driftRMSEDrifts$  \\
 \bottomrule
 \end{tabular}
 \end{table}
 %
-Insgesamt erfassen die Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN} sämtliche Sudden Drifts sowie den Incremental Drift fortlaufend, was eine hohe Reaktionsfähigkeit ermöglicht, jedoch mit zahlreichen Fehlalarmen einhergeht. Die Fehlerraten-basierten Verfahren \ac{DDM} und \ac{EDDM} liefern demgegenüber eine spärlichere, fehlalarmfreie Detektion. Welches Verhalten vorzuziehen ist, hängt damit von der angestrebten Adaptionsstrategie ab. \par
+Tabelle~\ref{tab:synthetic_data_detection_stats} stellt für jeden der fünf Detektoren den erreichten Recall, das zugehörige Zufallsniveau, den mittleren Verzug sowie die Zahl der Fehlalarme und der Detektionen insgesamt gegenüber. Alle fünf Verfahren erkennen nach der Parameteroptimierung sämtliche Sudden Drifts, sodass die Unterscheidung allein über die übrigen Kennzahlen erfolgt. Die Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN} melden dabei über den gesamten Datenstrom hinweg um mehr als eine Größenordnung häufiger als die Fehlerraten-basierten Verfahren, wodurch ihr Zufallsniveau nahe an den erreichten Recall heranrückt. Sie erreichen ihren vollständigen Recall damit im Wesentlichen durch die schiere Zahl ihrer Detektionen. \ac{DDM} und \ac{EDDM} liegen demgegenüber mit einem Zufallsniveau von $\driftDDMChance$ und $\driftEDDMChance$ weit darunter. Der Schwellwert-Detektor liegt in seiner Meldungsdichte zwischen den beiden Klassen, und sein Abstand zum Zufallsniveau bleibt deutlich größer als der der Fenster-basierten Verfahren. Seine Meldungen kommen also seltener zufällig zustande, obwohl er ohne statistischen Test auskommt. \par
+%
+Welches Verhalten vorzuziehen ist, hängt von der angestrebten Adaptionsstrategie ab. Eine Adaption, die auf jede Meldung hin nachtrainiert, ist auf eine sparsame und zeitlich aussagekräftige Detektion angewiesen, da jede überflüssige Meldung Rechenzeit bindet und das Modell ohne Anlass verändert. Unter diesem Gesichtspunkt sind \ac{DDM}, \ac{EDDM} und der Schwellwert-Detektor vorzuziehen, deren Meldungen deutlich seltener zufällig zustande kommen. Wird die Detektion dagegen nur als ergänzendes Signal neben einem festen Nachtrainingsraster verwendet, fällt der höhere Verzug der Fehlerraten-basierten Verfahren stärker ins Gewicht als deren Sparsamkeit. \par
 %
 \subsection{Drift-Adaption} \label{sec:datensynthese_drift_adaption}
 %
 \input{\resultsdir syn_adaptation.tex}
 %
-Nachdem der \ac{CD} im vorigen Abschnitt detektiert werden konnte, besteht der abschließende Schritt der Verarbeitungskette darin, das in Abschnitt~\ref{sec:datensynthese_modellierung} eingeführte \ac{MLP} an den drift-behafteten Prozess zu adaptieren und damit der Modellverschlechterung entgegenzuwirken. Methodisch werden drei Varianten dem drift-behafteten Modell gegenübergestellt: 
+Nachdem der \ac{CD} im vorigen Abschnitt detektiert werden konnte, besteht der abschließende Schritt der Verarbeitungskette darin, das in Abschnitt~\ref{sec:syn_modellierung} eingeführte \ac{MLP} an den drift-behafteten Prozess zu adaptieren und damit der Modellverschlechterung entgegenzuwirken. Methodisch werden vier Varianten dem drift-behafteten Modell gegenübergestellt: 
 %
 \begin{itemize}
     \item eine \emph{passive} Adaption
+    \item eine \emph{passive} Adaption mit \emph{Recurrence-Selektor}
     \item eine \emph{aktive} Adaption
-    \item deren \emph{Kombination}
+    \item eine \emph{Kombination} aus passiver und aktiver Adaption
 \end{itemize}
 %
-Passive und aktive Adaption sowie deren Kombination werden im Folgenden zunächst definiert und anschließend methodisch ausgestaltet. \par
+Die vier Varianten werden im Folgenden zunächst definiert und anschließend methodisch ausgestaltet. \par
 %
-Allen adaptiven Strategien liegt ein inkrementelles Nachtraining des \ac{MLP} zugrunde. Anstatt das Modell vollständig neu zu trainieren, wird das bestehende Netz schrittweise an die veränderten Zusammenhänge angepasst. Dabei werden ausgewählte Layer des Netzes eingefroren, während die verbleibenden Schichten mit kleiner Lernrate über wenige Epochen mit dem Adam-Optimierer und dem \ac{MSE} als Verlustfunktion nachtrainiert werden. Ein Early-Stopping-Kriterium bricht das Training bei ausbleibender Verbesserung vorzeitig ab und begrenzt so das Risiko eines Overfitting an einen kurzen, lokalen Datenausschnitt. Zusätzlich wird jedes Nachtraining validiert: Senkt es den \ac{MSE} auf dem eigenen Trainingsfenster nicht, wird das Update verworfen und der vorherige Gewichtsstand wiederhergestellt. Das Einfrieren von Layern, die kleine Lernrate sowie das Early-Stopping wirken dabei dem in Abschnitt~\ref{sec:drift_adaption} beschriebenen \emph{Stability-Plasticity-Dilemma} entgegen, indem sie die Plastizität gezielt begrenzen. Im Gegensatz zum initialen Training auf dem drift-freien Referenzzeitraum (vgl. Abschnitt~\ref{sec:datensynthese_modellierung}) werden für die Adaption die drift-behafteten Eingangssignale $\tilde{u}_i^{\mathrm{f}}[k]$ als Features und die ebenfalls drift-behaftete Systemantwort $\tilde{y}^{\mathrm{f}}[k]$ als Label verwendet. Die kontinuierliche Verfügbarkeit des Labels entspricht dabei dem Mühlen-Anwendungsfall, in dem die Zielgröße sensorisch fortlaufend erfasst wird. \par
+Allen adaptiven Strategien liegt ein inkrementelles Nachtraining des \ac{MLP} zugrunde. Anstatt das Modell vollständig neu zu trainieren, wird das bestehende Netz schrittweise an die veränderten Zusammenhänge angepasst. Dabei werden ausgewählte Layer des Netzes eingefroren, während die verbleibenden Schichten mit kleiner Lernrate über wenige Epochen mit dem Adam-Optimierer und dem \ac{MSE} als Verlustfunktion nachtrainiert werden. Ein Early-Stopping-Kriterium bricht das Training bei ausbleibender Verbesserung vorzeitig ab und begrenzt so das Risiko eines Overfitting an einen kurzen, lokalen Datenausschnitt. Zusätzlich wird jedes Nachtraining validiert: Senkt es den \ac{MSE} auf dem eigenen Trainingsfenster nicht, wird das Update verworfen und der vorherige Gewichtsstand wiederhergestellt. Das Einfrieren von Layern, die kleine Lernrate sowie das Early-Stopping wirken dabei dem in Abschnitt~\ref{sec:drift_adaption} beschriebenen \emph{Stability-Plasticity-Dilemma} entgegen, indem sie die Plastizität gezielt begrenzen. Im Gegensatz zum initialen Training auf dem drift-freien Referenzzeitraum (vgl. Abschnitt~\ref{sec:syn_modellierung}) werden für die Adaption die drift-behafteten Eingangssignale $\tilde{u}_i^{\mathrm{f}}[k]$ als Features und die ebenfalls drift-behaftete Systemantwort $\tilde{y}^{\mathrm{f}}[k]$ als Label verwendet. Die kontinuierliche Verfügbarkeit des Labels entspricht dabei dem Mühlen-Anwendungsfall, in dem die Zielgröße sensorisch fortlaufend erfasst wird. \par
 %
 Zur Adaption wird der Strom auf ein gröberes Abtastraster mit dem Adaptionsintervall $T_{\mathrm{a}} = \paramTa$ reduziert, was $\num{\paramNPoints}$ Datenpunkten entspricht, und anschließend chunk-weise verarbeitet. Ein \emph{Chunk} bezeichnet in dem Zusammenhang einen zusammenhängenden Abschnitt des Datenstroms fester Länge -- hier etwa einen Tag bzw.\ $\num{\paramChunk}$ Datenpunkte -- und bildet die Einheit, auf der über eine Anpassung entschieden wird. Der Strom wird somit nicht punktweise, sondern blockweise in solchen Chunks durchlaufen. Innerhalb eines Chunks wird der Strom zunächst in einem Durchgang prädiziert und daraus der Simulationsfehler bestimmt. Anschließend werden die Strategie-spezifischen Bedingungen geprüft und nur bei Bedarf das Nachtraining ausgelöst. Die Verarbeitung folgt durchgängig dem prequentiellen Prinzip (\emph{test-then-train}). Jeder Datenpunkt wird dabei zunächst prädiziert und fließt erst danach in ein etwaiges Nachtraining ein. Trainingsfenster greifen hier zu keinem Zeitpunkt auf zukünftige Datenpunkte zu. \par
 % --- Strategien ---
-Die \emph{passive} Adaption setzt die in Abschnitt~\ref{sec:drift_adaption} eingeführte \emph{blinde} Anpassung um. Sie ist rein proaktiv und benötigt weder Fehlerauswertung noch Detektor. In festen Abständen von $N_{\mathrm{p}}$ Punkten wird das Modell auf dem gleitenden Fenster der letzten $N_{\mathrm{w}}$ Punkte nachtrainiert und so eine kontinuierliche Grundadaption bereitgestellt, deren Eingriffsdichte allein über die Periode $N_{\mathrm{p}}$ gesteuert wird. \par
+Die \emph{passive} Adaption setzt die in Abschnitt~\ref{sec:drift_adaption} eingeführte \emph{blinde} Anpassung um. Sie ist rein proaktiv und benötigt weder Fehlerauswertung noch Detektor. In festen Abständen von $n_{\mathrm{p}}$ Punkten wird das Modell auf dem gleitenden Fenster der letzten $n_{\mathrm{w}}$ Punkte nachtrainiert und so eine kontinuierliche Grundadaption bereitgestellt, deren Eingriffsdichte allein über die Periode $n_{\mathrm{p}}$ gesteuert wird. \par
+%
+Eine Variante der passiven Adaption ergänzt das Trainingsfenster um einen \emph{Recurrence-Selektor}. Neben den letzten $n_{\mathrm{w}}$ Punkten werden dabei zurückliegende Punkte aus einem Rückblickhorizont $n_{\mathrm{h}}$ hinzugezogen, deren Fehler unter dem aktuellen Modell höchstens um $\lambda_{\mathrm{rec}}$ vom mittleren Fehler des aktuellen Fensters abweicht, höchstens jedoch $N_{\mathrm{rec}}$ Stück. Der Selektor greift damit den in Abschnitt~\ref{sec:terminologie} beschriebenen \emph{Recurring Drift} auf, indem er einem wiederkehrenden Betriebszustand die bereits gesehenen Daten desselben Zustands zurückgibt, statt sie mit dem gleitenden Fenster zu verwerfen. Die Auswahl bleibt kausal, da ausschließlich Punkte vor dem aktuellen Fenster in Frage kommen. Die Eingriffsdichte bleibt gegenüber der rein periodischen Variante unverändert, allein die Zusammensetzung des Trainingsfensters ändert sich. \par
 %
 Die \emph{aktive} Adaption koppelt das Nachtraining hingegen an die Drift-Detektion aus Abschnitt~\ref{sec:datensynthese_drift_erkennung}. Erst ein erkannter Drift löst eine Anpassung aus, die dadurch zielgerichtet, zugleich aber von der Detektionsqualität abhängig ist. \par
 %
 Die \emph{kombinierte} Strategie soll beide Mechanismen zusammenführen, wobei die periodische passive Komponente als Rückfallebene (\emph{Backstop}) wirkt. Sie löst nur aus, wenn im selben Zeitraum keine detektor-getriggerte Anpassung erfolgt ist. Verpasst der Detektor eine Veränderung, fängt die periodische Komponente sie auf. \par
 % --- Methodik: Screening ---
-Da die aktive Strategie von der Wahl des Detektors abhängt, wird dieser nicht manuell festgelegt, sondern anhand eines Screenings bestimmt. Als Trigger stehen die vier statistischen Detektoren \ac{KSWIN}, \ac{ADWIN}, \ac{DDM} und \ac{EDDM} sowie ein Schwellwert-Detektor zur Auswahl. Der Schwellwert-Detektor bildet die performance-basierte Erkennung (Abschnitt~\ref{sec:drift_erkennung}) in ihrer einfachsten Form ab, indem er anschlägt, sobald der über ein gleitendes Fenster berechnete \ac{RMSE} des Simulationsfehlers $e[k]$ einen festgelegten Schwellwert überschreitet.
-Für jeden Trigger wird ein vollständiger Adaptionslauf durchgeführt. Derjenige Trigger mit dem kleinsten resultierenden \ac{RMSE} wird dann als aktive Strategie ausgewählt und als aktive Komponente der kombinierten Strategie übernommen. Die Anforderungen an den Detektor unterscheiden sich dabei von der reinen Detektions-Evaluation aus Abschnitt~\ref{sec:datensynthese_drift_erkennung}, denn im geschlossenen Kreis arbeitet er auf dem Simulationsfehler $e[k]$ des sich fortlaufend ändernden Modells, dessen Niveau sich mit jeder Anpassung verschiebt.
-Fehlerraten-basierte Verfahren wie \ac{DDM} oder \ac{EDDM} setzen dazu den Betrag des Simulationsfehlers $|e[k]|$ über die in Abschnitt~\ref{sec:datensynthese_drift_erkennung} eingeführte Schwelle $\lambda_{\mathrm{bin}}$ in ein binäres Richtig/Falsch-Signal um. Diese Schwelle ist am Fehlerniveau des statischen Modells festgelegt. Sobald die laufende Adaption dieses Niveau absenkt, passt sie nicht mehr, und der Detektor arbeitet außerhalb seines vorgesehenen Betriebspunkts. Die Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN} vergleichen dagegen ein aktuelles Detektionsfenster mit einem mitlaufenden Referenzfenster und kommen ohne fest kalibrierten Schwellwert aus, sodass sie vom absoluten Fehlerniveau kaum betroffen sind. Um für alle Verfahren einen passenden Betriebspunkt zu erhalten, werden die Detektorparameter nicht aus der reinen Detektion übernommen, sondern im geschlossenen Adaptionskreis neu abgestimmt. \par
+Da die aktive Strategie von der Wahl des Detektors abhängt, wird dieser nicht manuell festgelegt, sondern anhand eines Screenings bestimmt. Als Trigger stehen die fünf in Abschnitt~\ref{sec:datensynthese_drift_erkennung} untersuchten Detektoren zur Auswahl. Für jeden von ihnen werden die Hyperparameter mit reduziertem Budget abgestimmt und die gefundene Konfiguration anschließend auf dem voll aufgelösten Strom über mehrere Zufalls-Seeds nachgerechnet, da die Abstände zwischen den Triggern kleiner ausfallen als die Streuung eines einzelnen Triggers. Dabei gelten alle Trigger als gleichwertig, deren Abstand zum besten in einem gepaarten $t$-Test nicht signifikant ist. Bevorzugt wird dann das Verfahren mit den wenigsten Annahmen, also der geringsten Komplexität. Der so bestimmte Trigger wird mit vollem Budget nachgetunt und als aktive Komponente auch der kombinierten Strategie übernommen. Im vorliegenden Fall führt \ac{KSWIN} das Screening knapp an, ist vom Schwellwert-Detektor jedoch statistisch nicht zu unterscheiden, sodass der Schwellwert-Detektor als Trigger zum Einsatz kommt. Die Anforderungen an den Detektor unterscheiden sich dabei von der reinen Detektions-Evaluation aus Abschnitt~\ref{sec:datensynthese_drift_erkennung}, denn im geschlossenen Kreis arbeitet er auf dem Simulationsfehler $e[k]$ des sich fortlaufend ändernden Modells, dessen Niveau sich mit jeder Anpassung verschiebt.
+Fehlerraten-basierte Verfahren wie \ac{DDM} oder \ac{EDDM} setzen dazu den Betrag des Simulationsfehlers $|e[k]|$ über die in Abschnitt~\ref{sec:datensynthese_drift_erkennung} eingeführte Schwelle $\lambda_{\mathrm{bin}}$ in ein binäres Richtig/Falsch-Signal um. Diese Schwelle ist am Fehlerniveau des statischen Modells festgelegt. Sobald die laufende Adaption dieses Niveau absenkt, passt sie nicht mehr, und der Detektor arbeitet außerhalb seines vorgesehenen Betriebspunkts. Dasselbe gilt für den Schwellwert-Detektor, dessen Schwelle unmittelbar auf dem Fehlerniveau liegt. Die Fenster-basierten Verfahren \ac{KSWIN} und \ac{ADWIN} vergleichen dagegen ein aktuelles Detektionsfenster mit einem mitlaufenden Referenzfenster und kommen ohne fest kalibrierten Schwellwert aus, sodass sie vom absoluten Fehlerniveau kaum betroffen sind. Um für alle Verfahren einen passenden Betriebspunkt zu erhalten, werden die Detektorparameter nicht aus der reinen Detektion übernommen, sondern im geschlossenen Adaptionskreis neu abgestimmt. \par
 % --- Methodik: Berechnung ---
 Wird bei der aktiven Strategie zum Zeitschritt $k_{\mathrm{d}}$ ein Drift erkannt, erfolgt unmittelbar ein Nachtraining auf dem zurückliegenden Fenster $[\,k_{\mathrm{d}} - n_{-},\, k_{\mathrm{d}}\,]$. Würde bis zum Nachtraining zunächst $n_{+}$ Punkte abgewartet um dem Nachtraining mehr Daten zur Verfügung zu stellen, entstünde eine Totzeit, in der der bereits detektierte Drift unberücksichtigt bliebe. Stattdessen wird das Modell während einer Nachführphase der Länge $n_{+}$ nachgeführt, das heißt am Ende jedes Chunks durch ein kurzes inkrementelles Nachtraining auf den zuletzt eingetroffenen Datenpunkten an die fortschreitende Veränderung angepasst. Detektionen innerhalb einer laufenden Phase verlängern diese lediglich, ohne ein weiteres Sofort-Training auszulösen. Der Eingriffsaufwand ist damit von der Detektionsdichte entkoppelt. Auch ein fenster-basiertes Verfahren, das den Incremental Drift als dichte Folge von Einzeldetektionen nachzeichnet (vgl. Abschnitt~\ref{sec:datensynthese_drift_erkennung}), wirkt so als Ereignis-Trigger. \par
 %
@@ -500,7 +515,7 @@ Zwischen zwei Sofort-Trainings wird zudem eine Refraktärzeit als Vielfaches der
 %
 Die Bewertung der Strategien erfolgt über den Simulationsfehler auf dem drift-behafteten Strom über das gesamte Kalenderjahr. Als Kennzahlen dienen der \ac{RMSE}, der Mittelwert $\bar{e}$ und die Streuung $\sigma$ des Fehlers, die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ sowie die Anzahl der ausgelösten Nachtrainings. 
 
-Letztere quantifiziert den Eingriffsaufwand der jeweiligen Strategie. Da das inkrementelle Nachtraining stochastisch ist, wird die Auswertung zusätzlich über \adaptNSeeds\ unabhängige Läufe mit unterschiedlichen Zufalls-Seeds wiederholt und jede Kennzahl als Mittelwert samt Streuung über diese Läufe zusammengefasst. Die Streuung über die Seeds dient dabei als Maß für die Reproduzierbarkeit einer Strategie. \par
+Letztere quantifiziert den Eingriffsaufwand der jeweiligen Strategie. Da das inkrementelle Nachtraining seine Trainingsdaten in zufälliger Reihenfolge durchläuft, endet es auch bei identischen Daten auf leicht unterschiedlichen Gewichten. Die Auswertung wird daher über \adaptNSeeds\ unabhängige Läufe mit unterschiedlichen Zufalls-Seeds wiederholt und jede Kennzahl als Mittelwert samt Streuung über diese Läufe zusammengefasst. Die Streuung über die Seeds dient dabei als Maß für die Reproduzierbarkeit einer Strategie. \par
 %
 Die Wirksamkeit der adaptiven Strategien hängt maßgeblich von ihren Hyperparametern ab. Diese werden daher analog zur Optimierung der Detektoren in Abschnitt~\ref{sec:datensynthese_drift_erkennung} je Strategie mit dem Optimierungsverfahren \texttt{Optuna} eingestellt. Im Unterschied zur Detektion erfordert jeder Versuch hier einen vollständigen Adaptionslauf mit wiederholtem Nachtraining und ist damit rechenintensiver. Das Tuning erfolgt dabei auf einem gröber abgetasteten Strom mit $T_{\mathrm{a}} = \paramTaTune$. Anders als bei der Detektion wird keine \emph{Ground Truth} der Drifts benötigt, da die gemessene Systemantwort als Label vorliegt und der \ac{RMSE} direkt bewertet werden kann. Die Zielfunktion kombiniert den auf den Fall ohne Adaption normierten \ac{RMSE} mit einem Strafterm für die Zahl der Nachtrainings, um den Eingriffsaufwand zu begrenzen:
 %
@@ -516,8 +531,8 @@ Optimiert werden die Lernrate, die Epochenzahl, das Freeze-Muster, das Reset-Ver
 %
 \begin{itemize}
     \item Die Refraktärzeit wird nicht als absolute Punktzahl, sondern als dimensionsloses Vielfaches der mittleren Dauer stationärer Betriebsphasen optimiert, sodass derselbe Wert im Tuning und in der Anwendung dieselbe physikalische Dauer bezeichnet und ohne Umskalierung übertragbar ist.
-    \item Die kombinierte Strategie erhält die Optima der beiden Einzelstrategien als Startkandidaten der Optimierung.
-    \item Die besten Konfigurationen aller drei Strategien werden abschließend auf dem voll aufgelösten Strom gegengeprüft, wobei je Strategie die dort beste Konfiguration übernommen wird.
+    \item Die kombinierte Strategie erhält die Optima der beiden Einzelstrategien als Startkandidaten der Optimierung, die Variante mit Recurrence-Selektor das Optimum der passiven Strategie.
+    \item Die besten Konfigurationen aller vier Strategien werden abschließend auf dem voll aufgelösten Strom gegengeprüft, wobei je Strategie die dort beste Konfiguration übernommen wird.
 \end{itemize}
 %
 Das Freeze-Muster, das ausschließlich das Output-Layer freigibt, ist für die Detektor-gestützten Strategien vom Suchraum ausgeschlossen. \par
@@ -533,9 +548,9 @@ Das Freeze-Muster, das ausschließlich das Output-Layer freigibt, ist für die D
 
     \begin{subfigure}[t]{\textwidth}
         \centering
-        \input{\plotdir syn_adaptation_blind.pgf}
-        \caption{Passive Adaption}
-        \label{fig:synthetic_data_adaptation_blind}
+        \input{\plotdir syn_adaptation_blind_rec.pgf}
+        \caption{Passive Adaption mit Recurrence-Selektor}
+        \label{fig:synthetic_data_adaptation_blind_rec}
     \end{subfigure}
 
     \begin{subfigure}[t]{\textwidth}
@@ -551,16 +566,16 @@ Das Freeze-Muster, das ausschließlich das Output-Layer freigibt, ist für die D
         \caption{Kombinierte Adaption}
         \label{fig:synthetic_data_adaptation_combined}
     \end{subfigure}
-    \caption{Normierter Simulationsfehler der vier Adaptionsstrategien auf dem drift-behafteten Datenstrom im Vergleich zum Driftsignal $c[k]$; erkannte Drifts sind in (\subref{fig:synthetic_data_adaptation_informed}) und (\subref{fig:synthetic_data_adaptation_combined}) markiert}
+    \caption{Normierter Simulationsfehler ausgewählter Adaptionsstrategien auf dem drift-behafteten Datenstrom im Vergleich zum Driftsignal $c[k]$; erkannte Drifts sind in (\subref{fig:synthetic_data_adaptation_informed}) und (\subref{fig:synthetic_data_adaptation_combined}) markiert}
     \label{fig:synthetic_data_adaptation_comparison}
 \end{figure}
 %
-Abbildung~\ref{fig:synthetic_data_adaptation_comparison} stellt den normierten Simulationsfehler der vier Strategien dem Driftsignal $c[k]$ gegenüber. Die einzelnen Teilabbildungen zeigen für die Baseline ohne Adaption (\subref{fig:synthetic_data_adaptation_baseline}), die passive (\subref{fig:synthetic_data_adaptation_blind}), die aktive (\subref{fig:synthetic_data_adaptation_informed}) und die kombinierte Strategie (\subref{fig:synthetic_data_adaptation_combined}) jeweils den Fehlerverlauf über sechs Monate, wobei in den Detektor-gestützten Varianten zusätzlich die erkannten Drifts markiert sind. Da eine solche Zeitreihe stets nur einen einzelnen der \adaptNSeeds\ Läufe abbilden kann, wird der Medoid-Seed dargestellt, also der Lauf, dessen Kennzahlen dem Mittel über alle Läufe am nächsten liegen. Der Medoid ist der zentralste tatsächlich aufgetretene Vertreter einer Menge und damit, anders als das rechnerische Mittel, ein real beobachteter Lauf. Die zugehörigen Kennzahlen fasst Tabelle~\ref{tab:synthetic_data_adaptation_stats} zusammen. Ohne Adaption reproduziert das Modell erwartungsgemäß die in Abschnitt~\ref{sec:datensynthese_modellierung} beschriebene Degradation, der Fehlerverlauf folgt sichtbar der Sägezahnstruktur des Driftsignals. \par
+Abbildung~\ref{fig:synthetic_data_adaptation_comparison} stellt den normierten Simulationsfehler dem Driftsignal $c[k]$ gegenüber. Die einzelnen Teilabbildungen zeigen für die Baseline ohne Adaption (\subref{fig:synthetic_data_adaptation_baseline}), die passive Adaption mit Recurrence-Selektor (\subref{fig:synthetic_data_adaptation_blind_rec}), die aktive (\subref{fig:synthetic_data_adaptation_informed}) und die kombinierte Strategie (\subref{fig:synthetic_data_adaptation_combined}) jeweils den Fehlerverlauf über sechs Monate, wobei in den Detektor-gestützten Varianten zusätzlich die erkannten Drifts markiert sind. Da eine solche Zeitreihe stets nur einen einzelnen der \adaptNSeeds\ Läufe abbilden kann, wird der Medoid-Seed dargestellt, also der Lauf, dessen Kennzahlen dem Mittel über alle Läufe am nächsten liegen. Der Medoid ist der zentralste tatsächlich aufgetretene Vertreter einer Menge und damit, anders als das rechnerische Mittel, ein real beobachteter Lauf. Die zugehörigen Kennzahlen fasst Tabelle~\ref{tab:synthetic_data_adaptation_stats} zusammen. Ohne Adaption reproduziert das Modell erwartungsgemäß die in Abschnitt~\ref{sec:syn_modellierung} beschriebene Degradation, der Fehlerverlauf folgt sichtbar der Sägezahnstruktur des Driftsignals. \par
 %
 \providecommand{\adaptpm}[2]{$#1 \pm #2$}
 \begin{table}[tbp]
 \centering
-\caption{Kennzahlen der vier Adaptionsstrategien auf dem drift-behafteten Strom, als Mittelwert $\pm$ Standardabweichung über \adaptNSeeds\ Seeds}
+\caption{Kennzahlen der fünf Adaptionsstrategien auf dem drift-behafteten Strom, als Mittelwert $\pm$ Standardabweichung über \adaptNSeeds\ Seeds}
 \label{tab:synthetic_data_adaptation_stats}
 \begin{tabular}{lccccc}
 \toprule
@@ -568,28 +583,29 @@ Abbildung~\ref{fig:synthetic_data_adaptation_comparison} stellt den normierten S
 \midrule
 Baseline   & \adaptpm{\adaptBaselineRmse}{\adaptBaselineRmseStd} & \adaptpm{\adaptBaselineBias}{\adaptBaselineBiasStd} & \adaptpm{\adaptBaselineSigma}{\adaptBaselineSigmaStd} & \adaptpm{\adaptBaselineCorrAbs}{\adaptBaselineCorrAbsStd} & \adaptpm{\adaptBaselineNTrain}{\adaptBaselineNTrainStd} \\
 Passiv     & \adaptpm{\adaptBlindRmse}{\adaptBlindRmseStd}       & \adaptpm{\adaptBlindBias}{\adaptBlindBiasStd}       & \adaptpm{\adaptBlindSigma}{\adaptBlindSigmaStd}       & \adaptpm{\adaptBlindCorrAbs}{\adaptBlindCorrAbsStd}       & \adaptpm{\adaptBlindNTrain}{\adaptBlindNTrainStd} \\
+Passiv + Rec & \adaptpm{\adaptBlindRecRmse}{\adaptBlindRecRmseStd} & \adaptpm{\adaptBlindRecBias}{\adaptBlindRecBiasStd} & \adaptpm{\adaptBlindRecSigma}{\adaptBlindRecSigmaStd} & \adaptpm{\adaptBlindRecCorrAbs}{\adaptBlindRecCorrAbsStd} & \adaptpm{\adaptBlindRecNTrain}{\adaptBlindRecNTrainStd} \\
 Aktiv      & \adaptpm{\adaptInformedRmse}{\adaptInformedRmseStd} & \adaptpm{\adaptInformedBias}{\adaptInformedBiasStd} & \adaptpm{\adaptInformedSigma}{\adaptInformedSigmaStd} & \adaptpm{\adaptInformedCorrAbs}{\adaptInformedCorrAbsStd} & \adaptpm{\adaptInformedNTrain}{\adaptInformedNTrainStd} \\
 Kombiniert & \adaptpm{\adaptCombinedRmse}{\adaptCombinedRmseStd} & \adaptpm{\adaptCombinedBias}{\adaptCombinedBiasStd} & \adaptpm{\adaptCombinedSigma}{\adaptCombinedSigmaStd} & \adaptpm{\adaptCombinedCorrAbs}{\adaptCombinedCorrAbsStd} & \adaptpm{\adaptCombinedNTrain}{\adaptCombinedNTrainStd} \\
 \bottomrule
 \end{tabular}
 \end{table}
 %
-Mit den getunten Hyperparametern reduzieren alle drei adaptiven Strategien den Simulationsfehler deutlich, wobei sich eine klare Rangfolge ergibt (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Die passive Adaption senkt den \ac{RMSE} bereits auf deutlich weniger als die Hälfte des Werts ohne Adaption. Die aktive Adaption bleibt bei vergleichbarem Eingriffsaufwand knapp dahinter zurück. Den geringsten Fehler erzielt die kombinierte Strategie, die den \ac{RMSE} noch etwas weiter absenkt, allerdings mit dem höchsten Eingriffsaufwand. Dass die kombinierte Strategie den niedrigsten Fehler erreicht, ist darauf zurückzuführen, dass die passive Komponente bereits einen Großteil der Drift abfängt und die detektor-getriggerte Komponente sie gezielt ergänzt. \par
+Mit den getunten Hyperparametern senken alle vier adaptiven Strategien den Simulationsfehler auf deutlich weniger als die Hälfte des Werts ohne Adaption, wobei sich eine klare Rangfolge ergibt (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Den geringsten Fehler erzielt die passive Adaption mit Recurrence-Selektor, dicht gefolgt von der rein periodischen passiven Adaption. Beide kommen mit derselben, allein über die Periode $n_{\mathrm{p}}$ festgelegten Zahl an Nachtrainings aus. Die kombinierte Strategie ordnet sich knapp dahinter ein, benötigt dafür aber annähernd doppelt so viele Nachtrainings. Die aktive Adaption bleibt trotz höheren Eingriffsaufwands als die passive am weitesten zurück. Der Zugewinn liegt hier also nicht in der gezielten Auslösung, sondern in der Auswahl der Trainingsdaten. Das ist eine unmittelbare Folge der Driftcharakteristik. Der Drift verläuft über weite Strecken inkrementell und wirkt damit dauerhaft statt ereignishaft, sodass ein regelmäßiges Nachtraining auf dem jüngsten Fenster bereits die passende Antwort ist, während die detektor-getriggerte Anpassung den fortlaufenden Anteil zwischen zwei Meldungen unbearbeitet lässt. \par
 %
-Im Gegensatz zum Fall ohne Adaption, dessen Fehler von einem gerichteten, mit dem Drift korrelierten Anteil dominiert wird, sinken durch die Adaption sowohl der Bias als auch die Streuung deutlich. Die kombinierte Strategie reduziert dabei den mittleren Fehleranteil $\bar{e}$ und die Streuung $\sigma$ am stärksten und erreicht damit den insgesamt kleinsten \ac{RMSE}. Entsprechend schwächt sich die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ unter der kombinierten Strategie am stärksten ab. Der Restfehler folgt dem Driftsignal kaum noch, der \ac{CD} wird durch die Adaption somit weitgehend kompensiert. \par
+Im Gegensatz zum Fall ohne Adaption, wo der Fehler von einem gerichteten, mit dem Drift korrelierten Anteil dominiert wird, sinkt durch alle Adaptionsstrategien sowohl der Bias als auch die Streuung deutlich. Der mittlere Fehleranteil $\bar{e}$ fällt dabei überall auf eine vergleichbare Größenordnung, sodass die Rangfolge im \ac{RMSE} nahezu vollständig über die Streuung $\sigma$ entsteht. Am kleinsten fällt diese unter der passiven Adaption mit Recurrence-Selektor aus, und entsprechend sinkt auch die Korrelation des Fehlerbetrags $|e|$ mit dem Driftbetrag $|c[k]|$ hier am stärksten. Der \ac{CD} wird durch die Adaption somit weitgehend kompensiert. \par
 %
 \begin{figure}[tbp]
     \centering
     \makebox[\textwidth][c]{%
         \input{\plotdir syn_adaptation_seed_violin.pgf}
     }
-    \caption{Verteilung des \ac{RMSE} der drei adaptiven Strategien über \adaptNSeeds\ Läufe mit unterschiedlichen Seeds, dargestellt als Violinen mit überlagerten Boxplots}
+    \caption{Verteilung des \ac{RMSE} der vier adaptiven Strategien über \adaptNSeeds\ Läufe mit unterschiedlichen Seeds, dargestellt als Violinen mit überlagerten Boxplots}
     \label{fig:synthetic_data_adaptation_seed_violin}
 \end{figure}
 %
-Neben den Mittelwerten gibt die Streuung über die \adaptNSeeds\ Läufe Aufschluss über die Reproduzierbarkeit der Strategien. Abbildung~\ref{fig:synthetic_data_adaptation_seed_violin} stellt die Verteilung des \ac{RMSE} je Strategie über alle Läufe als Violinen mit überlagerten Boxplots dar. Die Violinen zeichnen die Dichte der Läufe nach, während die Boxplots Median und Quartile hervorheben. Die passive Adaption weist dabei die schmalste Verteilung und damit die höchste Reproduzierbarkeit auf, wohingegen die kombinierte Strategie trotz ihres niedrigsten mittleren Fehlers die breiteste Streuung über die Läufe zeigt (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Die aktive Adaption ordnet sich sowohl im Mittel als auch in der Streuung dazwischen ein. Der niedrigste Gesamtfehler der kombinierten Strategie geht somit mit einer etwas geringeren Reproduzierbarkeit einher. \par
+Neben den Mittelwerten gibt die Streuung der Läufe über \adaptNSeeds\ Seeds Aufschluss über die Reproduzierbarkeit der Strategien. Abbildung~\ref{fig:synthetic_data_adaptation_seed_violin} stellt die Verteilung des \ac{RMSE} je Strategie als Violinen mit überlagerten Boxplots dar. Die Violinen zeichnen die Dichte der Läufe nach, während die Boxplots Median und Quartile hervorheben. Die beiden passiven Strategien weisen dabei die dünnsten Verteilungen und damit die höchste Reproduzierbarkeit auf, während die beiden Detektor-gestützten Strategien um mehr als eine Größenordnung breiter streuen (vgl. Tabelle~\ref{tab:synthetic_data_adaptation_stats}). Grund dafür ist die Rückkopplung zwischen Nachtraining und Detektion. Unter den passiven Strategien liegen die Eingriffszeitpunkte fest, sodass eine Abweichung zwischen zwei Läufen nur bis zum nächsten ohnehin geplanten Nachtraining wirkt. Unter den Detektor-gestützten Strategien bestimmt dagegen das Fehlerniveau selbst, wann der nächste Eingriff erfolgt, und eine einmal entstandene Abweichung verändert damit den gesamten weiteren Eingriffsverlauf. Der insgesamt kleinste Einzelwert über alle Läufe wird dabei von der kombinierten Strategie erreicht. Er liegt jedoch am unteren Rand einer breiten Verteilung und ist damit ein Zufallsbefund einzelner Läufe, keine Eigenschaft der Strategie. Niedrigster mittlerer Gesamtfehler und höchste Reproduzierbarkeit liegen somit beide auf der passiven Seite. \par
 %
-Insgesamt zeigt sich, dass die Adaption den synthetisch erzeugten \ac{CD} wirksam ausgleichen kann, sofern ihre Hyperparameter geeignet gewählt werden. Insbesondere die Kombination aus kontinuierlicher fehlergetriebener und detektor-getriggerter Anpassung erweist sich als wirksamste Strategie, da sie den niedrigsten Gesamtfehler erreicht, wenngleich mit dem höchsten Eingriffsaufwand. \par
+Insgesamt zeigt sich, dass die Adaption den synthetisch erzeugten \ac{CD} wirksam ausgleichen kann, sofern ihre Hyperparameter geeignet gewählt werden. Als wirksamste Strategie erweist sich hier das passive periodische Nachtraining, ergänzt um den Recurrence-Selektor. Es erreicht den niedrigsten Gesamtfehler bei zugleich geringstem Eingriffsaufwand und höchster Reproduzierbarkeit. Der Beitrag der Detektion liegt damit weniger in einer Verbesserung des Fehlers als in der Möglichkeit, den Eingriffszeitpunkt überhaupt zu begründen. \par
 %
 \section{Der Tennessee-Eastman-Process} \label{sec:TEP}
 %
@@ -648,7 +664,7 @@ Durch \texttt{IDV(13)} bleibt der Prozess somit stationär und ohne Trend, da se
 Für die Zielsetzung dieser Arbeit folgt daraus, dass der \ac{TEP} in seiner ursprünglichen Form keinen Fehler bereitstellt, der diese Eigenschaften erfüllt. Um den \ac{TEP} dennoch als Benchmark für die Drift-Erkennung und -Adaption nutzen zu können, wird das Simulationsmodell um eine Störgröße erweitert, die einen strukturierten, anhaltenden Drift nach dem Vorbild des synthetischen Datenstroms aus Abschnitt~\ref{sec:synthetischer_datensatz} erzeugt. \par
 %
 Realisiert wird diese Störgröße durch einen Eingriff im C-Code als \texttt{IDV(29)}, in Fortführung der etablierten Störungen (siehe Tabelle~\ref{tab:tep-stoerungen}). Aktivierung und Amplitude sind über dieselbe Schnittstelle einstellbar wie bei den übrigen Störungen. Offen bleibt, an welcher Stelle im Prozess der Drift angreifen soll.
-Naheliegend wäre dazu ein Angriffspunkt in der Anlagenphysik, etwa ein Eingriff in die Reaktionskinetik wie durch \texttt{IDV(13)}, da sich dort eine tatsächliche Veränderung des Prozessverhaltens abbildet. Der \ac{TEP} ist jedoch vollständig geregelt. Diese Regelung fängt jede anhaltende Störung ab und überführt sie in eine bleibende Veränderung der Stellgrößen, die gemeinsam mit den Messgrößen aufgezeichnet werden. Anhand ebendieses Messvektors werden die Betriebskosten als Zielgröße durch den Simulator deterministisch erzeugt. Eine Veränderung der Anlagenphysik ist in den aufgezeichneten Daten also vollständig sichtbar und der Zusammenhang zwischen ihnen und den Kosten bleibt erhalten. Das gilt auch für einen Merkmalssatz aus wenigen dieser Größen, da Merkmale nach ihrer Erklärungskraft für die Kosten ausgewählt werden und ein Satz die Störung folglich nur um den Preis seiner eigenen Prädiktivität ausblenden könnte. Verschoben wird lediglich die Lage der Daten im Merkmalsraum, was gemäß \eqref{eq:covariate_shift} einem \emph{Covariate Shift} entspricht und die gelernte Abbildung von Merkmalen auf Kosten gültig lässt. \par
+Naheliegend wäre dazu ein Angriffspunkt in der Anlagenphysik, etwa ein Eingriff in die Reaktionskinetik wie durch \texttt{IDV(13)}, da sich dort eine tatsächliche Veränderung des Prozessverhaltens abbildet. Der \ac{TEP} ist jedoch vollständig geregelt. Diese Regelung fängt jede anhaltende Störung ab und überführt sie in eine bleibende Veränderung der Stellgrößen, die gemeinsam mit den Messgrößen aufgezeichnet werden. Anhand ebendieses Messvektors werden die Betriebskosten als Zielgröße durch den Simulator deterministisch erzeugt. Eine Veränderung der Anlagenphysik ist in den aufgezeichneten Daten also vollständig sichtbar und der Zusammenhang zwischen ihnen und den Kosten bleibt erhalten. Das gilt auch für wenige ausgewählte Features, da diese nach ihrer Erklärungskraft für die Kosten bestimmt werden und die Störung folglich nur um den Preis ihrer eigenen Prädiktivität ausblenden könnten. Verschoben wird lediglich die Lage der Daten im Feature-Raum, was gemäß \eqref{eq:covariate_shift} einem \emph{Covariate Shift} entspricht und die gelernte Abbildung von Features auf Kosten gültig lässt. \par
 %
 Außerhalb dieses Wirkungskreises verbleibt jedoch die Sensorik, welche die Messwerte bereitstellt. Messstellen unterliegen in der industriellen Praxis Einflüssen wie Verschmutzung und Alterung, während Wartungs- und Kalibrierintervalle begrenzt sind. Es wird daher angenommen, dass ein Thermoelement über Wochen hinweg einen zunehmend verfälschten Wert liefert, ohne dass sich am Prozess selbst etwas ändert. Genau diesen Sensorverschleiß bildet \texttt{IDV(29)} an der Strippertemperatur (\texttt{XMEAS(18)}) nach. Sie wird im \ac{TEP} aufgezeichnet, ist kein Teil eines Reglers und tritt in der Kostenformel des Simulators nicht auf. Verfälscht wird deshalb allein der ausgegebene Messwert, während der Prozesswert und mit ihm das Anlagenverhalten unberührt bleiben. \par
 %
@@ -657,7 +673,7 @@ Das Driftsignal ist dabei strukturgleich zum synthetischen Signal $c[k]$ aus Abs
 Innerhalb eines Segments fällt es gemäß Gleichung \eqref{eq:cd_incremental} jedoch weiterhin linear von einem Niveau eines oberen Bandes auf ein Niveau eines unteren Bandes ab. An der Segmentgrenze springt es auf das Startniveau des folgenden Segments, sodass beide Drifttypen aus Abbildung~\ref{fig:phenomenon} auch im \ac{TEP} abgebildet sind.
 Die Segmentgrenzen folgen demselben Raster der nominellen Segmentdauer $T_{\mathrm{seg}}$ mit unveränderter zufälliger Verschiebung. Da der \ac{TEP} über einen frei gewählten Zeitraum statt über ein Kalenderjahr simuliert wird, ergibt sich hier lediglich die Segmentzahl aus der Simulationsdauer. Alle Zufallsniveaus werden deterministisch aus einem Seed und dem Segmentindex abgeleitet, womit das Signal zustandslos und unabhängig von der Schrittweite des Solvers reproduzierbar ist. \par
 %
-Die Segmentdauer $T_{\mathrm{seg}}$ wird aus dem synthetischen Fall übernommen. Nach unten ist sie dadurch begrenzt, dass sich der Kalibrierfehler während des Anfahrens und Haltens eines Betriebspunkts nur unwesentlich ändern darf, damit jeder Betriebspunkt einen einzelnen Driftpegel abbildet. Der Driftkoeffizient $\kappa_m$ ist so bemessen, dass die Verschiebung des Prädiktionsfehlers deutlich über dem Rauschen des Modells innerhalb eines Betriebspunkts liegt, der Kalibrierfehler in der Spitze aber unter der prozessbedingten Streuung der Strippertemperatur bleibt. \par
+Die Segmentdauer $T_{\mathrm{seg}}$ wird aus dem synthetischen Fall übernommen. Nach unten ist sie dadurch begrenzt, dass sich der Kalibrierfehler während des Anfahrens und Haltens eines Betriebspunkts nur unwesentlich ändern darf, damit jeder Betriebspunkt einen einzelnen Driftpegel abbildet. Der Driftkoeffizient $\kappa_m$ ist so bemessen, dass die Verschiebung des Simulationsfehlers deutlich über dem Rauschen des Modells innerhalb eines Betriebspunkts liegt, der Kalibrierfehler in der Spitze aber unter der prozessbedingten Streuung der Strippertemperatur bleibt. \par
 %
 Der Eingriff in den Quelltext beschränkt sich auf die Auswertung des Faktors $1 + \kappa_m \cdot c(t)$ als \texttt{driftf} in einer separaten Datei und dessen Multiplikation an der Zuweisung von \texttt{XMEAS(18)}, wie in Listing~\ref{lst:tep_sensordrift} dargestellt.
 %
@@ -710,7 +726,7 @@ In die Simulation gehen alle sechs Modi ein. Die Abdeckung unterschiedlicher, ü
 Die sechs Modi aus Tabelle~\ref{tab:modes} allein genügen der erforderlichen Betriebspunktabdeckung nicht. Daher wird jeder Modus zu einer Schar benachbarter Betriebspunkte ausgedehnt. Als Rahmen dient das Fenster von $±15\%$ je Setpoint, das Reinartz et al. in Schritten von $5 \%$ abtasten \cite{reinartz.2022}. Dieser Rahmen wird übernommen, das Raster der Abtastung dagegen ersetzt. Die Grenzen sind dabei als Prozentsatz des Modusnennwerts festgelegt und nicht als fester Absolutbetrag, sodass die Auslenkung über die Modi hinweg vergleichbar bleibt, obwohl die Setpoints in unterschiedlichen Größenordnungen liegen. Zulässig ist jede Kombination, die in allen zwölf Größen innerhalb dieser Grenzen liegt, also ein eng begrenzter Ausschnitt des Setpoint-Raums um den Nennwert des Modus. Das entspricht dem Stellgrößenraum aus Abschnitt~\ref{sec:stellgroessen}, hier jedoch lokal um einen bekannten Betriebspunkt statt über den gesamten Stellbereich. \par
 %
 Zwei Einschränkungen ergeben sich jedoch aus dem Prozess. Setpoints, deren Nennwert bereits am Rand des Stellbereichs liegt, werden nur nach unten variiert, was die Rührerdrehzahl bei voller Leistung sowie die nahezu geschlossenen Ventile betrifft. Zudem bleibt das Fenster bewusst eng, da der \ac{TEP} über Sicherheitsabschaltungen verfügt und eine Kombination weit ab vom optimalen Betriebspunkt zum Abbruch der Simulation führen kann.
-Das Fenster wird nach dem Latin-Hypercube-Ansatz abgetastet, wie er im Mühlen-Anwendungsfall in Abschnitt~\ref{sec:datenselektion} und beim synthetischen Datenstrom in Abschnitt~\ref{sec:datensynthese_modellierung} zum Einsatz kommt. Das Verfahren unterteilt jede der zwölf Achsen in gleich große Intervalle und belegt jedes davon genau einmal, sodass jeder Setpoint seinen Bereich unabhängig von der Zahl der Punkte gleichmäßig abdeckt. \par
+Das Fenster wird nach dem Latin-Hypercube-Ansatz abgetastet, wie er im Mühlen-Anwendungsfall in Abschnitt~\ref{sec:datenselektion} und beim synthetischen Datenstrom in Abschnitt~\ref{sec:syn_modellierung} zum Einsatz kommt. Das Verfahren unterteilt jede der zwölf Achsen in gleich große Intervalle und belegt jedes davon genau einmal, sodass jeder Setpoint seinen Bereich unabhängig von der Zahl der Punkte gleichmäßig abdeckt. \par
 %
 Die gleichmäßige Belegung der einzelnen Achsen schließt jedoch nicht aus, dass die Punkte im Raum ungünstig liegen können und sich einzelne Paare unnötig nahe sind. Daher wird nicht eine einzelne Ziehung verwendet, sondern aus einer größeren Zahl unabhängiger Ziehungen diejenige genutzt, deren kleinster Punktabstand am größten ausfällt. Dieses Maximin-Kriterium bevorzugt Versuchspläne, die das Fenster gleichmäßig ausfüllen, und vermeidet Häufungen, die einen Teil des Betriebsbereichs unbelegt ließen. \par
 %
@@ -730,7 +746,7 @@ Im fortlaufenden Betrieb hat sich jedoch gezeigt, dass ein Teil der Punkte trotz
 Die Zahl der dabei angefahrenen Betriebspunkte geht über das hinaus, was für einen Prozess dieser Art üblich ist, und ist in der Literatur zum \ac{TEP} in dieser Breite nicht zu finden. Sie ist hier jedoch nötig, damit die Datengrundlage der Betriebspunktvielfalt des Mühlen-Anwendungsfalls entspricht und die angestrebte Generalisierung trägt. \par
 %
 Der Fehlerlauf wiederholt dieselbe Folge von Betriebspunkten mit aktivierter Störung \texttt{IDV(\paramDriftIDV)}. Der Simulator wird dafür neu aufgesetzt, sodass beide Läufe aus demselben Zustand starten. Da der Kalibrierdrift den Prozess nicht berührt, sind beide Läufe prozessseitig identisch.
-Die Amplitude des Drifts liegt zwischen zwei Schranken. Nach unten muss die von ihm verursachte Verschiebung des Prädiktionsfehlers deutlich über dem Rauschen des Modells innerhalb eines Betriebspunkts liegen, damit der Drift überhaupt erkennbar wird. Nach oben muss der Kalibrierfehler als schleichende Dekalibrierung eines Thermoelements plausibel bleiben. Mit $\paramDriftAmp{}$ erreicht der Kalibrierfehler einen Spitzenwert von $\genCalPeakPct$ beziehungsweise $\genCalPeakK$, während die erwartete Verschiebung des Prädiktionsfehlers um den Faktor $\genShiftOverNoise{}$ über dem Rauschen liegt. \par
+Die Amplitude des Drifts liegt zwischen zwei Schranken. Nach unten muss die von ihm verursachte Verschiebung des Simulationsfehlers deutlich über dem Rauschen des Modells innerhalb eines Betriebspunkts liegen, damit der Drift überhaupt erkennbar wird. Nach oben muss der Kalibrierfehler als schleichende Dekalibrierung eines Thermoelements plausibel bleiben. Mit $\paramDriftAmp{}$ erreicht der Kalibrierfehler einen Spitzenwert von $\genCalPeakPct$ beziehungsweise $\genCalPeakK$, während die erwartete Verschiebung des Simulationsfehlers um den Faktor $\genShiftOverNoise{}$ über dem Rauschen liegt. \par
 %
 Damit liegen drei Datensätze vor. Die Kampagne aus einzeln angefahrenen Betriebspunkten dient dem Training, der nominale Lauf als drift-freie Referenz und der Fehlerlauf als drift-behafteter Strom, der über seine Laufzeit knapp zehn Driftperioden durchläuft.
 Abbildung~\ref{fig:tep_stream} zeigt einen Ausschnitt über vier Betriebspunkte. (\subref{fig:tep_stream_point}) stellt den Setpoint der Produktionsrate zwei Messgrößen gegenüber: die Strippertemperatur und das Spülventil. Erkennbar sind das Anfahren über die Rampe, das hinterlegte Haltefenster mit dem quasi-stationären Verlauf und die Rückkehr in den Ausgangszustand. (\subref{fig:tep_stream_drift}) zeigt die Strippertemperatur im Drift-freien sowie im Drift-behafteten Fall zusammen mit dem Driftsignal. Die Abweichung zwischen beiden Läufen folgt dem Verlauf des Driftsignals einschließlich seines Sprungs an der Segmentgrenze. \par
@@ -755,59 +771,65 @@ Abbildung~\ref{fig:tep_stream} zeigt einen Ausschnitt über vier Betriebspunkte.
     \label{fig:tep_stream}
 \end{figure}
 %
-% Absatz 1 — Werkzeugkette & Betriebsmodus:
-%   - pyTEP als Python-Schnittstelle zu MATLAB/Simulink \cite{reinartz.2022}
-%   - gewählter Betriebsmodus (vgl. Tab.~\ref{tab:modes}) und Begründung
-%
-% Absatz 2 — Anregung / \ac{DOE}:
-%   - Variation der Setpoints (-15% bis +15%) nach Reinartz et al.
-%   - \ac{DOE}-Erzeugung analog zur Datenselektion (Abschn.~\ref{sec:datenselektion}, LHS)
-%
-% Absatz 3 — Pre-Run & Simulation:
-%   - Bestimmung stationärer Arbeitspunkte (Pre-Run)
-%   - Erzeugung des drift-freien Referenzstroms und des drift-behafteten Stroms
-%
-% Absatz 4 — Variablenauswahl & resultierender Datensatz:
-%   - Auswahl der n am stärksten beeinflussten Messgrößen (aus 41 Messgrößen)
-%   - Abtastung, Länge des Stroms, Speicherung (data.pkl)
-%   -> Kennzahlen (Anzahl Variablen, Datenpunkte) in Tabelle zusammenfassen
-%
-% \begin{figure}[tbp]
-%     \centering
-%     % \includesvg[width=\linewidth]{\graphdir tep_stream_example.svg}
-%     \caption{Beispielhafter Ausschnitt des generierten drift-behafteten Datenstroms}
-%     \label{fig:tep_stream_example}
-% \end{figure}
-% -> Abbildung im Text beschreiben (drift-freie vs. drift-behaftete Phase)
-%
 \subsection{Modellierung} \label{sec:tep_modellierung}
 %
-Der generierte Prozess wird auf dem drift-freien Referenzzeitraum modelliert und anschließend auf den gesamten Datenstrom angewandt, um die drift-bedingte Modellverschlechterung sichtbar zu machen.
+\input{\resultsdir tep_model_error.tex}
 %
-% Absatz 1 — Modellwahl:
-%   - \ac{MLP} analog Abschn.~\ref{sec:datensynthese_modellierung} (Generalisierung des Ansatzes)
-%   - ENTSCHEIDUNG: Kalman/\ac{EKF} als Vergleich? (beim \ac{TEP} evtl. entfallen -> hier festlegen)
+Nachdem der \ac{TEP} in Abschnitt~\ref{sec:tep_drift} um einen Kalibrierdrift erweitert und in Abschnitt~\ref{sec:tep_generation} ein Datenstrom erzeugt wurde, soll der so erzeugte Prozess nun modelliert werden. Trainiert wird das Modell auf dem Datensatz der Kampagne, während die beiden Produktionsläufe der Bewertung dienen. Für die Bewertung ist entscheidend, dass beide Läufe dieselbe Folge von Betriebspunkten durchlaufen haben und prozessseitig identisch sind. Sie unterscheiden sich allein im aufgezeichneten Messwert der Strippertemperatur, sodass jede Abweichung zwischen ihren Fehlerverläufen auf den Kalibrierdrift zurückgeht. Der Vergleich der beiden Verläufe macht damit die drift-bedingte Modellverschlechterung sichtbar. \par
 %
-% Absatz 2 — Vorverarbeitung:
-%   - Glättung (gleitender Mittelwert), Min-Max-Normierung
-%   - Feature-/Label-Definition (ausgewählte Messgrößen -> Zielgröße)
+Das Vorgehen entspricht grundsätzlich dem des synthetischen Datenstroms aus Abschnitt~\ref{sec:syn_modellierung}: Ein Modell wird auf einem drift-freien Referenzdatensatz trainiert, auf den Datenstrom angewandt und über seinen Simulationsfehler bewertet. Der \ac{TEP} stellt daran zwei Anforderungen, die im synthetischen Fall nicht bestanden. Die Zielgröße entsteht im Simulator, während die Systemantwort des synthetischen Prozesses in Abschnitt~\ref{sec:systemantwort} durch eine bekannte Gleichung gegeben ist. Zudem zeichnet der \ac{TEP} eine Vielzahl von Mess- und Stellgrößen auf, aus denen die Features des Modells zu wählen sind, wohingegen der synthetische Prozess seine beiden Eingangssignale inhärent vorgibt. \par
 %
-% Absatz 3 — Trainingskonfiguration:
-%   - Architektur, Optimierer (Adam), Verlustfunktion (\ac{MSE}), Epochen, Batchgröße
-%   - Training ausschließlich auf drift-freiem Referenzdatensatz
+Als Label dient die Zielgröße der Betriebskosten, die der Simulator nach der von Downs und Vogel angegebenen Rechnung deterministisch aus dem Messvektor bildet \cite{downs.1993}. Sie ist damit über den aufgezeichneten Messvektor eindeutig bestimmt, ohne dass der Zusammenhang zwischen Betriebspunkt und Kosten in geschlossener Form vorläge. Aus derselben Rechnung werden auch die Features abgeleitet. Den größten Anteil an den Kosten tragen die Verluste über den Spülstrom. Innerhalb des Spülstroms folgen allein die Anteile der Komponenten $D$ und $E$ den Kosten über die Betriebspunkte hinweg. Daraus ergibt sich die Wirkkette, die die Auswahl der Features begründet. Das Spülventil stellt die Rate des Spülstroms ein. Die Zufuhr der Komponente $E$ zum Reaktor ist deren Quelle, und die Separatortemperatur entscheidet darüber, welcher Anteil in den Spülstrom gelangt statt zu kondensieren. Hinzu kommt das geregelte Massenverhältnis der beiden Produkte, das die sechs Betriebsmodi voneinander trennt. Größen, die unmittelbar in die Kostenrechnung eingehen, bleiben ausgeschlossen, damit das Modell den Prozesszusammenhang lernt und nicht die Rechnung des Simulators nachvollzieht. \par
 %
-% Absatz 4 — Ergebnis der Modellgüte:
-%   - Simulationsfehler drift-frei vs. drift-behaftet
-%   -> Fehlerkennzahlen (RMSE, Mittelwert, Streuung) in Tabelle
-%   -> im Text qualitativ mit Verweis auf Tabelle beschreiben
+Als weiteres Feature kommt die Strippertemperatur hinzu. Sie wird durch eine Vorwärtsselektion gestützt, die die Größen nacheinander nach ihrem Zugewinn an Modellgüte aufnimmt. Zugleich ist sie der Wirkort des Kalibrierdrifts, der über sie in das Modell gelangt. Dass sie diese zweite Rolle übernehmen kann, beruht auf den drei in Abschnitt~\ref{sec:tep_drift} genannten Eigenschaften. Sie wird aufgezeichnet, sie gehört keinem Regelkreis an und sie tritt in der Kostenrechnung nicht auf. Prozess und Kosten bleiben deshalb unberührt, sodass die Differenz zwischen den Fehlerverläufen beider Läufe allein aus dem Modell stammt. Unter den Features reagiert sie überdies am empfindlichsten auf eine Verfälschung ihres Messwerts. Die Auswahl ruht damit auf der Kostenrechnung und dem Aufbau des Prozesses und bleibt vom Umfang der Kampagne unabhängig. \par
 %
-% \begin{figure}[tbp]
-%     \centering
-%     % \includesvg[width=\linewidth]{\graphdir tep_model_error.svg}
-%     \caption{Simulationsfehler des Modells über den drift-behafteten Datenstrom}
-%     \label{fig:tep_model_error}
-% \end{figure}
-% -> Abbildung im Text beschreiben (Anstieg des Fehlers mit dem Drift)
+Trainiert wird auf \tepParamNCampaign{} Betriebspunkten und damit nicht auf dem gesamten Bestand der \genRunPoints{} fahrbaren Punkte. Diese Teilmenge bildet den Umfang ab, den ein Versuchsprogramm in der Praxis zeitlich hergibt, und hält damit den Bezug zum Mühlen-Anwendungsfall, in dem der Versuchsplan ebenfalls nur einen Teil des später gefahrenen Betriebsbereichs abdeckt. Die verbleibenden Punkte tragen die Bewertung auf Betriebspunkten, die das Modell im Training nicht gesehen hat. Mit jedem weiteren Punkt sinkt der nominale Fehler des Modells. Zugleich schrumpft jedoch die Zahl der Punkte außerhalb der Kampagne, die diese Bewertung tragen. Die gewählte Größe hält beide Anteile in einem tragfähigen Verhältnis. Die Kampagne ist damit ein Versuchsplan über die sechs Betriebsmodi aus Tabelle~\ref{tab:modes} und deren Umgebung. Sie entspricht damit dem Referenzdatensatz, der im synthetischen Fall nach dem Latin-Hypercube-Ansatz erzeugt wird, und der Datenselektion in Abschnitt~\ref{sec:datenselektion}. \par
+%
+Die Vorverarbeitung folgt der des synthetischen Falls in Abschnitt~\ref{sec:syn_modellierung}. Die Signale werden über ein Fenster von \tepParamWindow{} Schritten gleitend gemittelt und anschließend mittels Min-Max-Normierung skaliert. Die Skalierung wird auf der Kampagne bestimmt und auf beide Produktionsläufe unverändert angewandt, sodass alle drei Datensätze in derselben Bezugsskala liegen. Als Trainingsdaten dienen die stationären Bereiche der Kampagne, in denen die Betriebspunkte eingeschwungen sind. Ihre Lage ergibt sich unmittelbar aus der Blockstruktur aus Rampe und stationärem Bereich, die alle drei Datensätze teilen, sodass das Fenster fest vorgegeben werden kann. Auf einen Ausreißerfilter wird verzichtet, da die Streuung über die Betriebspunkte hier das Nutzsignal trägt und die extremen Punkte gerade den Rand des abgedeckten Betriebsbereichs abbilden. \par
+%
+Als Modell dient wie im synthetischen Fall ein \ac{MLP}, womit die in Abschnitt~\ref{sec:modellvergleich} getroffene Modellwahl fortgeführt wird. Der \ac{KF} und der \ac{EKF} bleiben demgegenüber auf den synthetischen Datenstrom beschränkt, da sie ein explizit formuliertes Beobachtungsmodell voraussetzen, das beim \ac{TEP} mit der im Simulator hinterlegten Kostenrechnung nicht vorliegt.
+%
+Der Aufbau des Netzes bleibt gegenüber Abschnitt~\ref{sec:syn_modellierung} unverändert. Es besteht aus \tepParamNLayers{} Hidden-Layern mit je \tepParamNeurons{} Neuronen und Tanh-Aktivierung sowie einem linearen Ausgabeneuron. Trainiert wird mit dem Adam-Optimierer und dem \ac{MSE} als Verlustfunktion über maximal \tepParamEpochs{} Epochen bei einer Batchgröße von \tepParamBatch{}. Die Komplexität des Netzes entspricht damit trotz des deutlich umfangreicheren Prozesses der des synthetischen Falls. Denn die Modellierung zur Betriebspunktoptimierung bleibt eine Regression weniger Features auf eine skalare Zielgröße, wobei lediglich eingeschwungene Zustände berücksichtigt werden. Die Prozessdynamik bleibt außen vor (vgl. Abschnitt~\ref{sec:modellvergleich}).  \par
+%
+Validiert wird auf den Anfahrrampen der Kampagnenpunkte. Da die Zahl der Betriebspunkte gering ist, bleiben auf diese Weise alle Punkte für das Training erhalten. Die Rampen liegen außerhalb der stationären Bereiche und stellen damit Betriebszustände dar, die dem Modell im Training nicht begegnen. Als eigenständige Validierungsdaten sind sie geeignet, da ein allein auf den Rampen gelerntes Modell die stationären Abschnitte gut vorhersagt und umgekehrt ebenso. Über den Validierungsfehler bricht ein Early Stopping das Training ab und greift auf die Gewichte der besten Epoche zurück.
+%
+Als Bewertungsgröße dient der Simulationsfehler, also die Abweichung zwischen der Prädiktion des Modells und den tatsächlichen Betriebskosten des Simulators. Er wird auf dem nominalen Lauf und auf dem Fehlerlauf über den gesamten Datenstrom ausgewertet. Beide Verläufe werden mit Mittelwert und Streuung des nominalen Fehlers normiert. Als Bezugsgröße tritt das Driftsignal $c(t)$ hinzu. Da der Sensordrift den eigentlichen Prozess nicht berührt, entspricht das Verhältnis der aufgezeichneten Strippertemperatur beider Läufe dem Kalibrierfaktor. \par
+%
+\begin{figure}[tbp]
+    \centering
+    \input{\plotdir tep_model_error.pgf}
+    \caption{Normierter Simulationsfehler auf dem nominalen und dem drift-behafteten Datenstrom im Vergleich zum Driftsignal $c(t)$}
+    \label{fig:tep_model_error}
+\end{figure}
+%
+Abbildung~\ref{fig:tep_model_error} stellt den normierten Simulationsfehler des nominalen und des drift-behafteten Laufs über einem Ausschnitt des Datenstroms dar, überlagert mit dem Driftsignal $c(t)$. Farbe und Markerform folgen dabei weiter Farb- und Marker-Konvention. Auf dem nominalen Lauf ist zu erkennen, dass der Fehler um Null schwankt, wobei sich seine Streuung abhängig vom Betriebspunkt verändert, die Blockstruktur des Datenstroms jedoch erkennbar bleibt. Auf dem drift-behafteten Lauf treten hingegen Abschnitte mit deutlich größeren Ausschlägen auf, die dem Verlauf des Driftsignals folgen. Die Sägezahnstruktur zeichnet sich dabei nicht unmittelbar im Fehlerverlauf ab, da die Streuung zwischen den Betriebspunkten den Drifteinfluss überlagert. Der systematische Zusammenhang tritt jedoch in der segmentweisen Auswertung hervor, in der die Differenz beider Fehlerverläufe dem Driftsignal über alle Segmente hinweg folgt. \par
+%
+Tabelle~\ref{tab:tep_model_error_stats} fasst die Kennzahlen des Simulationsfehlers zusammen, aufgeteilt nach den Betriebspunkten der Kampagne und den übrigen Punkten des Datenstroms. Der Aufbau entspricht dabei dem des synthetischen Falls in Tabelle~\ref{tab:synthetic_data_model_error_stats}, ergänzt um das Fehlerverhältnis aus drift-behaftetem und nominalem \ac{RMSE}. Über alle Betriebspunkte hinweg steigt der \ac{RMSE} vom nominalen zum drift-behafteten Lauf deutlich an. Getragen wird der Anstieg von beiden Anteilen, denn der Fehler nimmt sowohl einen von Null verschiedenen Mittelwert an als auch eine größere Streuung. Damit wiederholt sich das Bild, das das \ac{MLP} bereits auf dem synthetischen Datenstrom gezeigt hat. \par
+%
+\begin{table}[tbp]
+\centering
+\caption{Kennzahlen der drift-bedingten Modellverschlechterung}
+\label{tab:tep_model_error_stats}
+\begin{tabular}{lcccccc}
+\toprule
+\multirow{2}{*}[-4pt]{\textbf{Betriebspunkte}} & \multicolumn{2}{c}{\ac{RMSE}} & \multicolumn{2}{c}{Streuung $\sigma$}
+ & \multirow{2}{*}[-4pt]{\shortstack[c]{Mittelwert $\bar{e}$\\[4pt](drift-behaftet)}}
+ & \multirow{2}{*}[-4pt]{\shortstack[c]{Fehler-\\[4pt]verhältnis}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+ & drift-frei & drift-behaftet & drift-frei & drift-behaftet & & \\
+\midrule
+Alle & $\tepstatAlleRmseFree$ & $\tepstatAlleRmseFault$ & $\tepstatAlleSigmaFree$ & $\tepstatAlleSigma$ & $\tepstatAlleBias$ & $\tepstatAlleK$ \\
+Kampagne & $\tepstatGesehenRmseFree$ & $\tepstatGesehenRmseFault$ & $\tepstatGesehenSigmaFree$ & $\tepstatGesehenSigma$ & $\tepstatGesehenBias$ & $\tepstatGesehenK$ \\
+Übrige & $\tepstatUngesehenRmseFree$ & $\tepstatUngesehenRmseFault$ & $\tepstatUngesehenSigmaFree$ & $\tepstatUngesehenSigma$ & $\tepstatUngesehenBias$ & $\tepstatUngesehenK$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+%
+Die Aufteilung nach der Zugehörigkeit zur Kampagne trennt davon einen zweiten Beitrag ab. Auf den Punkten der Kampagne liegt das nominale Fehlerniveau niedriger als auf den übrigen, da das Modell diese Betriebspunkte im Training bereits gesehen hat. Da der Drift das Fehlerniveau beider Gruppen anhebt, fällt das Fehlerverhältnis auf den Kampagnenpunkten mit ihrem niedrigeren Ausgangsniveau am größten aus. Wie weit der Drift im Simulationsfehler sichtbar bleibt, hängt damit davon ab, wie weit ein Betriebspunkt von der Kampagne entfernt liegt. \par
+%
+Bestimmt man den Abstand jedes Betriebspunkts zum nächstgelegenen Kampagnenpunkt, so wächst der nominale Fehler über den abgedeckten Abstandsbereich hinweg um Faktor \tepstatDistGrowth{}, während die drift-bedingte Verschiebung nahezu unverändert bleibt. Über die Sichtbarkeit des Drifts entscheidet somit nicht seine eigene Größe, sondern das Fehlerniveau, vor dem er sich abheben muss. \par
+%
+Der \ac{TEP}-Datenstrom reproduziert damit die Degradation, die sich zuvor bereits am synthetischen Prozess gezeigt hat. Ausgelöst wird sie hier jedoch nicht durch einen Eingriff in die Systemgleichung, sondern durch einen Sensordrift, der allein den aufgezeichneten Messwert verfälscht. Dass das Modell auch dann an Güte verliert, wenn die Anlage selbst unverändert weiterläuft, entspricht der industriellen Praxis, in der Messstellen verschmutzen und altern. Mit dem \ac{TEP} liegt damit ein Benchmark unter realistischen Prozessbedingungen vor, an dem sich der Umgang mit \ac{CD} erproben lässt. \par
 %
 \subsection{Drift-Erkennung} \label{sec:tep_detektion}
 %

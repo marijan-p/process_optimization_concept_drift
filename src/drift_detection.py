@@ -18,6 +18,10 @@ Voraussetzung: ``pip install frouros``
 
 from __future__ import annotations
 
+import hashlib
+import math
+import pathlib
+
 import collections
 from typing import Callable, Dict, List, Sequence, Tuple
 
@@ -226,6 +230,79 @@ def synthetic_error_stream(
     return c, error
 
 
+# --------------------------------------------------------------------------- #
+# Selbstauskunft: erkennt ein veraltetes Modul im laufenden Kernel
+# --------------------------------------------------------------------------- #
+try:
+    MODULE_SHA = hashlib.sha1(
+        pathlib.Path(__file__).resolve().read_bytes()).hexdigest()[:8]
+except Exception:          # eingefroren, kein Dateizugriff -- dann kein Abgleich
+    MODULE_SHA = None
+
+
+def assert_current():
+    """Prueft, ob das geladene Modul noch der Quelldatei entspricht.
+
+    Ein Jupyter-Kernel haelt bereits importierte Module fest; ``import
+    drift_detection`` ist dann ein No-op und eine Aenderung an der Datei bleibt
+    wirkungslos. ``MODULE_SHA`` wird beim Import berechnet und hier gegen einen
+    frischen Blick auf die Datei gehalten -- der Vergleich deckt jede Aenderung
+    ab, nicht nur ein einzelnes Merkmal.
+    """
+    if MODULE_SHA is None:
+        return None
+    disk = hashlib.sha1(pathlib.Path(__file__).resolve().read_bytes()).hexdigest()[:8]
+    if disk != MODULE_SHA:
+        raise RuntimeError(
+            f"drift_detection.py auf der Platte ({disk}) weicht vom geladenen "
+            f"Modul ({MODULE_SHA}) ab -- veralteter Kernel. Kernel neu starten "
+            "und, falls schon getunt wurde, einmal mit FORCE_RECOMPUTE = True "
+            "durchlaufen.")
+    return MODULE_SHA
+
+
+def _space_consts(code):
+    """Konstanten eines Code-Objekts, verschachtelte Code-Objekte aufgeloest.
+
+    ``repr`` eines Code-Objekts enthaelt Speicheradresse und Dateipfad und ist
+    damit prozessabhaengig -- eine daraus gebildete Kennung waere bei jedem
+    Kernelstart eine andere und wuerde jeden Cache verfehlen. Enthaelt eine
+    Funktion kein Code-Objekt (kein Comprehension, kein Lambda), liefert der
+    Helfer genau ``code.co_consts`` und die Kennung bleibt unveraendert.
+    """
+    import types
+    out = []
+    for c in code.co_consts:
+        if isinstance(c, types.CodeType):
+            out.append(("<code>", c.co_name, _space_consts(c), c.co_names))
+        else:
+            out.append(c)
+    return tuple(out)
+
+
+def _space_id_of(func, n: int = 8) -> str:
+    """Kennung des von ``func`` aufgespannten Suchraums aus dem Code-Objekt."""
+    code = func.__code__
+    consts = _space_consts(code)
+    if consts and consts[0] == func.__doc__:
+        consts = consts[1:]        # Docstring raus
+    return hashlib.sha1(repr((consts, code.co_names)).encode()).hexdigest()[:n]
+
+
+def search_space_id(n: int = 8) -> str:
+    """Kennung des Optuna-Suchraums aus dem GELADENEN Code-Objekt.
+
+    Bewusst nicht ueber ``inspect.getsource``: das liest die Quelldatei von der
+    Platte und liefert in einem veralteten Kernel die neue Fassung, waehrend die
+    alte laeuft -- die Kennung waere dann ein falscher Zeuge, der den Cache
+    verwirft und das Ergebnis der alten Grenzen unter der neuen Kennung ablegt.
+    Genau das ist am 2026-09-01 passiert. ``co_consts`` traegt die Zahlenwerte
+    der Grenzen, ``co_names`` die aufgerufenen Namen.
+    """
+    assert_current()
+    return _space_id_of(_suggest_params, n)
+
+
 # ===========================================================================
 # Parameter-Tuning auf Basis der Ground Truth des synthetischen Datenstroms
 # ===========================================================================
@@ -259,12 +336,47 @@ def score_detections(
     drift_active: Sequence[bool],
     tolerance: int,
     n: int,
-    weights: Tuple[float, float, float] = (1.0, 0.3, 0.05),
+    weights: Tuple[float, float, float] = (1.0, 0.3, 1.0),
+    fa_decades: float = 3.0,
 ) -> Dict[str, float]:
     """Bewertet eine Detektionsliste gegen die Ground Truth.
 
-    Returns dict mit recall (Sudden Drifts), mean_delay, n_false (Fehlalarme in
-    stabilen Phasen), fa_per_true und kombiniertem ``score`` (kleiner = besser).
+    Fehlalarm ist jede Detektion ausserhalb aller Toleranzfenster -- unabhaengig
+    davon, ob der Prozess dort gerade driftet. Die frueher benutzte Definition
+    (nur Detektionen in nachweislich stabiler Phase) stellte bei inkrementellem
+    Drift den Grossteil der Fehlalarme frei: ``drift_active`` deckt dort rund
+    84 % des Stroms ab, gemessen wurde also nur auf einem Sechstel. Ein Detektor,
+    der durchgehend feuert, wurde damit kaum bestraft und gewann das Tuning.
+
+    Der Fehlalarm-Term im Score ist ``fa_term`` -- die Zahl der Fehlalarme je
+    Ereignis, logarithmisch bewertet und auf [0, 1] gestaucht::
+
+        fa_term = min(1, log10(1 + n_false / n_sudden) / fa_decades)
+
+    0 heisst kein Fehlalarm, 1 heisst ``10**fa_decades`` Fehlalarme je Ereignis.
+    Die logarithmische Skala ist noetig, weil sich die Detektoren ueber
+    Groessenordnungen unterscheiden (im synthetischen Fall 23 bis 17808
+    Detektionen auf 4 Ereignisse). Ein linearer Term aus ``1 - precision`` liegt
+    in diesem Bereich fuer alle Kandidaten zwischen 0,98 und 0,99, traegt also
+    keinen Gradienten -- das Tuning optimiert dann nur noch den Verzug und senkt
+    ihn, indem es haeufiger feuert. Genau das ist am 2026-09-01 passiert.
+
+    ``precision`` und ``fa_per_true`` bleiben als Kennzahlen erhalten, gehen aber
+    nicht in den Score ein.
+
+    Parameters
+    ----------
+    drift_active : wird nur noch fuer ``n_false_stable`` gebraucht, die alte
+        Fehlalarm-Definition. Sie wird zum Vergleich mitberichtet.
+    weights : (w_recall, w_delay, w_falsealarm).
+    fa_decades : Zahl der Dekaden, ueber die der Fehlalarm-Term auf [0, 1]
+        gestaucht wird. Geht in den Konfigurations-Hash der Notebooks ein.
+
+    Returns
+    -------
+    dict mit recall, mean_delay, precision, fa_term, n_false (ausserhalb der
+    Fenster), n_false_stable (alte Definition), n_hits, fa_per_true, n_sudden,
+    n_detected und kombiniertem ``score`` (kleiner = besser).
     """
     w_rec, w_del, w_fa = weights
     drifts = np.asarray(sorted(int(d) for d in drifts), int)
@@ -283,25 +395,61 @@ def score_detections(
     mean_delay = float(np.mean(delays)) if delays else float(tolerance)
     norm_delay = min(mean_delay / tolerance, 1.0) if tolerance > 0 else 0.0
 
-    # Fehlalarme: Detektionen in stabiler Phase (nicht aktiv & nicht im Sudden-Fenster)
+    # Toleranzfenster: alles darin gilt als plausibel auf ein Ereignis bezogen.
     sudden_window = np.zeros(n, bool)
     for s in sudden:
         sudden_window[s:min(n, s + tolerance + 1)] = True
-    n_false = int(sum(1 for d in drifts if 0 <= d < n
-                      and not active[d] and not sudden_window[d]))
+
+    inside = [bool(sudden_window[d]) for d in drifts if 0 <= d < n]
+    n_valid = len(inside)
+    n_hits = int(sum(inside))
+    n_false = n_valid - n_hits
+    precision = n_hits / n_valid if n_valid else 0.0
     fa_per_true = n_false / max(1, n_sudden)
 
-    score = w_rec * (1.0 - recall) + w_del * norm_delay + w_fa * fa_per_true
-    return dict(recall=recall, n_sudden=n_sudden, n_detected=int(drifts.size),
-                mean_delay=mean_delay, n_false=n_false, fa_per_true=fa_per_true,
+    # Alte Definition, nur noch als Vergleichskennzahl (s. Docstring).
+    n_false_stable = int(sum(1 for d in drifts if 0 <= d < n
+                             and not active[d] and not sudden_window[d]))
+
+    fa_term = min(1.0, math.log10(1.0 + fa_per_true) / fa_decades) if fa_decades > 0 else 0.0
+
+    score = w_rec * (1.0 - recall) + w_del * norm_delay + w_fa * fa_term
+    return dict(recall=recall, precision=precision, fa_term=float(fa_term),
+                n_sudden=n_sudden, n_detected=int(drifts.size), n_hits=n_hits,
+                mean_delay=mean_delay, n_false=n_false,
+                n_false_stable=n_false_stable, fa_per_true=fa_per_true,
                 score=float(score))
 
 
 def _suggest_params(name: str, trial, err_threshold_bounds=None):
     """Optuna-Suchraum je Detektor. Returns (config_overrides, err_threshold|None).
 
+    Geweitet wurde am 2026-09-01 nur dort, wo ein Optimum nachweislich am
+    Anschlag lag: KSWIN ``alpha`` (in jedem Lauf auf 1e-6), DDM ``drift_level``
+    (3.95 bei Deckel 4.0), EDDM ``alpha`` (0.99867 bei 0.999) und RMSE
+    ``window`` (exakt 150 bei 150). Das hat KSWIN und RMSE deutlich verbessert
+    (RMSE von 1852 auf 324 Detektionen bei Recall 1.0).
+
+    Zusaetzlich geweitete Zaehlgrenzen von DDM und EDDM (500 -> 2000) sind am
+    2026-09-02 wieder zurueckgenommen worden. Dort lag kein Optimum am Anschlag
+    (372 bzw. 355 von 500), die Weitung hat nur das Suchvolumen verzwoelffacht:
+    DDM fiel von Recall 0.75 auf 0.50, EDDM von 0.25 auf 0.00, obwohl ihre
+    frueheren Optima im groesseren Raum enthalten waren. Ein Lauf mit 500 statt
+    200 Trials aenderte daran nichts -- TPE zieht nur ``n_startup_trials`` = 10
+    Zufallspunkte, unabhaengig von der Trial-Zahl, und findet das schmale gute
+    Becken im grossen Raum schlicht nicht mehr. Regel daraus: eine Grenze nur
+    weiten, wenn das Optimum an ihr klebt.
+
     Parameters
     ----------
+    enqueue : Liste roher Optuna-Parameterdicts, die als Startkandidaten
+        eingereiht werden. Gedacht fuer bereits bekannte gute Betriebspunkte:
+        TPE zieht nur ``n_startup_trials`` = 10 Zufallspunkte, und ein schmales
+        gutes Becken in einem weiten Suchraum wird darin oft nicht getroffen.
+        Ein eingereihter Punkt wird reguler bewertet und konkurriert mit den
+        uebrigen Trials -- das Ergebnis kann dadurch nie schlechter werden als
+        der eingereihte Punkt. Werte ausserhalb der Verteilung werden von Optuna
+        mit einer Warnung uebernommen, nicht auf den Rand gezogen.
     err_threshold_bounds : (float, float) | None
         Suchbereich fuer err_threshold bei DDM/EDDM als (lo, hi). Wird None
         uebergeben, greift der Fallback (0.5, 4.0). Empfohlener Ansatz: lo aus
@@ -311,9 +459,9 @@ def _suggest_params(name: str, trial, err_threshold_bounds=None):
     et_lo, et_hi = err_threshold_bounds if err_threshold_bounds is not None else (0.5, 4.0)
     name = name.upper()
     if name == "KSWIN":
-        min_inst = trial.suggest_int("min_num_instances", 50, 400)
+        min_inst = trial.suggest_int("min_num_instances", 50, 2000)
         return dict(
-            alpha=trial.suggest_float("alpha", 1e-6, 5e-3, log=True),
+            alpha=trial.suggest_float("alpha", 1e-12, 5e-3, log=True),
             min_num_instances=min_inst,
             num_test_instances=trial.suggest_int("num_test_instances", 20, max(20, min_inst // 2)),
         ), None
@@ -324,14 +472,14 @@ def _suggest_params(name: str, trial, err_threshold_bounds=None):
             min_window_size=trial.suggest_int("min_window_size", 5, 64),
         ), None
     if name == "DDM":
-        drift_level = trial.suggest_float("drift_level", 1.5, 4.0)
+        drift_level = trial.suggest_float("drift_level", 1.5, 12.0)
         return dict(
             drift_level=drift_level,
             warning_level=trial.suggest_float("warning_level", 1.0, drift_level),
             min_num_instances=trial.suggest_int("min_num_instances", 30, 500),
         ), trial.suggest_float("err_threshold", et_lo, et_hi)
     if name == "EDDM":
-        alpha = trial.suggest_float("alpha", 0.90, 0.999)
+        alpha = trial.suggest_float("alpha", 0.90, 0.99999)
         return dict(
             alpha=alpha,
             beta=trial.suggest_float("beta", 0.70, alpha),
@@ -339,10 +487,10 @@ def _suggest_params(name: str, trial, err_threshold_bounds=None):
                 "min_num_misclassified_instances", 30, 500),
         ), trial.suggest_float("err_threshold", et_lo, et_hi)
     if name == "RMSE":
-        window = trial.suggest_int("window", 15, 150)
+        window = trial.suggest_int("window", 15, 1000)
         return dict(
             window=window,
-            threshold=trial.suggest_float("threshold", 0.5, 4.0),
+            threshold=trial.suggest_float("threshold", 0.5, 10.0),
         ), None
     raise ValueError(f"Unbekannter Detektor '{name}'")
 
@@ -355,12 +503,14 @@ def tune_detector(
     tolerance: int,
     n_trials: int = 50,
     downsample: int = 1,
-    weights: Tuple[float, float, float] = (1.0, 0.3, 0.05),
+    weights: Tuple[float, float, float] = (1.0, 0.3, 1.0),
+    fa_decades: float = 3.0,
     seed: int = 42,
     reset_on_drift: bool = True,
     cooldown: int = 0,
     show_progress_bar: bool = False,
     err_threshold_bounds=None,
+    enqueue: List[dict] = None,
 ):
     """Optimiert die Parameter eines Detektors mit Optuna (TPE).
 
@@ -411,7 +561,8 @@ def tune_detector(
             cooldown=cd_eval,
         )
         s = score_detections(drifts, sudden_eval, active_eval,
-                             tolerance=tol_eval, n=n_eval, weights=weights)
+                             tolerance=tol_eval, n=n_eval, weights=weights,
+                             fa_decades=fa_decades)
         for k, v in s.items():
             trial.set_user_attr(k, v)
         return s["score"]
@@ -420,6 +571,8 @@ def tune_detector(
         direction="minimize",
         sampler=optuna.samplers.TPESampler(seed=seed),
     )
+    for _p in (enqueue or []):
+        study.enqueue_trial(dict(_p), skip_if_exists=True)
     study.optimize(objective, n_trials=n_trials, show_progress_bar=show_progress_bar)
     return study
 
