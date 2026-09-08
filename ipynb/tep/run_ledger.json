@@ -12,16 +12,32 @@
       "parents": {
         "tep:production": "6fe76fde"
       },
-      "updated": "2026-08-20T10:45:15"
+      "updated": "2026-08-29T11:44:21"
     },
     "tep:model": {
-      "id": "5d29a9f2",
+      "id": "7120a160",
       "base_id": "30098669",
       "parents": {
         "tep:production": "6fe76fde",
         "tep:error": "a568acfa"
       },
-      "updated": "2026-08-17T10:27:05"
+      "updated": "2026-09-08T10:27:09"
+    },
+    "tep:detection": {
+      "id": "09a95f44",
+      "base_id": "30098669",
+      "parents": {
+        "tep:model": "7120a160"
+      },
+      "updated": "2026-09-08T11:54:35"
+    },
+    "tep:adaptation": {
+      "id": "fd048bc4",
+      "base_id": "30098669",
+      "parents": {
+        "tep:model": "5d29a9f2"
+      },
+      "updated": "2026-09-07T00:51:42"
     }
   }
 }

@@ -597,8 +597,8 @@
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{0.736667in}{1.113546in}%
-\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=1.063333in]{tep_model_error-img0.png}}%
+\pgfsys@transformshift{0.736667in}{0.913546in}%
+\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=1.240000in]{tep_model_error-img0.png}}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
