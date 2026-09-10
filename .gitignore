@@ -64,10 +64,11 @@ models/
 # results/
 
 # Große / rohe Datensätze – je nach Größe ausschließen:
-data/mill_data/
 data/tep/
 data/synthetic_data/
-data/syn/
+data/mill_data/raw_1hz/
+data/mill_data/raw_10s/
+data/mill_data/archive/
 
 # ─── IDE / OS ─────────────────────────────
 .vscode/*
@@ -80,3 +81,4 @@ Desktop.ini
 _carryover
 _claude_output
 _origin
+_shelf
