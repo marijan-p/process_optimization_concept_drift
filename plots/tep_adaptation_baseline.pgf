@@ -591,8 +591,8 @@
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{0.736667in}{0.579346in}%
-\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=0.723333in]{tep_adaptation_baseline-img0.png}}%
+\pgfsys@transformshift{0.736667in}{0.606013in}%
+\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=0.820000in]{tep_adaptation_baseline-img0.png}}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
