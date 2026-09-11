@@ -1,0 +1,16 @@
+name,role,unit,minimum,maximum,decimals
+feed_rate,feature,t/h,0,35,1
+classifier_speed,feature,%,0,100,1
+tension_pressure,feature,bar,0,250,0
+mill_fan_speed,feature,%,0,100,1
+main_drive_speed,feature,%,0,100,1
+recirculation_damper_position,feature,%,0,100,1
+stack_damper_position,feature,%,0,100,1
+hotgas_generator_load,feature,%,0,100,1
+total_specific_energy,label,kWh/t,0,50,1
+tonnage,context,t,0,,0
+roller_height_1,context,mm,,,2
+roller_height_2,context,mm,,,2
+roller_height_3,context,mm,,,2
+roller_height_4,context,mm,,,2
+roller_temperature,context,°C,,,1
