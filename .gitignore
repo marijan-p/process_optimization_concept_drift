@@ -66,9 +66,11 @@ models/
 # Große / rohe Datensätze – je nach Größe ausschließen:
 data/tep/
 data/synthetic_data/
-data/mill_data/raw_1hz/
-data/mill_data/raw_10s/
-data/mill_data/archive/
+data/mill/*
+!data/mill/raw/
+data/mill/raw/raw_1hz/
+data/mill/raw/raw_10s/
+data/mill/raw/archive/
 
 # ─── IDE / OS ─────────────────────────────
 .vscode/*
