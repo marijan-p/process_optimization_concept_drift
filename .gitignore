@@ -68,8 +68,6 @@ data/tep/
 data/synthetic_data/
 data/mill/*
 !data/mill/raw/
-data/mill/raw/raw_1hz/
-data/mill/raw/raw_10s/
 data/mill/raw/archive/
 
 # ─── IDE / OS ─────────────────────────────
