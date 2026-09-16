@@ -525,6 +525,20 @@ def tep_model_store(model_dir):
                          legacy_glob={"model": "tep_model_*.pkl"})
 
 
+def mill_data_store(data_dir):
+    """Artefakte des Muehlen-Anwendungsfalls -- flach in ``data/mill``.
+
+    Kein ``legacy``-Argument wie bei den beiden anderen Faellen: der Muehlensatz
+    ist erst nach der Umstellung auf die Kennungen entstanden, es gibt also
+    keine alten Dateinamen zu uebernehmen.
+    """
+    return ArtifactStore(data_dir, "mill")
+
+
+def mill_model_store(model_dir):
+    return ArtifactStore(model_dir, "mill")
+
+
 class RunConsistencyError(RuntimeError):
     """Wird ausgeloest, wenn finale Ausgaben aus inkonsistenten Laeufen stammen."""
 
@@ -828,6 +842,14 @@ def tep_plot_store(plot_dir, prefix="tep", *, ledger=None):
 
 
 def tep_results_store(results_dir, prefix="tep", *, ledger=None):
+    return OutputStore(results_dir, prefix, ledger=ledger)
+
+
+def mill_plot_store(plot_dir, prefix="mill", *, ledger=None):
+    return OutputStore(plot_dir, prefix, ledger=ledger)
+
+
+def mill_results_store(results_dir, prefix="mill", *, ledger=None):
     return OutputStore(results_dir, prefix, ledger=ledger)
 
 
