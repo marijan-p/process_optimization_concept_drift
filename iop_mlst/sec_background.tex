@@ -2,21 +2,81 @@
 %
 % Background
 %
-% Inhalt (Vorschlag):
-%     - CD-Taxonomie und Definitionen: Real Concept Drift vs. Covariate Shift,
-%       Sudden / Incremental
-%     - performance-basierte Detektoren: KSWIN, ADWIN, DDM, EDDM
-%     - Adaptionsstrategien: passiv, aktiv, kombiniert; Stability-Plasticity-Dilemma
-%     - der TEP als Anlage: Reaktionen, fuenf Hauptkomponenten, Regelkonzept nach
-%       Ricker, Betriebskosten als Zielgroesse, Stoerungskatalog IDV(1)-IDV(28)
-%     - Rahmen des Benchmarks: der TEP steht stellvertretend fuer die
-%       Betriebspunktoptimierung ueber ein Kostensurrogat; Sensoralterung und
-%       begrenzte Kalibrierintervalle sind der Anwendungsbezug, auf den die
-%       Ergebnisse generalisieren sollen
-%
-% Vgl. Dissertation: Kapitel 2 und sec:TEP
-%
-
 \section{Background} \label{sec:background}
-
-
+%
+\subsection{Concept drift} \label{subsec:concept_drift}
+%
+The deterioration of a deployed model as its underlying data changes is a well-documented phenomenon, but the terms used to describe it are not applied consistently. Occasionally the same term denotes different effects, or different terms refer to the same effect~\cite{bayram.2022a}. Two of them frame the present work. \emph{Dataset shift} refers to a deviation of the data distribution between a fixed training and a test scenario~\cite{quinonero.2008}, whereas \emph{concept drift} refers to the evolution of that distribution over time in a continuous data stream~\cite{gama.2014}. Webb et al.~\cite{webb.2016} describe the latter as the counterpart of the former in stream learning. The type of application considered in this work falls on the seam between the two. Where the operating point of a continuously run plant is optimized, the model is identified once from a designed campaign, which is the fixed training scenario dataset shift refers to, and is then applied to the continuously recorded measurements of the running plant, which is the stream concept drift refers to. The change the model is exposed to thus occurs in a data stream, although the model itself is not learned from one, and it is this change the present work addresses. What changes in this reading is the concept, which Gama et al.~\cite{gama.2014} define as the joint distribution of the features $X$ and the target $y$ at a point in time $t$,
+%
+\begin{equation} \label{eq:concept}
+    C_t = P_t(X, y).
+\end{equation}
+%
+Which part of this distribution changes, however, determines whether a model has to be adapted at all. \par
+%
+In its general form, a concept drift is a change of this distribution between two points in time,
+%
+\begin{equation} \label{eq:concept_drift}
+    P_t(X, y) \neq P_{t+\Delta t}(X, y).
+\end{equation}
+%
+By Bayes' theorem, $P_t(X, y) = P_t(y \mid X)\,P_t(X)$, such a change can originate in the distribution of the inputs, in the posterior that relates them to the target, or in both. A change confined to the inputs,
+%
+\begin{equation} \label{eq:covariate_shift}
+    P_t(X) \neq P_{t+\Delta t}(X),
+\end{equation}
+%
+is referred to as \emph{covariate shift} or, where the posterior is explicitly required to be unaffected, as \emph{virtual drift}. The data then move to a different region of the input space, whereas the mapping the model was fitted to remains valid. A change of the posterior itself,
+%
+\begin{equation} \label{eq:real_concept_drift}
+    P_t(y \mid X) \neq P_{t+\Delta t}(y \mid X),
+\end{equation}
+%
+is referred to as \emph{real concept drift} and occurs when the model returns an erroneous estimate for inputs it has already been trained on. According to this definition, the input distribution may shift along with the posterior or remain unchanged, $P_t(X) = P_{t+\Delta t}(X)$, the latter being referred to as \emph{actual drift}. In either case the posterior has changed, so that the learned mapping is no longer valid and the model has to be adapted~\cite{gama.2014, bayram.2022a}. \par
+%
+A second criterion distinguishes concept drifts not by the source of the change but by the pattern in which it unfolds over time~\cite{gama.2014, bayram.2022a}. A \emph{sudden} drift replaces one concept with another at a single point in time, whereas an \emph{incremental} drift passes through intermediate concepts, so that the transition extends over a period of time. In a \emph{gradual} drift the old and the new concept alternate, the new one prevailing more often as the stream proceeds, and a \emph{recurring} drift returns to a concept that has already been observed before. These patterns are to be distinguished from outliers and noise, which deviate from the current concept without replacing it and to which a detector should not respond. \par
+%
+\subsection{Drift detection} \label{subsec:detection}
+%
+The basic principle of a drift detector is to determine, while the stream proceeds, whether the most recent observations still originate from the same distribution as a previously defined reference. Regardless of the algorithm used, this determination amounts to a statistical hypothesis test~\cite{bayram.2022a}. Given a reference sample $\mathcal{D}_t$ and a sample $\mathcal{D}_{t+w}$ collected over a window of $w$ observations, the null hypothesis states that both originate from the same distribution,
+%
+\begin{equation} \label{eq:drift_hypothesis}
+    H_0: P(\mathcal{D}_t) = P(\mathcal{D}_{t+w}) \quad \text{against} \quad
+    H_1: P(\mathcal{D}_t) \neq P(\mathcal{D}_{t+w}).
+\end{equation}
+%
+This is assessed by a test statistic $S(\mathcal{D}_t, \mathcal{D}_{t+w})$ that quantifies the deviation between the two samples and is compared against a threshold $\lambda$. As long as $S \leq \lambda$ holds, the null hypothesis is retained and the stream is treated as stationary. Once the threshold is exceeded, it is rejected and a drift is declared. The threshold thus determines the trade-off that every detector faces, given that lowering the threshold shortens the delay until a change is detected but, at the same time, increases the number of false alarms. \par
+%
+The detectors differ in terms of the sample on which the test is performed, which is how they are typically categorized~\cite{bayram.2022a}. \emph{Data distribution-based} detectors apply a distance measure directly to the feature distributions of two windows of the stream~\cite{kifer.2004}. They require no labels, but they respond to any change of the input distribution, whether or not the predictive performance of the model is affected by it~\cite{gama.2014}. \emph{Performance-based} detectors apply the test to the error of the model instead, so that a drift is declared only where the deterioration it causes becomes measurable. \emph{Multiple hypothesis-based} detectors combine several such tests, either in parallel through a decision rule or hierarchically through a warning level that a second test confirms~\cite{lu.2018}, and \emph{context-based} detectors extend them by information about the system or the model. \par
+%
+This paper focuses on the performance-based family. It requires the target value to remain available during operation, so that the model's error can be evaluated at every step. The choice is determined by the task itself, because a model used to select an operating point should be adjusted wherever its estimate deviates from the true value. Since a detector compares only specific windows of the data stream rather than its entirety, a deliberate change to the operating point constitutes a change in the observed input distribution, even if the system and the learned mapping remain unchanged. However, a deterioration in the measurement chain shifts the measured variables as well. Monitoring the input distribution thus responds to both, while only the latter invalidates the learned mapping. Referring the test to the model error distinguishes the two. \par
+%
+Within the performance-based family, the detectors are distinguished by the strategy with which they track the error~\cite{bayram.2022a}. In its simplest form, a performance indicator is compared against a fixed threshold over a moving window, without a statistical test and without a warning level~\cite{gama.2014}. Methods of \emph{statistical process control} monitor the error rate instead and signal a drift once it departs by a statistically defined margin from the best value observed so far, whereas \emph{window-based} methods maintain a reference and a detection window over the error stream and compare the two by a statistical test. \emph{Ensemble-based} methods combine several learners and derive the indication of a change from the development of their individual errors. The evaluation presented here comprises a threshold on the root mean squared error as a reference, DDM and EDDM as representatives of statistical process control, and ADWIN and KSWIN as representatives of the window-based methods. \par
+%
+Both methods of statistical process control considered here monitor a binary error signal, so that a regression error has to be converted by a threshold beforehand. DDM tracks the error rate $p_i$ and its standard deviation $\sigma_i$ under a normal approximation of the underlying binomial distribution. It retains the smallest sum $p_{\mathrm{min}} + \sigma_{\mathrm{min}}$ observed so far as its reference, issues a warning once $p_i + \sigma_i$ exceeds this reference by twice $\sigma_{\mathrm{min}}$ and declares a drift at three times $\sigma_{\mathrm{min}}$~\cite{gama.2004}. EDDM replaces the error rate with the distance between two consecutive errors, which shortens as a drift develops gradually. The current mean distance is related to the largest one observed so far, and a warning and a drift are declared once this ratio falls below two respective thresholds~\cite{baena.2006}. \par
+%
+The two window-based methods considered differ in how the two windows are formed. ADWIN keeps a single window of the error stream and enlarges it as long as the stream appears stationary. The window is repeatedly split into two consecutive subwindows, whose means are compared against a bound derived from Hoeffding's inequality. Once the difference exceeds that bound, a drift is declared and the older part of the window is discarded, so that the window length itself reflects the extent of the current concept~\cite{bifet.2007}. KSWIN, in contrast, keeps a window of fixed size, from which it forms a detection window of the most recent observations and a reference window drawn uniformly at random from the older part. Both are compared by the Kolmogorov-Smirnov test, which makes no assumption about the shape of the underlying distribution~\cite{raab.2020}. \par
+%
+\subsection{Drift adaptation} \label{subsec:adaptation}
+%
+A detector establishes that the concept has changed, but does not modify the model. Restoring the predictive performance requires the model to be adapted, for which the survey of Gama et al.~\cite{gama.2014} remains the reference. Every adaptation strategy is characterized by two decisions: one regarding the data and one regarding the model. The data on which the adaptation is performed are stored in a short-term memory. This short-term memory typically consists of a window covering the most recent observations, along with a mechanism that governs how older observations are discarded. Forgetting quickly increases the responsiveness to a change, but it also increases the susceptibility to noise. The model, on the other hand, serves as the long-term memory in which the relation observed in the data is generalized. \par
+%
+Regarding the long-term memory, there are two approaches to adapting the model. Full retraining involves discarding the current model and training a new one based on the data stored in the short-term memory. This serves as a robust reference in research but requires these data to be sufficient on their own, a demanding requirement, particularly where they have to be gathered from a design of experiments. Incremental learning instead updates the existing model with the observations as they arrive, so that no new model is trained. Every update is subject to the stability-plasticity dilemma, the trade-off between incorporating new knowledge and retaining what has already been learned~\cite{gama.2014}. Too much plasticity leads to catastrophic forgetting, whereas too much stability renders the adaptation ineffective. \par
+%
+The second characteristic of an adaptation strategy is its trigger. A passive, or blind, strategy updates the model continuously, irrespective of whether a change has occurred. It requires no detector, but it spends effort on updates that may not be needed and keeps the model in motion even if the concept is stable. In contrast, an active, or informed, strategy performs an update only once a detector has signalled a drift. The adaptation is thereby targeted, but it becomes dependent on the quality of the detection, since a change that goes unnoticed triggers nothing. Combining both is intended to resolve this conflict, by keeping a continuous update in place and reinforcing it wherever a drift is detected~\cite{gama.2014}. \par
+%
+\subsection{The Tennessee Eastman process} \label{subsec:tep}
+%
+The TEP is a non-linear simulation of an industrial chemical plant, in which two liquid products are formed from four gaseous reactants in four irreversible and exothermic reactions, accompanied by an inert component and a by-product~\cite{downs.1993}. It comprises five main units connected in sequence, as shown in figure~\ref{fig:tep_flowsheet}. The reactants are fed into the reactor, where they react over a non-volatile catalyst held in the liquid phase, and the reaction heat is removed by an internal cooling bundle. The products leave the reactor as vapour, are cooled in the condenser and are separated from the remaining gases in the vapour-liquid separator, which divides the process into a forward product path and a recycle loop. In the stripper, the liquid is freed from residual reactants by the gas fed in below, whereas the uncondensed vapours are returned to the reactor by the compressor, with a purge preventing the inert component and the by-product from accumulating. \par
+%
+\begin{figure}[tb]
+    \centering
+    \includegraphics[width=\linewidth]{figures/tep_flowsheet.pdf}
+    \caption{Flowsheet of the TEP with its five main units, redrawn in monochrome
+after~\cite{bathelt.2015}.}
+    \label{fig:tep_flowsheet}
+\end{figure}
+%
+The process involves 41 measured variables and 12 manipulated variables, most of which operate valves~\cite{downs.1993}. In its original form, the system is unstable in an open-loop control configuration and triggers a safety shutdown shortly after startup. Downs and Vogel deliberately leave the control strategy undefined and present its design as a task for the benchmark. They do define six operating modes based on the mass ratio of the two products and the production rate. A mode, however, represents a requirement rather than an operating point, and the process can meet it in many different steady states. Ricker determines, for each mode, the steady state that meets this requirement at the lowest operating costs~\cite{ricker.1995}, and derives a decentralized control scheme that maintains the system at a specified operating point and rejects disturbances~\cite{ricker.1996}. In this scheme, the manipulated variables are specified by the controllers and merely recorded, while the plant is operated using setpoints whose combination defines the operating point. The operating costs are calculated by the simulation itself and are thus available at every step of a simulation run. \par
+%
+Alongside the plant, Downs and Vogel provide a catalogue of 20 process disturbances that can be activated during a run, expanded to 28 in the revision by Bathelt et al.~\cite{downs.1993, bathelt.2015}. Its entries represent typical fault cases, among them step changes in the feed composition, random variations of a feed temperature and a sticking valve. Each of them is switched on at a point in time and is present from then on, so that a monitoring method can decide which one is active. A slow and continuous change of the kind considered for concept drift is not part of the catalogue. The simulation is available as source code and can be driven from Python~\cite{bathelt.2015, reinartz.2022}. \par

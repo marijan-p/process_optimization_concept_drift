@@ -3,6 +3,33 @@
 \documentclass[anonymous]{iopjournal}	% [anonymous] provides output without author names, affiliations or acknowledgments to facilitate double-anonymous peer-review
 
 %---------------------------------------------------------------
+% Sprache und Mathematik
+%---------------------------------------------------------------
+\usepackage[american]{babel}
+\usepackage{csquotes}
+\usepackage{amsmath}
+
+%---------------------------------------------------------------
+% Typografie
+% Schrift, Randausgleich und Tabellen. Die Klasse selbst setzt
+% weder eine Schrift noch Mikrotypografie.
+%---------------------------------------------------------------
+\usepackage{libertinus}   % Serif, Sans und Mathematik aus einer Familie
+% Fallback, falls libertinus fehlt: \usepackage{newtxtext}\usepackage{newtxmath}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\sisetup{range-units=single, separate-uncertainty=true}
+
+% Bildunterschriften im Stil der Klasse, aber mit korrekten Abstaenden
+\usepackage{pgf}
+\usepackage{caption}
+\captionsetup{font=footnotesize, labelfont=bf, labelsep=period,
+              justification=raggedright, singlelinecheck=true}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\footnotesize}
+
+%---------------------------------------------------------------
 % Literatur
 %---------------------------------------------------------------
 \usepackage[
@@ -12,13 +39,33 @@
 ]{biblatex}
 \addbibresource{references.bib}
 
+%---------------------------------------------------------------
+% Querverweise, nach hyperref (wird von der Klasse geladen)
+%---------------------------------------------------------------
+\usepackage[capitalise, noabbrev]{cleveref}
+
+% Zeilennummern fuer das Review
+% \usepackage{lineno}
+% \linenumbers
+
+%---------------------------------------------------------------
+% Kopfzeile
+% Die Klasse setzt Platzhalter (Journal vv (yyyy) aaaaaa, Author et al),
+% die erst in der Produktion gefuellt werden. Bis dahin:
+%---------------------------------------------------------------
+\makeatletter
+\fancyhead[L]{{\small\sf IOP Publishing}\hspace{5mm}{\it Mach.\ Learn.: Sci.\ Technol.}}
+\fancyhead[R]{\if@anonymous\else Marijan {\it et al}\ \fi}
+\makeatother
+
+
 \begin{document}
 
 \articletype{Paper} %	 e.g. Paper, Letter, Topical Review...
 
-\title{Replace this text with the article title}
+\title{Extending the Tennessee Eastman process into a benchmark for concept drift in soft-sensor regression}
 
-\author{Pascal Marijan$^1$\orcid{0009-0008-1678-8038}, Tatjana Legler$^1$\orcid{0000-0002-7297-0845} and Martin Ruskowski$^{1,*}$\orcid{0000-0002-6534-9057}}
+\author{Pascal Marijan$^{1,*}$\orcid{0009-0008-1678-8038}, Tatjana Legler$^1$\orcid{0000-0002-7297-0845} and Martin Ruskowski$^1$\orcid{0000-0002-6534-9057}}
 
 \affil{$^1$Chair of Machine Tools and Control Systems, Department of Mechanical and Process Engineering, RPTU Kaiserslautern-Landau, Kaiserslautern, Germany}
 
@@ -28,8 +75,9 @@
 
 \email{pascal.marijan@rptu.de}
 
-\keywords{sample term, sample term, sample term}
+\keywords{concept drift, sensor drift, Tennessee Eastman process, benchmark data stream, soft sensor, drift detection, model adaptation}
 
+\input{generated/tep_values}
 %
 \input{abstract}   % Abstract
 \input{sec_introduction}

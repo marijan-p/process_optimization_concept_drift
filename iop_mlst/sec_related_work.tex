@@ -2,73 +2,41 @@
 %
 % Related Work
 %
-% Outline (four parts, settled 04.09.2026). The TEP comes last so that the
-% funnel narrows monotonically -- model class, application studies, requirement
-% on the data basis, the one candidate that meets it, what it still lacks --
-% and so that sections 2 and 3 run in the same order, concept drift first and
-% the TEP last, with section 3 handing the plant straight to section 4.
-%
-% Each part closes with the residue it leaves open. The sum of the residues is
-% the gap that IDV(29) fills.
-%
-%   2.1 Adaptive soft sensors in the process industry
-%       - the model class the cost surrogate belongs to; the established
-%         adaptation mechanisms (moving window, recursive schemes, just-in-time
-%         learning, ensembles) and their precondition, a label available online
-%         [kadlec.2009, kadlec.2011]
-%       - TODO a recent survey on adaptive soft sensors (2020 onwards); in
-%         neither references.bib nor diss.bib
-%       - Residue: the causes listed there are all on the process side, the
-%         measurement chain does not appear among them
-%
-%   2.2 Concept drift detection and adaptation in industrial applications
-%       - studies, not methods: electroslag remelting [bayram.2022b] and the own
-%         grinding plant [marijan.2025]; the application side is predominantly
-%         classification [lu.2018, bayram.2022 as the frame]
-%       - TODO two or three further industrial case studies
-%       - Residue: onset and extent of the drift are unknown, so detectors can
-%         only be compared with one another rather than measured
-%
-%   2.3 Benchmark streams with a known drift ground truth
-%       - synthetic generators: exact drift onset, no plant physics
-%       - real-world streams: physics, but no ground truth [souza.2020]
-%       - regression streams are the exception in both camps [webb.2016]
-%       - TODO generator and framework literature (MOA, river, SEA / rotating
-%         hyperplane / Agrawal); in neither bib file
-%       - Residue, phrased as a demand rather than a conclusion, so that 2.4
-%         reads as the answer to it: what is required is a simulated plant that
-%         carries plant physics and a defined drift onset at the same time
-%
-%   2.4 The Tennessee Eastman process as a benchmark
-%       - history, model revisions and control concepts [downs.1993, ricker.1995,
-%         ricker.1996, ricker.2005, bathelt.2015, reinartz.2022]
-%       - what the TEP is actually used for: fault detection and diagnosis; the
-%         standardised public reference data is cut for classification
-%         [reinartz.2021]
-%       - TODO three to five TEP fault-detection and -diagnosis works (PCA/DPCA,
-%         deep learning). This is the largest of the four gaps, diss.bib holds
-%         none of them
-%       - the disturbance catalogue is characterised as a FAULT catalogue only;
-%         IDV(13) at most in a subordinate clause as the single candidate
-%         labelled "slow drift". The analysis stays in sec_drift_injection --
-%         do not pre-empt the own finding here
-%       - closing paragraph = the gap: the TEP meets every requirement derived
-%         in the introduction except the drift itself
-%
-% Boundary to the background: related work reports STUDIES and DATA HOLDINGS,
-% the background DEFINITIONS and MECHANICS. [gama.2004, baena.2006, bifet.2007,
-% raab.2020, widmer.1996, moreno-torres.2012] belong to section 3, and so does
-% the TEP as a plant -- components, control concept, cost function.
-%
-% Cf. dissertation: chapter 2 and sec:TEP
-%
-
 \section{Related Work} \label{sec:related_work}
 
 \subsection{Adaptive soft sensors in the process industry} \label{subsec:soft_sensors}
 
+Data-driven soft sensors are a well-established tool in the process industry. They estimate a quantity that is not accessible to direct measurement from process variables that are recorded routinely, and they are derived from the historical record of the plant rather than from first principles. Kadlec et al.~\cite{kadlec.2009} survey the field and describe a recurring development path from the selection and cleaning of historical data through the choice of a model structure to its validation against plant data. What all of them share is the assumption that the relation learned from the historical record remains valid while the model is applied. A model used to optimize the operating point differs in this respect, since it is queried at points the plant is not currently running. \par
+%
+However, this assumption proves problematic in an industrial setting, since the distribution of the collected data may shift along with changing operating conditions. This phenomenon is known as concept drift, a notion established by Widmer and Kubat~\cite{widmer.1996} for learning problems in which the target concept changes along with a context that is not observed. It has evolved into a distinct field of research focused on detecting changes in a data stream and adapting a model to respond to them as they occur. The process industry has encountered the same problem on the plant side, and the literature on “soft sensors” offers adaptation mechanisms as a solution to keep a deployed model aligned with the process it describes. \par
+%
+Kadlec et al.~\cite{kadlec.2011} review these mechanisms and group them into instance selection, instance weighting and ensemble methods. The recursive formulation of the partial least squares~\cite{qin.1998} is key to their calculations, and the review attributes its significance to the collinearity of the process data and the fact that a linear projection can be updated in closed-form. Kadlec and Gabrys~\cite{kadlec.2011b} join instance weighting and ensemble methods by maintaining an ensemble of locally valid models in which the members are adapted recursively and their combination weights alongside them. Here, they report an improvement over the recursive formulation alone on data from an industrial polymerisation reactor. Common to all of these mechanisms is the requirement that a reliable target value becomes available again during operation. \par
+%
+With regard to the measurement chain, a soft sensor should not be adapted as long as the underlying hardware sensor provides erroneous measurements~\cite{kadlec.2011}. A corrupted measurement is thus treated as a data quality issue rather than as a cause of drift. Nevertheless, it has been documented that the measurement hardware itself is a vulnerability. Fortuna et al.~\cite{fortuna.2007b} report on a virtual instrument based on multilayer perceptrons (MLP) that estimates the octane number of gasoline in a refinery. The model was deliberately designed to replace the measurement hardware during maintenance. Thus, a model whose input data deteriorates while the underlying plant remains unchanged fits between these two concepts. \par
+%
+
 \subsection{Concept drift detection and adaptation in industrial applications} \label{subsec:cd_industrial}
+
+Gama et al.~\cite{gama.2014} provide the taxonomy and the terminology for the detection and the adaptation task, and much of the subsequent work refers to them. Outside the process industry, concept drift is studied mainly on classification tasks. Lima et al.~\cite{lima.2022} review the regression case systematically and identify 41 studies over the decade up to 2020, in which detection methods built on ensembles and neural networks prevail. Industrial soft sensing belongs to this smaller share, since the quantity a soft sensor estimates is continuous. \par
+%
+Concept drift has been identified in a number of industrial applications. Bayram et al.~\cite{bayram.2022b} investigate an electroslag remelting process at a steel manufacturer, in which a model predicts the minimum pressure of a vacuum pumping operation, while the addition of another furnace alters the conditions under which the model was trained. They address this problem using importance weighting. Zenisek et al.~\cite{zenisek.2019} consider the drift in the context of predictive maintenance as an indication of wear, develop their detector using synthetic data streams, and then apply it to industrial radial fans. Marijan et al.~\cite{marijan.2025} model the energy consumed per ton of ground material in an industrial grinding plant with an MLP, observe the drift caused by material wear through the evolution of the model error, and compare four detection methods together with active and passive adaptation. What these real-world use cases have in common is that, while the change can be identified, it cannot be precisely determined. Moreover, there is no drift-free reference run besides the one affected, so a detected change can be classified as plausible but not as valid. \par
+%
 
 \subsection{Benchmark streams with a known drift ground truth} \label{subsec:benchmarks}
 
+Research on learning from data streams evaluates its methods using data streams in which the drift is defined by design. Street and Kim~\cite{street.2001} generate data in a three-dimensional feature space, from which two features are relevant. Then, they divide the data stream into four blocks and shift the threshold separating the two classes from one block to the next. Hulten et al.~\cite{hulten.2001} let the concept change continuously instead, by rotating the hyperplane that separates the classes as the stream proceeds. Both constructions state the point of change exactly, and both are classification problems whose features are drawn rather than measured. Generators of this kind are collected in the frameworks the field works with, such as MOA~\cite{bifet.2010} for stream classification and clustering and river~\cite{montiel.2021} for the Python ecosystem. \par
+%
+On the other hand, there are data streams that have been recorded on real-world systems. Souza et al.~\cite{souza.2020} collect such data streams in a public repository and investigate the associated problems, including the scarcity of publicly available non-stationary datasets. However, their collection is again tailored to classification. Kadlec et al.~\cite{kadlec.2011} list seven publicly available datasets of the process industry, four of which relate to batch processes or contain no target variables. Two of them describe continuous plants with a regression target, a debutanizer column and a sulfur recovery unit~\cite{fortuna.2007}. With approximately 10,000 measured values, the latter is the largest stream of the entire list. In none of these cases is the recorded run accompanied by a drift-free run over the same conditions, so the moment at which a change enters the data remains unknown. \par
+%
+However, one of the seven datasets is based on a simulator. Birol et al.~\cite{birol.2002} provide a modular simulation package for fed-batch fermentation for the production of penicillin, allowing a run to be repeated under different conditions and thus yielding a pair of runs. The process is carried out in batches, so it does not provide the stationary operating points that an optimization of the operating point refers to.
+This presents a dilemma. A generated data stream indicates when the concept changes, but there is no actual plant behind it, whereas a recorded data stream does involve the plant but does not specify the moment of the change. What is missing is a simulation that can be run into the same sequence of operating points twice, with the change introduced by design. \par
+%
+
 \subsection{The Tennessee Eastman process as a benchmark} \label{subsec:tep_benchmark}
+
+One simulated plant comes close to this description. Downs and Vogel~\cite{downs.1993} published the Tennessee Eastman process as a plant-wide control problem, a simulation of a chemical plant together with a catalogue of disturbances that can be activated during a simulation run. Ricker~\cite{ricker.1995} determined the operating points at which the plant runs at minimum cost and later proposed a decentralised control scheme that holds it at a commanded operating point~\cite{ricker.1996}. Bathelt et al.~\cite{bathelt.2015} revised the simulation model and provided an updated implementation, and Reinartz and Enevoldsen~\cite{reinartz.2022} made the simulation controllable from Python, including changes to process configurations while a run is in progress. Through these contributions the process has become a standard reference plant in process monitoring research. \par
+%
+Russell et al.~\cite{russell.2000} detect the catalogued disturbances with canonical variate analysis and dynamic principal component analysis.Their study can thus be considered one of the works establishing this process as a reference case for statistical process monitoring. Yin et al.~\cite{yin.2012} compare the established data-driven methods against one another on the same benchmark, Seng Ng and Srinivasan~\cite{sengng.2010} distribute the task over several agents that vote on a diagnosis, and Wu and Zhao~\cite{wu.2018} replace the statistical model with a deep convolutional network. The methods vary from contribution to contribution, but the research question remains the same: Which of the faults listed in the catalog is currently affecting the system? Additionally, standardized reference data for the process, designed for the same task, have been published. Reinartz et al.~\cite{reinartz.2021} provide a dataset for fault detection and decision support in which every run is labelled by the disturbance it carries. \par
+%
+A benchmark of this kind requires two properties, a sequence of operating points that can be run twice and a change introduced by design. The Tennessee Eastman process provides the first, since its operating points can be defined and commanded such that two runs differ only in what is changed intentionally. However, the alteration itself is what the process does not offer. The entries of its catalogue are meant to be switched on such that a monitoring method can decide which of them is active, not to make a learned relation drift away gradually. Closing this gap is the purpose of the present work. Therefore, the list of disturbances is extended by a concept drift affecting the measurement chain, such that, across the same sequence of operating points, a drift-affected run is generated alongside a drift-free run. \par
+%
