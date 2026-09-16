@@ -125,7 +125,13 @@ stringstyle=\color{redstrings},
 basicstyle=\linespread{0.8}\ttfamily\footnotesize,
 tabsize=4,
 }
-\renewcommand{\lstlistingname}{Codeausschnitt} %Umbenennung von Listing zu Codeausschnitt
+
+%Umbenennung von Listing zu Codeausschnitt
+\renewcommand{\lstlistingname}{Codeausschnitt}
+\captionsetup[lstlisting]{
+    justification=raggedright,
+    singlelinecheck=false
+}
 
 %---------------------------------------------------------------
 % AMSTeX für boldsymbol
@@ -136,7 +142,6 @@ tabsize=4,
 %---------------------------------------------------------------
 % Hyperlinks für pdfTeX
 %---------------------------------------------------------------
-\usepackage{hyperref}
 \hypersetup{
  pdftitle    = {Prozessoptimierung unter Concept Drift: Adaptive Simulationsmodelle im industriellen Umfeld},
  pdfsubject  = {},
@@ -192,7 +197,7 @@ tabsize=4,
 %---------------------------------------------------------------
 % acronym for abbreviations
 %---------------------------------------------------------------
-\usepackage[printonlyused,nohyperlinks]{acronym}
+\usepackage[printonlyused]{acronym}
 \renewcommand*{\acsfont}[1]{\texttt{#1}}
 \usepackage{array}
 

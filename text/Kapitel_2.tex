@@ -356,7 +356,7 @@ Obwohl es sich bei der vorliegenden Problemstellung methodisch um Batch-Learning
 Im Zusammenhang der Definition des Concept Drifts ist anzumerken, dass auch hier in der Literatur einige Begriffe existieren, die als unterschiedliche Ausprägungsformen des Concept Drifts verstanden werden können. Dazu zählen \emph{Permanent Drift}, \emph{Temporary Drift}, \emph{Sampling Shift}, \emph{Feature Change}, \emph{Conditional Change}, \emph{Global Drift}, \emph{Label Shift} und \emph{Target Shift}, um nur eine Auswahl zu nennen \cite{bayram.2022}.
 Das Fehlen einer einheitlichen Terminologie wurde 2012 erstmals maßgeblich von Moreno-Torres et al. thematisiert \cite{moreno-torres.2012}. \par
 Um die terminologische Unschärfe aufzulösen, ist es daher zielführend, die verschiedenen Effekte mathematisch voneinander abzugrenzen. Einen solchen Ansatz verfolgen Bayram et al., die die Begriffe der Literatur anhand ihrer mathematischen Definitionen strukturieren \cite{bayram.2022}. Basierend auf dieser Systematik sind die verschiedenen Arten von Drifts in Tabelle \ref{tab:cd_definitionen} aufgeführt, wobei für jede mathematische Definition je ein in der Literatur verwendeter Begriff ausgewählt wurde.
-
+%
 \begin{table}[tb!]
     \centering
     \renewcommand{\arraystretch}{1.2} % Zeilenabstand
@@ -383,7 +383,7 @@ Um die terminologische Unschärfe aufzulösen, ist es daher zielführend, die ve
             \end{equation}} \\
         Actual Drift & \parbox{10cm}{
             \begin{equation} \label{eq:actual_drift}
-                P_t(y \ | \ X) \neq P_{t+w}(y \ | \ X) \text{ und } P_t(X) = P_{t+\Delta t}(X) 
+                P_t(y \ | \ X) \neq P_{t+\Delta t}(y \ | \ X) \text{ und } P_t(X) = P_{t+\Delta t}(X) 
             \end{equation}} \\
         Virtual Drift & \parbox{10cm}{
             \begin{equation} \label{eq:virtual_drift}

@@ -77,7 +77,7 @@ Das Zielniveau $c_i^{-} \sim \mathcal{U}(c_{\min},\, c_{\min}/\paramCdBandDiv)$ 
     \label{fig:synthetic_concept_drift}
 \end{figure}
 %
-Abbildung~\ref{fig:synthetic_concept_drift} zeigt den resultierenden Verlauf des Driftsignals $c[k]$ über ein Kalenderjahr. Trotz des diskreten Charakters von $c[k]$ erfolgt die Darstellung als kontinuierlicher Verlauf, da der stückweise lineare Verlauf so unmittelbar erkennbar wird. Das sägezahnartige Muster aus linearem Abfall beim \emph{Incremental Drift} innerhalb der Segmente und sprungartigen Anstiegen des \emph{Sudden Drift} an den Segmentgrenzen ist dabei deutlich erkennbar. Da $c_{i+1}^{+}$ stets aus dem positiven Teilbereich und $c_i^{-}$ stets aus dem negativen Teilbereich gezogen wird, sind die beiden Drifttypen im Signalverlauf klar voneinander unterscheidbar und das Signal deckt den Wertebereich $[c_{\min},\, c_{\max}]$ näherungsweise ab.
+Abbildung~\ref{fig:synthetic_concept_drift} zeigt den resultierenden Verlauf des Driftsignals $c[k]$ über ein Kalenderjahr. Trotz des diskreten Charakters von $c[k]$ erfolgt die Darstellung als kontinuierlicher Verlauf, da der stückweise lineare Verlauf so unmittelbar erkennbar wird. Jedes Segment erscheint dabei als eigene Linie, die vom oberen zum unteren grau hinterlegten Band abfällt und so den \emph{Incremental Drift} abbildet. Die Lücken zwischen den Linien markieren die sprungartigen Anstiege des \emph{Sudden Drift} an den Segmentgrenzen. Da $c_{i+1}^{+}$ stets aus dem oberen und $c_i^{-}$ stets aus dem unteren Band gezogen wird, sind die beiden Drifttypen im Signalverlauf klar voneinander unterscheidbar und das Signal deckt den Wertebereich $[c_{\min},\, c_{\max}]$ näherungsweise ab.
 %
 \subsection{Setpoints} \label{sec:generieren_von_setpoints}
 %
@@ -675,16 +675,22 @@ Die Segmentgrenzen folgen demselben Raster der nominellen Segmentdauer $T_{\math
 %
 Die Segmentdauer $T_{\mathrm{seg}}$ wird aus dem synthetischen Fall übernommen. Nach unten ist sie dadurch begrenzt, dass sich der Kalibrierfehler während des Anfahrens und Haltens eines Betriebspunkts nur unwesentlich ändern darf, damit jeder Betriebspunkt einen einzelnen Driftpegel abbildet. Der Driftkoeffizient $\kappa_m$ ist so bemessen, dass die Verschiebung des Simulationsfehlers deutlich über dem Rauschen des Modells innerhalb eines Betriebspunkts liegt, der Kalibrierfehler in der Spitze aber unter der prozessbedingten Streuung der Strippertemperatur bleibt. \par
 %
-Der Eingriff in den Quelltext beschränkt sich auf die Auswertung des Faktors $1 + \kappa_m \cdot c(t)$ als \texttt{driftf} in einer separaten Datei und dessen Multiplikation an der Zuweisung von \texttt{XMEAS(18)}, wie in Listing~\ref{lst:tep_sensordrift} dargestellt.
+Der Eingriff in den Quelltext des Simulators beschränkt sich auf wenige Zeilen in \texttt{temexd\_mod.c}, die in Codeausschnitt~\ref{lst:tep_sensordrift} dargestellt sind. Das Driftsignal selbst ist in der separaten Datei \texttt{drift\_function.c} umgesetzt, welche die S-Funktion als Quelltext einbindet und die sich zugleich als dynamische Bibliothek übersetzen lässt, sodass dasselbe Signal auch aus Python ausgewertet werden kann. Im Codeausschnitt bezeichnet \texttt{tcc} die vom Prozessmodell berechnete Strippertemperatur, die zunächst dem null-indizierten Messvektor \texttt{xmeas} an der Stelle von \texttt{XMEAS(18)} zugewiesen wird. Der Eintrag \texttt{idv[29]} enthält den über die Schnittstelle eingestellten Wert der Störung und damit den Driftkoeffizienten $\kappa_m$. Beim ersten Aufruf nach der Aktivierung wird die Simulationszeit \texttt{time} in \texttt{drift\_tonset} gespeichert. Beim Abschalten der Störung wird dieser Wert auf einen negativen Wert zurückgesetzt, sodass eine erneute Aktivierung das Muster neu beginnt. Die Funktion \texttt{drift\_signal} liefert $c(t)$ für die seit der Aktivierung verstrichene Zeit und wird über die Konstanten \texttt{DRIFT\_PERIOD}, \texttt{DRIFT\_GAMMA} und \texttt{DRIFT\_SEED} parametriert, die $T_{\mathrm{seg}}$, $\gamma_\tau$ und dem Seed der Zufallsniveaus entsprechen. Der resultierende Faktor \texttt{driftf} skaliert den Eintrag an \texttt{DRIFT\_SENSOR\_INDEX}, der auf \texttt{XMEAS(18)} verweist, erst nach der Zuweisung des Prozesswerts. Er wirkt damit ausschließlich auf den ausgegebenen Messwert, während der simulierte Prozess in seinem Verhalten identisch zum ungestörten Fall bleibt. \par
 %
-\begin{lstlisting}[language=C, caption={Aufprägung des Sensordrifts auf die Strippertemperatur, Ausschnitt aus \texttt{temexd\_mod.c}}, label={lst:tep_sensordrift}]
-/* xmeas im Code null-indiziert -> xmeas[17] entspricht XMEAS(18) */
-(*tcModelData).pv_.xmeas[17] = (*tcModelData).teproc_.tcc;
-(*tcModelData).pv_.xmeas[DRIFT_SENSOR_INDEX] =
-    (*tcModelData).pv_.xmeas[DRIFT_SENSOR_INDEX] * driftf;
+\begin{lstlisting}[language=C, float=tb,
+    caption={Anwendung des Sensordrifts in \texttt{temexd\_mod.c}, gekürzt und vereinfacht},
+    label={lst:tep_sensordrift}]
+xmeas[17] = tcc;                      /* Prozesswert von XMEAS(18) */
+if (idv[29] > 0.) {
+    if (drift_tonset < 0.) drift_tonset = time;
+    driftf = 1. + idv[29] * drift_signal(time - drift_tonset,
+                              DRIFT_PERIOD, DRIFT_GAMMA, DRIFT_SEED);
+} else {
+    drift_tonset = -1.;
+    driftf = 1.;
+}
+xmeas[DRIFT_SENSOR_INDEX] *= driftf;
 \end{lstlisting}
-%
-Da die Multiplikation mit dem Drifteinfluss erst nach der Bildung des Prozesswerts erfolgt, wirkt sie ausschließlich auf den ausgegebenen Messwert. Der simulierte Prozess bleibt in seinem Verhalten identisch zum ungestörten Fall. \par
 %
 \subsection{Generierung des Datenstroms} \label{sec:tep_generation}
 %
@@ -810,19 +816,22 @@ Tabelle~\ref{tab:tep_model_error_stats} fasst die Kennzahlen des Simulationsfehl
 \centering
 \caption{Kennzahlen der drift-bedingten Modellverschlechterung}
 \label{tab:tep_model_error_stats}
-\begin{tabular}{lcccccc}
-\toprule
-\multirow{2}{*}[-4pt]{\textbf{Betriebspunkte}} & \multicolumn{2}{c}{\ac{RMSE}} & \multicolumn{2}{c}{Streuung $\sigma$}
- & \multirow{2}{*}[-4pt]{\shortstack[c]{Mittelwert $\bar{e}$\\[4pt](drift-behaftet)}}
- & \multirow{2}{*}[-4pt]{\shortstack[c]{Fehler-\\[4pt]verhältnis}} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}
- & drift-frei & drift-behaftet & drift-frei & drift-behaftet & & \\
-\midrule
-Alle & $\tepstatAlleRmseFree$ & $\tepstatAlleRmseFault$ & $\tepstatAlleSigmaFree$ & $\tepstatAlleSigma$ & $\tepstatAlleBias$ & $\tepstatAlleK$ \\
-Kampagne & $\tepstatGesehenRmseFree$ & $\tepstatGesehenRmseFault$ & $\tepstatGesehenSigmaFree$ & $\tepstatGesehenSigma$ & $\tepstatGesehenBias$ & $\tepstatGesehenK$ \\
-Übrige & $\tepstatUngesehenRmseFree$ & $\tepstatUngesehenRmseFault$ & $\tepstatUngesehenSigmaFree$ & $\tepstatUngesehenSigma$ & $\tepstatUngesehenBias$ & $\tepstatUngesehenK$ \\
-\bottomrule
-\end{tabular}
+\makebox[\textwidth][c]{
+    \begin{tabular}{lcccccc}
+    \toprule
+    \multirow{2}{*}[-4pt]{\textbf{Betriebspunkte}} & \multicolumn{2}{c}{\ac{RMSE}} & \multicolumn{2}{c}{Streuung $\sigma$}
+    & \multirow{2}{*}[-8pt]{\shortstack[c]{Mittelwert $\bar{e}$\\ \shortstack[c]{drift-\\behaftet}}}
+    & \multirow{2}{*}[-8pt]{\shortstack[c]{Fehler-\\[4pt]verhältnis}} \\
+    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+    & \multirow{2}{*}[15pt]{drift-frei} & \shortstack[c]{drift-\\behaftet} & \multirow{2}{*}[15pt]{drift-frei} & \shortstack[c]{drift-\\behaftet} & & \\
+    \midrule
+    Alle & $\tepstatAlleRmseFree$ & $\tepstatAlleRmseFault$ & $\tepstatAlleSigmaFree$ & $\tepstatAlleSigma$ & $\tepstatAlleBias$ & $\tepstatAlleK$ \\
+    Kampagne & $\tepstatGesehenRmseFree$ & $\tepstatGesehenRmseFault$ & $\tepstatGesehenSigmaFree$ & $\tepstatGesehenSigma$ & $\tepstatGesehenBias$ & $\tepstatGesehenK$ \\
+    Übrige & $\tepstatUngesehenRmseFree$ & $\tepstatUngesehenRmseFault$ & $\tepstatUngesehenSigmaFree$ & $\tepstatUngesehenSigma$ & $\tepstatUngesehenBias$ & $\tepstatUngesehenK$ \\
+    \bottomrule
+    \end{tabular}
+}
+\vspace{3mm}
 \end{table}
 %
 Die Aufteilung nach der Zugehörigkeit zur Kampagne trennt davon einen zweiten Beitrag ab. Auf den Punkten der Kampagne liegt das nominale Fehlerniveau niedriger als auf den übrigen, da das Modell diese Betriebspunkte im Training bereits gesehen hat. Da der Drift das Fehlerniveau beider Gruppen anhebt, fällt das Fehlerverhältnis auf den Kampagnenpunkten mit ihrem niedrigeren Ausgangsniveau am größten aus. Wie weit der Drift im Simulationsfehler sichtbar bleibt, hängt damit davon ab, wie weit ein Betriebspunkt von der Kampagne entfernt liegt. \par
@@ -833,57 +842,6 @@ Der \ac{TEP}-Datenstrom reproduziert damit die Degradation, die sich zuvor berei
 %
 \subsection{Drift-Erkennung} \label{sec:tep_detektion}
 %
-Zur Detektion des im C-Code injizierten \ac{CD} werden dieselben performance-basierten Detektoren wie im synthetischen Fall auf den Simulationsfehler des Modells angewandt.
-%
-% Absatz 1 — Detektoren & Eingang:
-%   - \ac{KSWIN}, ADWIN, \ac{DDM}, \ac{EDDM} (Bibliothek frouros), Eingang = Simulationsfehler
-%   - Verweis Abschn.~\ref{sec:datensynthese_drift_erkennung} zur Vermeidung von Redundanz
-%
-% Absatz 2 — Binarisierung & Konfiguration:
-%   - Schwellenwert lambda_bin für \ac{DDM}/\ac{EDDM}
-%   - Tuning via Optuna, Ground Truth der injizierten Drifts (aus Abschn.~\ref{sec:tep_drift})
-%
-% Absatz 3 — Ergebnis:
-%   -> Detektionskennzahlen (Trefferquote, Fehlalarme, Verzögerung) in Tabelle
-%   -> im Text qualitativ mit Verweis auf Tabelle
-%
-% \begin{figure}[tbp]
-%     \centering
-%     % \includesvg[width=\linewidth]{\graphdir tep_detection.svg}
-%     \caption{Detektionszeitpunkte der Verfahren im Verlauf des Simulationsfehlers}
-%     \label{fig:tep_detection}
-% \end{figure}
-% -> Abbildung im Text beschreiben (Detektionen relativ zu Sudden/Incremental Drift)
 %
 \subsection{Drift-Adaption} \label{sec:tep_adaption}
-%
-Als abschließender Schritt der Verarbeitungskette wird das Modell an den drift-behafteten \ac{TEP} adaptiert, um der Modellverschlechterung entgegenzuwirken.
-%
-% Absatz 1 — Strategien:
-\begin{itemize}
-    \item eine \emph{passive} Adaption
-    \item eine \emph{aktive} Adaption
-    \item deren \emph{Kombination}
-\end{itemize}
-%   - Verweis Abschn.~\ref{sec:datensynthese_drift_adaption} / \ref{sec:drift_adaption}
-%
-% Absatz 2 — Inkrementelles Nachtraining:
-%   - Layer-Freezing, kleine Lernrate, Early-Stopping (Stability-Plasticity-Dilemma)
-%   - drift-behaftete Features/Label
-%
-% Absatz 3 — Chunk-weise Verarbeitung:
-%   - Adaptionsintervall T_a, Chunk-Länge, Auslösebedingungen je Strategie
-%
-% Absatz 4 — Bewertung & Tuning:
-%   -> Kennzahlen (\ac{RMSE}, Mittelwert, Streuung, Korrelation |e| mit |c[k]|, Anzahl Nachtrainings) in Tabelle
-%   - Optuna-Tuning mit Score J_a (vgl. Gl.~\eqref{eq:adaption_score})
-%   -> im Text qualitativ mit Verweis auf Tabelle
-%
-% \begin{figure}[tbp]
-%     \centering
-%     % \includesvg[width=\linewidth]{\graphdir tep_adaptation.svg}
-%     \caption{Simulationsfehler der Adaptionsstrategien über den drift-behafteten Datenstrom}
-%     \label{fig:tep_adaptation}
-% \end{figure}
-% -> Abbildung im Text beschreiben (Fehlerreduktion je Strategie)
 %
