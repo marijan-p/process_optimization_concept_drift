@@ -715,7 +715,7 @@
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsys@transformshift{0.736667in}{0.552916in}%
-\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=1.063333in]{syn_adaptation_blind_rec-img0.png}}%
+\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=1.053333in]{syn_adaptation_blind_rec-img0.png}}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%

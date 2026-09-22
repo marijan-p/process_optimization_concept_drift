@@ -20,15 +20,15 @@
       "parents": {
         "syn:model": "e7f8df2f"
       },
-      "updated": "2026-09-08T11:23:33"
+      "updated": "2026-09-19T10:14:14"
     },
     "syn:adaptation": {
-      "id": "b317ac6b",
+      "id": "544f795e",
       "base_id": "55c4dfbd",
       "parents": {
         "syn:model": "e7f8df2f"
       },
-      "updated": "2026-09-08T11:25:45"
+      "updated": "2026-09-22T09:47:18"
     }
   }
 }

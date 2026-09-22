@@ -1,11 +1,10 @@
 {
   "_provenance": {
-    "id": "a568acfa",
-    "base_id": "30098669",
+    "id": "90b92dbe",
+    "base_id": "818d4690",
     "sections": {
       "run": {
-        "t_run": 19728.0,
-        "passes": 2
+        "passes": 4
       },
       "error": {
         "idv": 29,
@@ -13,8 +12,8 @@
       }
     },
     "parents": {
-      "campaign": "30098669",
-      "production": "6fe76fde"
+      "campaign": "818d4690",
+      "production": "1d772720"
     }
   },
   "n_modes": 6,
@@ -28,8 +27,8 @@
     "ramp": 48.0,
     "soak": 96.0
   },
-  "n_feasible": 137,
-  "feasible_share": 0.457,
+  "n_feasible": 136,
+  "feasible_share": 0.453,
   "yield_per_mode": {
     "0": {
       "feasible": 35,
@@ -42,9 +41,9 @@
       "share": 0.42
     },
     "2": {
-      "feasible": 23,
+      "feasible": 22,
       "tested": 50,
-      "share": 0.46
+      "share": 0.44
     },
     "3": {
       "feasible": 23,
@@ -62,22 +61,21 @@
       "share": 0.38
     }
   },
-  "campaign_points": 137,
-  "campaign_rows": 263177,
-  "run_points": 121,
-  "run_rows": 348481,
-  "run_hours": 17424.0,
-  "run_years": 1.989,
+  "campaign_points": 136,
+  "campaign_rows": 261256,
+  "run_points": 122,
+  "run_rows": 351361,
+  "run_hours": 17568.0,
+  "run_years": 2.005,
   "run_points_per_mode": {
     "0": 35,
     "1": 21,
     "2": 16,
     "3": 20,
     "4": 16,
-    "5": 13
+    "5": 14
   },
   "dropped_in_sequence": [
-    5,
     23,
     89,
     93,
@@ -90,32 +88,31 @@
     191,
     206,
     237,
-    260,
     269,
     272
   ],
   "n_resets": 0,
   "n_aborts": 0,
-  "reserve_min": 0.087,
+  "reserve_min": 0.076,
   "drift_amplitude": {
     "idv": 29,
     "amp": 0.3,
     "signal_peak": 0.4897909132790647,
     "signal_rms": 0.2293441021160327,
     "peak_pct": 14.693727398371943,
-    "peak_k": 8.845623893819909,
+    "peak_k": 9.2482320245353,
     "rms_pct": 6.880323063480981,
-    "rms_k": 4.1419544842155505,
-    "expected_shift": 30.27342147931632,
-    "shift_over_noise": 8.409283744254532
+    "rms_k": 4.3304753361549295,
+    "expected_shift": 67.9775918671921,
+    "shift_over_noise": 40.462852301900064
   },
   "driftf": {
-    "min": 0.8624511175452296,
+    "min": 0.8624797405331243,
     "max": 1.1469716318402217,
-    "c_min": -0.4584962748492346,
+    "c_min": -0.4584008648895858,
     "c_max": 0.48990543946740556,
     "n_segments": 12,
-    "n_periods": 9.945205479452055,
-    "cref_rms": 1.0419968221525337e-05
+    "n_periods": 10.027397260273972,
+    "cref_rms": 1.0480398279552135e-05
   }
 }

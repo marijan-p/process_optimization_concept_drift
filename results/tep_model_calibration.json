@@ -1,0 +1,10 @@
+{
+  "t_stripper_nom": 62.94,
+  "sens_per_pct": 9.88,
+  "noise_floor": 1.68,
+  "span_cost": 1051.2,
+  "sensor_feature": "Stripper Temp",
+  "model": "8165f7ca",
+  "production": "1d772720",
+  "error": "90b92dbe"
+}

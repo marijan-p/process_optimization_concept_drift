@@ -708,8 +708,8 @@
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{0.736667in}{0.502679in}%
-\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=1.093333in]{syn_adaptation_baseline-img0.png}}%
+\pgfsys@transformshift{0.736667in}{0.506013in}%
+\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=1.090000in]{syn_adaptation_baseline-img0.png}}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
