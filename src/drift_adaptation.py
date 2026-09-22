@@ -717,10 +717,58 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
     return study, rmse_baseline
 
 
+def _pick_candidate(table, n_seeds, tie_alpha, tie_max_rel, verbose=True):
+    """Waehlt den Kandidaten aus der Ergebnistabelle der Gegenpruefung.
+
+    Bei einem einzelnen Seed bleibt es beim kleinsten RMSE -- ohne Streuung ist
+    keine andere Aussage moeglich. Ab drei Seeds gilt dieselbe Regel wie bei der
+    Detektorwahl: gleichwertig ist, wer im gepaarten t-Test nicht vom Fuehrenden
+    zu trennen ist UND hoechstens ``tie_max_rel`` ueber ihm liegt. Unter den
+    Gleichwertigen gewinnt der Kandidat mit den wenigsten Nachtrainings, bei
+    Gleichheit der zuerst eingetragene. Das ist derselbe Nebenaspekt, den die
+    Zielfunktion des Tunings mit 0,1 gewichtet.
+
+    Identische Kandidaten (etwa tpe_best und der beste Trial derselben Studie)
+    ergeben im Test nan; sie gelten als gleichwertig.
+    """
+    lead = min(table, key=lambda k: table[k]["rmse"])
+    if n_seeds < 3:
+        if verbose:
+            print(f"uebernommen: {lead} (RMSE={table[lead]['rmse']:.3f})")
+        return lead
+
+    from scipy import stats
+
+    ref = table[lead]["rmse_seeds"]
+    tied = [lead]
+    for name, v in table.items():
+        if name == lead:
+            continue
+        d = np.asarray(v["rmse_seeds"], float) - np.asarray(ref, float)
+        p = 1.0 if not np.any(d) else float(stats.ttest_rel(v["rmse_seeds"], ref).pvalue)
+        rel = float(v["rmse"] / (table[lead]["rmse"] or np.nan) - 1.0)
+        v["p_vs_lead"], v["rel_vs_lead"] = p, rel
+        if p > tie_alpha and rel <= tie_max_rel:
+            tied.append(name)
+    table[lead]["p_vs_lead"], table[lead]["rel_vs_lead"] = 1.0, 0.0
+
+    order = list(table)
+    best = min(tied, key=lambda k: (table[k]["n_train"], order.index(k)))
+    if verbose:
+        print(f"kleinster RMSE: {lead}; gleichwertig (p > {tie_alpha} und "
+              f"hoechstens {100 * tie_max_rel:.0f} % darueber): {tied}")
+        print(f"uebernommen: {best} (RMSE={table[best]['rmse']:.3f} "
+              f"+/- {table[best]['rmse_std']:.3f}, "
+              f"n_train={table[best]['n_train']:.0f})")
+    return best
+
+
 def crosscheck_candidates(base, X, y, *, best_params: dict, fixed: dict,
                           t_stat: float = 1.0, detector_factory=None, study=None,
                           top_k: int = 3, rescale: float = 1.0,
                           mode: str = "combined", seed: int = None,
+                          seeds=None, tie_alpha: float = 0.05,
+                          tie_max_rel: float = 0.05,
                           extra: Dict[str, dict] = None, verbose: bool = True):
     """Prueft Konfigurationskandidaten auf dem voll aufgeloesten Strom gegen.
 
@@ -767,23 +815,34 @@ def crosscheck_candidates(base, X, y, *, best_params: dict, fixed: dict,
     for name, p in (extra or {}).items():
         candidates[name] = dict(p)
 
+    # Ohne seeds bleibt es beim einen Seed und damit beim alten Verhalten.
+    _seeds = tuple(seeds) if seeds else (seed,)
+
     table = {}
     for name, p in candidates.items():
-        if seed is not None:
-            tf.keras.utils.set_random_seed(seed)
-        det = detector_factory() if detector_factory is not None else None
-        det, p_run = apply_det_params(det, scale_adapt_params(p, rescale))
-        p_run = resolve_cooldown(p_run, t_stat)
-        cfg = {**fixed, **p_run}
-        res = run_adaptation(base, X, y, mode=mode, detector=det, seed=seed, **cfg)
-        rmse = float(np.sqrt(np.mean(np.asarray(res["errors"], float) ** 2)))
-        table[name] = dict(rmse=rmse, n_train=len(res["train_steps"]),
-                           n_detect=len(res["detect_steps"]), params=dict(p))
+        _rmse, _ntrain, _ndet = [], [], []
+        for _sd in _seeds:
+            if _sd is not None:
+                tf.keras.utils.set_random_seed(_sd)
+            det = detector_factory() if detector_factory is not None else None
+            det, p_run = apply_det_params(det, scale_adapt_params(p, rescale))
+            p_run = resolve_cooldown(p_run, t_stat)
+            cfg = {**fixed, **p_run}
+            res = run_adaptation(base, X, y, mode=mode, detector=det, seed=_sd, **cfg)
+            _rmse.append(float(np.sqrt(np.mean(np.asarray(res["errors"], float) ** 2))))
+            _ntrain.append(len(res["train_steps"]))
+            _ndet.append(len(res["detect_steps"]))
+        table[name] = dict(
+            rmse=float(np.mean(_rmse)),
+            rmse_std=float(np.std(_rmse, ddof=1)) if len(_rmse) > 1 else 0.0,
+            rmse_seeds=[float(x) for x in _rmse],
+            n_train=float(np.mean(_ntrain)), n_detect=float(np.mean(_ndet)),
+            params=dict(p))
         if verbose:
-            print(f"{name:12s} RMSE={rmse:.4f}  n_train={len(res['train_steps'])}"
-                  f"  n_detect={len(res['detect_steps'])}")
+            _sd_txt = (f" +/- {table[name]['rmse_std']:.4f}" if len(_rmse) > 1 else "")
+            print(f"{name:14s} RMSE={table[name]['rmse']:.4f}{_sd_txt}"
+                  f"  n_train={table[name]['n_train']:.0f}"
+                  f"  n_detect={table[name]['n_detect']:.0f}")
 
-    best = min(table, key=lambda k: table[k]["rmse"])
-    if verbose:
-        print(f"uebernommen: {best} (RMSE={table[best]['rmse']:.3f})")
+    best = _pick_candidate(table, len(_seeds), tie_alpha, tie_max_rel, verbose)
     return dict(table[best]["params"]), table
