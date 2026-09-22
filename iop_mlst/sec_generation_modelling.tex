@@ -16,9 +16,110 @@
 %     - Feature-Auswahl aus der Kostenrechnung; Rolle der Strippertemperatur
 %     - MLP, Vorverarbeitung, Validierung auf den Anfahrrampen
 %
+% Aus Abschnitt 3 offen:
+%   - Kampagne als Trainingsentwurf an 3.1 und 3.3 anschliessen: ein
+%     vollstaendiges Neutrainieren verlangt eine neue Kampagne
+%   - einmal explizit festhalten, dass die Betriebskosten an jedem Schritt
+%     vorliegen -- das ist die Voraussetzung der performance-basierten
+%     Detektion aus 3.2
+%   - Strippertemperatur als Feature begruenden, damit der Angriffspunkt aus
+%     Abschnitt 4 im Merkmalsvektor ankommt
+%
+% Aus Abschnitt 4 offen:
+%   - Untergrenze von kappa_m nachreichen: die driftbedingte Verschiebung des
+%     Modellfehlers muss deutlich ueber dessen Rauschen innerhalb eines
+%     Betriebspunkts liegen (Diss: \genShiftOverNoise, ca. 8,4-fach); braucht
+%     das Modell, deshalb nicht in sec_drift_injection. Die Obergrenze
+%     (Kalibrierfehler unter der prozessbedingten Streuung) steht dort bereits.
+%
 % Vgl. Dissertation: sec:tep_generation und sec:tep_modellierung
 %
 
 \section{Data stream generation and modeling} \label{sec:generation_modelling}
-
-
+%
+The data stream is generated with \texttt{pyTEP}, which runs the Simulink model and controls it from Python~\cite{reinartz.2022}. Between resets of the simulator, setpoints are ramped, disturbances are activated and the simulation is advanced interval by interval, after which all recorded variables and the operating costs are returned as \texttt{pandas} DataFrames and appended to a continuous record. As part of the compiled model, \texttt{IDV(29)} is activated like any other disturbance, so that a drift-affected run differs from a nominal one only in this setting. The \texttt{pyTEP} package itself requires only minor extensions, which are included in the fork. \par
+%
+The operating points of the stream are organized around the six operating modes of the TEP. Their cost-optimal steady states are listed in Table ~\ref{tab:modes_setpoints}, where Reinartz et al. ~\cite{reinartz.2021} retain only those variables from the full set of variables specified by Ricker ~\cite{ricker.1995} that are controlled in the decentralized control scheme ~\cite{ricker.1996}.
+The levels, the reactor pressure, the steam valve and the agitator speed are fixed across all modes and therefore shown in gray. The modes thus differ in production rate, product composition, reactor temperature and feed composition, the latter given by the molar fraction $y_\mathrm{AC}$ of A and C in the reactor feed and the share $y_\mathrm{A}$ of A therein. Two of them additionally differ in the position of the recycle valve. Six isolated operating points neither cover the range a model for operating point selection should remain valid for, nor do they vary the setpoints independently, so that their individual effects on operating costs cannot be separated. Each mode is therefore extended to a series of adjacent points using a design of experiments (DOE).\par
+%
+\begin{table}[tb]
+    \centering
+    \caption{Setpoints of the six operating modes after~\cite{reinartz.2021}.}
+    \label{tab:modes_setpoints}
+    \newcommand{\const}[1]{\textcolor{gray}{#1}}
+    \begin{tabular}{llrrrrrr}
+        \toprule
+        Setpoint & Unit & Mode 1 & Mode 2 & Mode 3 & Mode 4 & Mode 5 & Mode 6 \\
+        \midrule
+        Production rate            & \si{\metre\cubed\per\hour} & 22.89  & 22.73  & 18.04  & 36.04  & 23.55  & 20.20  \\
+        \const{Stripper level}     & \const{\si{\percent}}      & \const{50}   & \const{50}   & \const{50}   & \const{50}   & \const{50}   & \const{50}   \\
+        \const{Separator level}    & \const{\si{\percent}}      & \const{50}   & \const{50}   & \const{50}   & \const{50}   & \const{50}   & \const{50}   \\
+        \const{Reactor level}      & \const{\si{\percent}}      & \const{65}   & \const{65}   & \const{65}   & \const{65}   & \const{65}   & \const{65}   \\
+        \const{Reactor pressure}   & \const{\si{\kilo\pascal}}  & \const{2800} & \const{2800} & \const{2800} & \const{2800} & \const{2800} & \const{2800} \\
+        G in product               & mol-\%                     & 53.80  & 11.66  & 90.09  & 53.35  & 11.65  & 90.07  \\
+        $y_\mathrm{A}$             & \si{\percent}              & 63.137 & 64.196 & 62.110 & 61.940 & 64.030 & 61.468 \\
+        $y_\mathrm{AC}$            & mol-\%                     & 51.00  & 54.24  & 47.43  & 58.76  & 54.32  & 48.79  \\
+        Reactor temperature        & \si{\celsius}              & 122.9  & 124.2  & 121.9  & 128.2  & 124.6  & 123.0  \\
+        Recycle valve              & \si{\percent}              & 1      & 1      & 77.62  & 1      & 1      & 71.166 \\
+        \const{Steam valve}        & \const{\si{\percent}}      & \const{1}    & \const{1}    & \const{1}    & \const{1}    & \const{1}    & \const{1}    \\
+        \const{Agitator speed}     & \const{\si{\percent}}      & \const{100}  & \const{100}  & \const{100}  & \const{100}  & \const{100}  & \const{100}  \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+%
+The design builds on the dataset of Reinartz et al.~\cite{reinartz.2021}, in which individual setpoints are varied within $\pm\SI{15}{\percent}$ of their nominal value in steps of \SI{5}{\percent}. This window is applied, but the setpoints are varied jointly rather than individually, and the grid is replaced by a sample from a continuous range of values. The bounds are relative to the nominal value of the respective mode, so that the deflection remains comparable across setpoints of different magnitudes. Only the agitator speed, which is already at the upper limit of its range, is not raised any further. Beyond that, the window is deliberately kept narrow, since a combination far from the optimum can trip one of the safety shutdowns of the TEP. Within the window, each mode is sampled by a Latin hypercube, which covers every setpoint axis evenly regardless of the number of points.
+Using a maximin criterion, the design is selected from a larger number of independent draws as the one whose smallest distance between two points is largest, which avoids clusters that would leave part of the operating region unoccupied. Each mode receives its own design, complemented by the unchanged nominal setpoints, which yields \genPointsPerMode{} points per mode and \genCandidates{} candidates in total. \par
+%
+A candidate from the design is not necessarily feasible, so each one is first run in isolation, starting from the steady state of mode~1 in which the simulator is initialized. All twelve setpoints are ramped to their target values rather than stepped, since a step drives the controllers to their limits and can trigger a safety shutdown. The point is then held until the transients have decayed and the process has settled in a quasi-stationary state. These isolated runs are recorded and later serve as the training data. \par
+%
+The feasible points are subsequently strung together into a continuous stream. Between two of them, the setpoints are ramped back to the steady state of mode~1 over another ramp of the same duration, so that every point is approached from the same conditions. 
+The order of the points within the stream is drawn at random. In the continuous run, a few of them still shut the simulation down, so these points are removed and the run is repeated, which leaves an uninterrupted stream of \genRunPoints{} operating points covering about \genRunYears{} years of plant operation. The fault run repeats exactly this sequence with \texttt{IDV(29)} active and starts from a freshly initialized simulator, so that both runs begin in the same state. Since the calibration drift does not touch the process, the two are identical on the process side and differ only in the recorded stripper temperature. Three datasets thus result: the isolated points of the campaign for training, the nominal run as a drift-free reference, and the fault run as the drift-affected stream. \par
+%
+Figure~\ref{fig:tep_stream} shows an excerpt of the stream over four operating points. Panel~(\subref{fig:tep_stream_point}) relates the setpoint of the production rate to two recorded variables, the stripper temperature and the purge valve. It shows the ramp into the point, the shaded holding window with its quasi-stationary course, and the return to the initial state. Panel~(\subref{fig:tep_stream_drift}) shows the stripper temperature for both runs along with the drift signal, demonstrating how the drift affects the recorded signal. Both runs follow the same pattern imposed by the operating points, while the drift-affected one departs from the nominal by an offset that follows the drift signal, including its jump at a segment boundary. \par
+%
+\begin{figure}[tb]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \centering
+        \input{figures/tep_stream_point.pgf}
+        \caption{Operating points}
+        \label{fig:tep_stream_point}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \input{figures/tep_stream_drift.pgf}
+        \caption{Drift influence}
+        \label{fig:tep_stream_drift}
+    \end{subfigure}
+    \caption{Excerpt of the generated data stream over four operating points.}
+    \label{fig:tep_stream}
+\end{figure}
+%
+The data stream is modeled as a regression of a few recorded variables on the operating costs. The model is trained on the campaign and then applied to both production runs, which differ only in the recorded stripper temperature. Any deviation between their error courses is therefore attributable to the drift, and comparing the two reveals the deterioration in the model. 
+The model label is the operating costs, which the simulator computes deterministically from the measurement vector according to the calculation given by Downs and Vogel~\cite{downs.1993}. The features are derived from that same calculation, which is dominated by the losses through the purge stream. Selected are the variables that govern this stream, namely the purge valve as its rate, the feed of component E to the reactor as its source and the separator temperature as the split between purge and condensate, complemented by the controlled mass ratio of the two products, which separates the six operating modes. Variables entering the cost calculation directly are excluded, so that the model learns the relation within the process rather than reproducing the arithmetic of the simulator. \par
+%
+Another feature added is the stripper temperature. Its impact on costs is based on a forward selection process, considering variables successively according to their contribution to improving the model's quality. At the same time, it carries the calibration error into the model, while process and costs remain untouched, so that the difference between the two error courses is attributable to the model alone. Among the features, it is moreover the one that responds most sensitively to a distortion of its own measurement. \par
+%
+The DOE spans the operating region, whereas operation is not restricted to the points it contains. Therefore, training uses the quasi-stationary holding intervals of a subset of the feasible operating points. The remaining points carry the assessment on operating points the model has not seen. 
+For data preprocessing, the signals are smoothed by a moving average and scaled by a min-max normalization, which is determined on the campaign and applied unchanged to both production runs. However, no outlier filter is applied, since the spread across the operating points carries the signal and the extreme points mark the border of the covered region. \par
+%
+The model is a multilayer perceptron with tanh activation in its hidden layers and a linear output neuron, trained with the Adam optimizer on the mean squared error. Despite the size of the process, this level of complexity meets the requirements, since it involves the regression of several features on a scalar target value, which is evaluated exclusively in steady-state conditions. The dynamics of the process are not taken into account.
+Since the number of operating points is small, the ramp-up sections of the campaign points are used during validation, so that all quasi-steady-state areas can be used for training. An early stopping on the validation error terminates the training and falls back on the weights of the best epoch. Table~\ref{tab:generation_model_params} summarizes the model parameters along with those of the stream. \par
+%
+\begin{table}[tb]
+    \centering
+    \caption{Parameters of the data stream and of the model.}
+    \label{tab:generation_model_params}
+    \begin{tabular}{lr@{\hspace{3em}}lr}
+        \toprule
+        \multicolumn{2}{c}{Data stream} & \multicolumn{2}{c}{Model} \\
+        \cmidrule(r){1-2}\cmidrule(l){3-4}
+        Points per mode     & \genPointsPerMode  & Campaign points             & \modelCampaignPoints \\
+        Candidates in total & \genCandidates     & Smoothing window in samples & \modelWindowSize \\
+        Ramp duration       & \genRampDuration   & Hidden layers               & \modelLayers \\
+        Holding duration    & \genHoldDuration   & Neurons per layer           & \modelNeurons \\
+        Block duration      & \genBlockDuration  & Maximum epochs              & \modelEpochs \\
+                            &                    & Batch size                  & \modelBatch \\
+        \bottomrule
+    \end{tabular}
+\end{table}

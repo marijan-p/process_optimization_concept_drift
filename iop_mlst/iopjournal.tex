@@ -22,6 +22,8 @@
 \sisetup{range-units=single, separate-uncertainty=true}
 
 % Bildunterschriften im Stil der Klasse, aber mit korrekten Abstaenden
+\usepackage{import}
+\usepackage{subcaption}
 \usepackage{pgf}
 \usepackage{caption}
 \captionsetup{font=footnotesize, labelfont=bf, labelsep=period,
@@ -78,6 +80,7 @@
 \keywords{concept drift, sensor drift, Tennessee Eastman process, benchmark data stream, soft sensor, drift detection, model adaptation}
 
 \input{generated/tep_values}
+\graphicspath{{figures/}}
 %
 \input{abstract}   % Abstract
 \input{sec_introduction}

@@ -15,6 +15,18 @@
 %     - Detektion: KSWIN, ADWIN, DDM, EDDM auf dem Simulationsfehler (frouros)
 %     - Adaption: passiv, aktiv, kombiniert; inkrementelles Nachtraining
 %
+% Aus Abschnitt 3 offen:
+%   - Schwelle zur Binarisierung des Regressionsfehlers fuer DDM/EDDM berichten;
+%     in 3.2 als Parameter eingefuehrt
+%   - Schwellwert auf der rollenden RMSE als Referenzdetektor mitfuehren; in 3.2
+%     als einfachste Form angekuendigt
+%   - Verzugszeit als Kennzahl an das Driftmuster aus 3.1 binden
+%   - kadlec.2011 (S. 3) aufgreifen: keine Adaption, solange der Hardware-Sensor
+%     falsch misst -- der eigene Fall unterscheidet sich, weil das Label sauber
+%     bleibt und nur ein Feature verfaelscht ist
+%   - der Drift wird nur entlang der gefahrenen Trajektorie sichtbar, wirkt aber
+%     im ganzen Bereich -> Begruendung fuer den nominalen Referenzlauf
+%
 % Vgl. Dissertation: sec:tep_modellierung, sec:tep_detektion, sec:tep_adaption
 %
 
