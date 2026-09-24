@@ -23,12 +23,12 @@
       "updated": "2026-09-19T10:14:14"
     },
     "syn:adaptation": {
-      "id": "544f795e",
+      "id": "920c986a",
       "base_id": "55c4dfbd",
       "parents": {
         "syn:model": "e7f8df2f"
       },
-      "updated": "2026-09-22T09:47:18"
+      "updated": "2026-09-24T09:44:04"
     }
   }
 }
