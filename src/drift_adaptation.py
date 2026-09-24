@@ -764,8 +764,8 @@ def _pick_candidate(table, n_seeds, tie_alpha, tie_max_rel, verbose=True):
 
 
 def crosscheck_candidates(base, X, y, *, best_params: dict, fixed: dict,
-                          t_stat: float = 1.0, detector_factory=None, study=None,
-                          top_k: int = 3, rescale: float = 1.0,
+                          t_stat: float = 1.0, detector_factory=None,
+                          rescale: float = 1.0,
                           mode: str = "combined", seed: int = None,
                           seeds=None, tie_alpha: float = 0.05,
                           tie_max_rel: float = 0.05,
@@ -780,7 +780,6 @@ def crosscheck_candidates(base, X, y, *, best_params: dict, fixed: dict,
       * ``tpe_best``  – bestes Tuning-Ergebnis der Strategie ``mode``
       * ``union``     – Vereinigung der Einzeloptima (nur mode="combined":
                         informed-Optimum + blinde Fenster-/Schwellenparameter)
-      * ``trial_<n>`` – Top-k-Trials der uebergebenen Optuna-Study
       * ``extra``     – optionale manuelle Kandidaten {name: params}, z. B. die
                         Konfiguration einer anderen Strategie als Quervergleich
 
@@ -807,11 +806,6 @@ def crosscheck_candidates(base, X, y, *, best_params: dict, fixed: dict,
         candidates["union"] = {**bl, **inf,
                                "blind_window": bl["blind_window"],
                                "blind_period": bl["blind_period"]}
-    if study is not None:
-        trials = sorted([t for t in study.trials if t.value is not None],
-                        key=lambda t: t.value)
-        for t in trials[:top_k]:
-            candidates[f"trial_{t.number}"] = decode_adapt_params(t.params)
     for name, p in (extra or {}).items():
         candidates[name] = dict(p)
 
