@@ -298,9 +298,12 @@ def search_space_id(n: int = 8) -> str:
     verwirft und das Ergebnis der alten Grenzen unter der neuen Kennung ablegt.
     Genau das ist am 2026-09-01 passiert. ``co_consts`` traegt die Zahlenwerte
     der Grenzen, ``co_names`` die aufgerufenen Namen.
+    ``co_code`` kommt hinzu, weil ``co_consts`` Schalter wie ``log=True`` nicht
+    sieht, sobald derselbe Schalter schon an anderer Stelle der Funktion steht.
     """
     assert_current()
-    return _space_id_of(_suggest_params, n)
+    base = _space_id_of(_suggest_params, 40)
+    return hashlib.sha1((base + _suggest_params.__code__.co_code.hex()).encode()).hexdigest()[:n]
 
 
 # ===========================================================================
@@ -451,7 +454,9 @@ def _suggest_params(name: str, trial, err_threshold_bounds=None):
         der eingereihte Punkt. Werte ausserhalb der Verteilung werden von Optuna
         mit einer Warnung uebernommen, nicht auf den Rand gezogen.
     err_threshold_bounds : (float, float) | None
-        Suchbereich fuer err_threshold bei DDM/EDDM als (lo, hi). Wird None
+        Suchbereich fuer err_threshold bei DDM/EDDM als (lo, hi), logarithmisch
+        abgetastet: der Bereich aus den Perzentilen reicht ueber mehrere
+        Groessenordnungen, die guten Schwellen liegen am unteren Rand. Wird None
         uebergeben, greift der Fallback (0.5, 4.0). Empfohlener Ansatz: lo aus
         dem 80. Perzentil des stabilen Fehlers, hi aus dem 99.5. Perzentil
         des Gesamtfehlers (vgl. tune_detector).
@@ -477,7 +482,7 @@ def _suggest_params(name: str, trial, err_threshold_bounds=None):
             drift_level=drift_level,
             warning_level=trial.suggest_float("warning_level", 1.0, drift_level),
             min_num_instances=trial.suggest_int("min_num_instances", 30, 500),
-        ), trial.suggest_float("err_threshold", et_lo, et_hi)
+        ), trial.suggest_float("err_threshold", et_lo, et_hi, log=True)
     if name == "EDDM":
         alpha = trial.suggest_float("alpha", 0.90, 0.99999)
         return dict(
@@ -485,7 +490,7 @@ def _suggest_params(name: str, trial, err_threshold_bounds=None):
             beta=trial.suggest_float("beta", 0.70, alpha),
             min_num_misclassified_instances=trial.suggest_int(
                 "min_num_misclassified_instances", 30, 500),
-        ), trial.suggest_float("err_threshold", et_lo, et_hi)
+        ), trial.suggest_float("err_threshold", et_lo, et_hi, log=True)
     if name == "RMSE":
         window = trial.suggest_int("window", 15, 1000)
         return dict(
