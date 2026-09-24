@@ -92,7 +92,7 @@ def _from_points(raw: pd.DataFrame) -> pd.DataFrame:
 
 
 def load_production(data_dir, name="operation_points_production.csv") -> pd.DataFrame:
-    """Der Produktionsstrom: stationaere Betriebspunkte ueber knapp fuenf Jahre.
+    """Der Produktionsstrom: stationaere Betriebspunkte 11/2021 bis 09/2024.
 
     Die Fenster-Metadaten (``duration_min``, ``running_share``, ``nominal_hz``,
     ``source`` ...) bleiben erhalten; Kapitel 4 filtert und erklaert damit.
