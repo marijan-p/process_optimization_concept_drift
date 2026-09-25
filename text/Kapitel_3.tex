@@ -902,6 +902,7 @@ Der Schwellwert-Detektor ist das einzige Verfahren, dessen Meldungen deutlich ü
 Schwellwert & $\tepdriftRMSERecall$ & $\tepdriftRMSEChance$  & $\tepdriftRMSEDelayH$  & $\tepdriftRMSEFalse$  & $\tepdriftRMSEDrifts$  \\
 \bottomrule
 \end{tabular}
+\vspace{3mm}
 \end{table}
 %
 Tabelle~\ref{tab:tep_detection_stats} fasst für die fünf Detektoren Recall, Zufallsniveau und mittleren Verzug sowie die Zahl der Fehlalarme und der Detektionen über den gesamten Fehlerlauf zusammen. Anders als im synthetischen Fall, in dem alle Verfahren sämtliche Sudden Drifts erkannten, unterscheiden sich die Verfahren hier bereits im Recall. Den vollständigen Recall erreichen allein die Fenster-basierten Verfahren, deren Zufallsniveau jedoch nahe daran heranreicht. Bei \ac{DDM} bleibt der Recall trotz seines Abstands zum Zufallsniveau gering, bei \ac{EDDM} fehlt er ganz. Einzig der Schwellwert-Detektor verbindet einen nennenswerten Recall mit einem Zufallsniveau, das weit darunter liegt. Damit trägt im \ac{TEP} allein der Schwellwert-Detektor eine Information über den Zeitpunkt der Sudden Drifts. Der Verzug spielt für diese Einordnung keine Rolle, da er bei allen Verfahren mit Treffern innerhalb des Toleranzfensters bleibt. \par
@@ -909,4 +910,86 @@ Tabelle~\ref{tab:tep_detection_stats} fasst für die fünf Detektoren Recall, Zu
 Insgesamt bestätigt sich die Erwartung, dass die Detektoren im \ac{TEP} deutlich schwerer auf die Sudden Drifts ansprechen als im synthetischen Fall. Ursache ist nicht die Größe des Drifts, sondern wie in Abschnitt~\ref{sec:tep_modellierung} gezeigt das Fehlerniveau, vor dem er sich abheben muss. In einem Datenstrom aus vielen Betriebspunkten überlagert die Streuung zwischen ihnen den Drifteinfluss so weit, dass Verfahren, die auf Veränderungen der Fehlerverteilung oder der Fehlerrate reagieren, ihre Aussagekraft über den Zeitpunkt eines Sprungs weitgehend verlieren. Robuster erweist sich die einfachste Form der Performance-basierten Erkennung, die den gemittelten Fehlerbetrag unmittelbar mit einem festen Schwellwert vergleicht. Ihre Meldungen außerhalb der Toleranzfenster zählen dabei zwar als Fehlalarme, markieren aber Abschnitte anhaltend erhöhten Fehlers und damit gerade jene Stellen, an denen ein Nachtraining des Modells ansetzen würde. \par
 %
 \subsection{Drift-Adaption} \label{sec:tep_adaption}
+%
+\input{\resultsdir tep_adaptation.tex}
+%
+Die Adaption des in Abschnitt~\ref{sec:tep_modellierung} trainierten \ac{MLP} an den Kalibrierdrift folgt dem Vorgehen aus Abschnitt~\ref{sec:datensynthese_drift_adaption}. Gegenübergestellt werden dieselben vier Strategien, also die passive Adaption mit und ohne Recurrence-Selektor sowie die aktive und die kombinierte Adaption, jeweils im Vergleich zum Modell ohne Adaption. Allen liegt dasselbe inkrementelle Nachtraining zugrunde, dessen Updates verworfen werden, sobald sie den Fehler auf dem eigenen Trainingsfenster nicht senken. Der Fehlerlauf wird chunk-weise verarbeitet, wobei jeder Datenpunkt zunächst prädiziert wird und erst danach in ein Nachtraining einfließen kann. Als Features dienen die Größen aus Abschnitt~\ref{sec:tep_modellierung}, nun jedoch aus dem Fehlerlauf einschließlich der drift-behafteten Strippertemperatur. Als Label dienen weiterhin die Betriebskosten. Sie bleiben vom Kalibrierfehler unberührt und lassen sich als Rechengröße aus dem Messvektor fortlaufend bilden. Den Trigger der aktiven und der kombinierten Strategie bestimmt ein Screening der Detektoren. Die Hyperparameter aller Strategien werden gegen die Zielfunktion nach Gleichung~\eqref{eq:adaption_score} optimiert und auf dem voll aufgelösten Strom über \tepadaptNSeeds\ Seeds bewertet. \par
+%
+% [2] Zeitskalen: \tepadaptTa, \tepadaptChunk, \tepadaptTaTune, Refraktärzeit in Betriebspunkten
+%
+% [3] Screening im geschlossenen Kreis: \tepadaptDetector, Schwellwert-Detektor versagt
+%
+% [4] Rolle des Detektors als Taktgeber (Rückbezug sec:tep_detektion)
+%
+\begin{figure}[tbp]
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \input{\plotdir tep_adaptation_baseline.pgf}
+        \caption{Baseline (keine Adaption)}
+        \label{fig:tep_adaptation_baseline}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \input{\plotdir tep_adaptation_blind_rec.pgf}
+        \caption{Passive Adaption mit Recurrence-Selektor}
+        \label{fig:tep_adaptation_blind_rec}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \input{\plotdir tep_adaptation_informed.pgf}
+        \caption{Aktive Adaption}
+        \label{fig:tep_adaptation_informed}
+    \end{subfigure}
+
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \input{\plotdir tep_adaptation_combined.pgf}
+        \caption{Kombinierte Adaption}
+        \label{fig:tep_adaptation_combined}
+    \end{subfigure}
+    \caption{Normierter Simulationsfehler ausgewählter Adaptionsstrategien auf dem drift-behafteten Datenstrom im Vergleich zum Driftsignal $c(t)$}
+    \label{fig:tep_adaptation_comparison}
+\end{figure}
+%
+% [5] Beschreibung der Abbildung
+%
+\providecommand{\adaptpm}[2]{$#1 \pm #2$}
+\begin{table}[tbp]
+\centering
+\caption{Kennzahlen der Adaptionsstrategien auf dem drift-behafteten Strom, als Mittelwert $\pm$ Standardabweichung über \tepadaptNSeeds\ Seeds}
+\label{tab:tep_adaptation_stats}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Strategie} & \ac{RMSE} & Mittelwert $\bar{e}$ & Streuung $\sigma$ & Korr. $|e|,|c|$ & Nachtrainings \\
+\midrule
+Baseline     & \adaptpm{\tepadaptBaselineRmse}{\tepadaptBaselineRmseStd} & \adaptpm{\tepadaptBaselineBias}{\tepadaptBaselineBiasStd} & \adaptpm{\tepadaptBaselineSigma}{\tepadaptBaselineSigmaStd} & \adaptpm{\tepadaptBaselineCorrAbs}{\tepadaptBaselineCorrAbsStd} & \adaptpm{\tepadaptBaselineNTrain}{\tepadaptBaselineNTrainStd} \\
+Passiv       & \adaptpm{\tepadaptBlindRmse}{\tepadaptBlindRmseStd}       & \adaptpm{\tepadaptBlindBias}{\tepadaptBlindBiasStd}       & \adaptpm{\tepadaptBlindSigma}{\tepadaptBlindSigmaStd}       & \adaptpm{\tepadaptBlindCorrAbs}{\tepadaptBlindCorrAbsStd}       & \adaptpm{\tepadaptBlindNTrain}{\tepadaptBlindNTrainStd} \\
+Passiv + Rec & \adaptpm{\tepadaptBlindRecRmse}{\tepadaptBlindRecRmseStd} & \adaptpm{\tepadaptBlindRecBias}{\tepadaptBlindRecBiasStd} & \adaptpm{\tepadaptBlindRecSigma}{\tepadaptBlindRecSigmaStd} & \adaptpm{\tepadaptBlindRecCorrAbs}{\tepadaptBlindRecCorrAbsStd} & \adaptpm{\tepadaptBlindRecNTrain}{\tepadaptBlindRecNTrainStd} \\
+Aktiv        & \adaptpm{\tepadaptInformedRmse}{\tepadaptInformedRmseStd} & \adaptpm{\tepadaptInformedBias}{\tepadaptInformedBiasStd} & \adaptpm{\tepadaptInformedSigma}{\tepadaptInformedSigmaStd} & \adaptpm{\tepadaptInformedCorrAbs}{\tepadaptInformedCorrAbsStd} & \adaptpm{\tepadaptInformedNTrain}{\tepadaptInformedNTrainStd} \\
+Kombiniert   & \adaptpm{\tepadaptCombinedRmse}{\tepadaptCombinedRmseStd} & \adaptpm{\tepadaptCombinedBias}{\tepadaptCombinedBiasStd} & \adaptpm{\tepadaptCombinedSigma}{\tepadaptCombinedSigmaStd} & \adaptpm{\tepadaptCombinedCorrAbs}{\tepadaptCombinedCorrAbsStd} & \adaptpm{\tepadaptCombinedNTrain}{\tepadaptCombinedNTrainStd} \\
+\bottomrule
+\end{tabular}
+\end{table}
+%
+% [6] Rangfolge
+%
+% [7] Warum die Eingriffsdichte entscheidet
+%
+% [8] Bias und Streuung
+%
+\begin{figure}[tbp]
+    \centering
+    \makebox[\textwidth][c]{%
+        \input{\plotdir tep_adaptation_seed_violin.pgf}
+    }
+    \caption{Verteilung des \ac{RMSE} der adaptiven Strategien über \tepadaptNSeeds\ Läufe mit unterschiedlichen Seeds}
+    \label{fig:tep_adaptation_seed_violin}
+\end{figure}
+%
+% [9] Streuung über die Seeds
+%
+% [10] Einordnung und Vergleich mit dem synthetischen Fall
 %
