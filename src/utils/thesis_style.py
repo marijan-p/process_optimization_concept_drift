@@ -284,7 +284,7 @@ def _symlog_ticks(ylim, linthresh):
 
 def error_timeseries(t, series, cd=None, *, ylabel="Norm. Fehler", xlabel=None,
                      detections=None, detection_label="Drift erkannt",
-                     detection_lw=0.9, ylim=(-1e3, 1e3),
+                     detection_lw=0.9, ylim=(-1e3, 1e3), yscale="symlog",
                      linthresh=3.0, linscale=0.8, yticks=None, ref_lines=True,
                      frac=1.0, rng=None, s=6, alpha=0.5,
                      cd_label="Driftsignal $c[k]$", cd_amp=None,
@@ -311,9 +311,12 @@ def error_timeseries(t, series, cd=None, *, ylabel="Norm. Fehler", xlabel=None,
     cd : Driftsignal (gleiche Laenge wie ``t``) oder ``None``.
     detections : x-Positionen erkannter Drifts (z. B. ``idx[d]``).
     frac / rng : Anteil geplotteter Punkte und Generator fuer die Duennung.
-    ylim / linthresh / linscale / yticks : symlog-Konfiguration der linken Achse;
-        ``yticks`` per Default automatisch als Dekaden aus ``ylim``.
-    ref_lines : gepunktete Hilfslinien bei ``+-linthresh`` (Grenze linear/logarithmisch).
+    yscale : ``"symlog"`` (Default) oder ``"linear"`` fuer die linke Achse.
+    ylim / linthresh / linscale / yticks : Konfiguration der linken Achse;
+        ``linthresh``/``linscale`` wirken nur bei ``"symlog"``. ``yticks`` per
+        Default als Dekaden aus ``ylim`` (symlog) bzw. automatisch (linear).
+    ref_lines : gepunktete Hilfslinien bei ``+-linthresh`` (Grenze linear/logarithmisch),
+        nur bei ``"symlog"``.
     cd_amp : halber Wertebereich der rechten Achse (Default ``1.05*max|c[k]|``).
     cd_tick_step : Tick-Abstand der rechten Achse. align_zero : Nullpunkte ausrichten.
     legend : ``True`` oder dict mit ``ax.legend``-Kwargs; Handles werden aus den
@@ -345,6 +348,9 @@ def error_timeseries(t, series, cd=None, *, ylabel="Norm. Fehler", xlabel=None,
     items = [(np.asarray(e[0], dtype=float), e[1], e[2] if len(e) > 2 else None)
              for e in items]
 
+    if yscale not in ("symlog", "linear"):
+        raise ValueError(f"yscale={yscale!r}, erwartet 'symlog' oder 'linear'")
+
     if ax is None:
         if figsize is None:
             figsize = (fig_width(width_scale), fig_width(height_scale))
@@ -355,7 +361,7 @@ def error_timeseries(t, series, cd=None, *, ylabel="Norm. Fehler", xlabel=None,
         rng = np.random.default_rng()
 
     # --- Hilfslinien an der linear/log-Grenze ---------------------------------- #
-    if ref_lines:
+    if ref_lines and yscale == "symlog":
         for v in (linthresh, -linthresh):
             ax.axhline(v, color=color("box"), lw=0.6, ls=":", alpha=0.6, zorder=1)
 
@@ -398,16 +404,19 @@ def error_timeseries(t, series, cd=None, *, ylabel="Norm. Fehler", xlabel=None,
     for d in (detections or []):
         ax.axvline(d, zorder=2, **vline("detection", lw=detection_lw, linestyle="--"))
 
-    # --- linke Achse: symlog ------------------------------------------------- #
-    ax.set_yscale("symlog", linthresh=linthresh, linscale=linscale)
+    # --- linke Achse --------------------------------------------------------- #
+    if yscale == "symlog":
+        ax.set_yscale("symlog", linthresh=linthresh, linscale=linscale)
     ax.set_ylim(*ylim)
     if yticks is None:
-        ticks, labels = _symlog_ticks(ylim, linthresh)
+        ticks, labels = (_symlog_ticks(ylim, linthresh) if yscale == "symlog"
+                         else (None, None))
     elif isinstance(yticks, tuple):
         ticks, labels = yticks
     else:
         ticks, labels = yticks, None
-    ax.set_yticks(ticks)
+    if ticks is not None:
+        ax.set_yticks(ticks)
     if labels is not None:
         ax.set_yticklabels(labels)
     ax.set_ylabel(ylabel)
