@@ -15,4 +15,4 @@ roller_height_3,context,mm,,,2
 roller_height_4,context,mm,,,2
 roller_temperature,context,°C,,,1
 feed_moisture,context,%,,,1
-water_injection,context,m³/h,,,2
+water_injection,context,l/h,,,0
