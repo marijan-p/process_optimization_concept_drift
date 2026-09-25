@@ -321,7 +321,8 @@ def run_adaptation(base, X, y, *, mode, detector=None,
          am Ende jedes Chunks ohne neue Detektion auf den soeben praedizierten
          Punkten des Chunks nachtrainiert (chunk-granulare Follow-ups, analog
          ``data_selector_sequence.train_scheduler`` alle batch_size Punkte).
-         Detektionen innerhalb einer laufenden Phase verlaengern diese nur.
+         Detektionen innerhalb einer laufenden Phase bleiben ohne Wirkung, sie
+         verlaengern die Phase nicht und loesen kein Sofort-Training aus.
          ``cooldown`` erzwingt zusaetzlich einen Mindestabstand zwischen zwei
          Sofort-Trainings (Refraktaerzeit, aus der mittleren Dauer stationaerer
          Phasen abgeleitet; 0 = aus). ``window_post`` wirkt bereits als weiche
@@ -383,8 +384,8 @@ def run_adaptation(base, X, y, *, mode, detector=None,
 
         # 2) Informed: Detektion -> Sofort-Training auf Vergangenheitsfenster
         #    und Start der Nachfuehrphase. Detektionen innerhalb einer bereits
-        #    laufenden Phase VERLAENGERN diese nur (kein weiteres Sofort-
-        #    Training) -> die Detektionsdichte des Verfahrens ist vom
+        #    laufenden Phase bleiben ohne Wirkung (keine Verlaengerung, kein
+        #    weiteres Sofort-Training) -> die Detektionsdichte des Verfahrens ist vom
         #    Eingriffsaufwand entkoppelt (max. ein Follow-up je Chunk), dichte
         #    Re-Detektoren wie KSWIN/ADWIN wirken damit als Ereignis-Trigger.
         if mode in ("informed", "combined") and detector is not None:
