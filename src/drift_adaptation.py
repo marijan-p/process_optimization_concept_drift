@@ -66,6 +66,7 @@ import drift_detection as dd
 __all__ = [
     "assert_current",
     "adapt_space_id",
+    "selector_space_id",
     "ADAPTATION_MODES",
     "SELECTORS",
     "REC_SUFFIX",
@@ -126,6 +127,13 @@ def adapt_space_id(n: int = 8) -> str:
     """
     assert_current()
     return dd._space_id_of(_suggest_adapt_params, n)
+
+
+def selector_space_id(n: int = 8) -> str:
+    """Kennung des Suchraums von :func:`_suggest_selector_params`, analog zu
+    :func:`adapt_space_id`."""
+    assert_current()
+    return dd._space_id_of(_suggest_selector_params, n)
 
 
 # Unterstuetzte Adaptionsstrategien (Reihenfolge wie in der Auswertung).
@@ -649,11 +657,25 @@ def _suggest_adapt_params(strategy: str, trial, chunk: int = 144,
     return params
 
 
+def _suggest_selector_params(trial, chunk: int = 144) -> dict:
+    """Nur die Parameter des Recurrence-Selektors, fuer das Tuning bei festen
+    Strategieparametern (``base_params`` in :func:`tune_adaptation`). Grenzen wie
+    in :func:`_suggest_adapt_params`; dort nicht ausgelagert, weil jede Aenderung
+    an deren Code-Objekt ``adapt_space_id`` und damit alle Tuning-Caches verschiebt.
+    """
+    return dict(
+        err_tol=trial.suggest_float("err_tol", 0.05, 3.0, log=True),
+        rec_horizon=trial.suggest_int("rec_horizon", chunk, 365 * chunk, log=True),
+        rec_max=trial.suggest_int("rec_max", 15, 400),
+    )
+
+
 def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
                     detector_factory=None, rmse_baseline: float = None,
                     n_trials: int = 20, weights: Tuple[float, float] = (1.0, 0.1),
                     seed: int = 42, show_progress_bar: bool = False,
-                    enqueue: List[dict] = None, t_stat: float = 1.0):
+                    enqueue: List[dict] = None, t_stat: float = 1.0,
+                    base_params: dict = None):
     """Optimiert die Adaptions-Hyperparameter einer Strategie mit Optuna (TPE).
 
     Parameters
@@ -671,6 +693,9 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
     enqueue : Liste roher Optuna-Parameterdicts (Freeze als String, vgl.
         :func:`encode_adapt_params`), die als Startkandidaten eingereiht werden
         (Warmstart, z. B. Vereinigung der Einzeloptima fuer ``combined``).
+    base_params : feste, dekodierte Strategieparameter (Tuning-Aufloesung). Ist
+        der Satz gesetzt, werden nur die Selektorparameter gesucht
+        (:func:`_suggest_selector_params`); ``strategy`` braucht dann ``_rec``.
 
     Returns
     -------
@@ -680,7 +705,9 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
     import optuna   # lazy: Modul bleibt ohne Optuna importierbar
 
     strategy = strategy.lower()
-    mode, _ = split_strategy(strategy)
+    mode, selector = split_strategy(strategy)
+    if base_params is not None and selector != "recurrence":
+        raise ValueError(f"base_params verlangt eine Strategie mit {REC_SUFFIX!r}")
     n = len(X)
     chunk = int(fixed.get("chunk", 144))
     n_units = int(np.ceil(n / chunk))
@@ -695,7 +722,10 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
                 else None)
 
     def objective(trial):
-        params = _suggest_adapt_params(strategy, trial, chunk=chunk, det_name=det_name)
+        if base_params is None:
+            params = _suggest_adapt_params(strategy, trial, chunk=chunk, det_name=det_name)
+        else:
+            params = {**base_params, **_suggest_selector_params(trial, chunk=chunk)}
         detector = (detector_factory()
                     if (mode in ("informed", "combined") and detector_factory is not None)
                     else None)
