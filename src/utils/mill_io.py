@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 
 __all__ = [
-    "TAGS", "FEATURES", "TARGET", "CONTEXT", "SOURCES",
+    "TAGS", "FEATURES", "TARGET", "CONTEXT", "SETPOINTS", "SOURCES",
     "load_operating_points", "load_production", "load_doe",
     "load_calibrations", "calibration_dates",
     "range_report", "gaps", "points_per_day", "days_to_points",
@@ -46,6 +46,8 @@ FEATURES: List[str] = TAGS.loc[TAGS["role"] == "feature", "name"].tolist()
 TARGET: str = TAGS.loc[TAGS["role"] == "label", "name"].iloc[0]
 #: Verschleiss- und Kalibrierkontext -- kein Modelleingang.
 CONTEXT: List[str] = TAGS.loc[TAGS["role"] == "context", "name"].tolist()
+#: Sollwerte der Merkmale, je Betriebspunkt konstant -- kein Modelleingang.
+SETPOINTS: List[str] = TAGS.loc[TAGS["role"] == "setpoint", "name"].tolist()
 
 SOURCES = ("production", "doe1", "doe2")
 
@@ -53,7 +55,7 @@ SOURCES = ("production", "doe1", "doe2")
 # --------------------------------------------------------------------------- #
 # Betriebspunkte lesen
 # --------------------------------------------------------------------------- #
-def _select(df: pd.DataFrame, roles=("feature", "label", "context"),
+def _select(df: pd.DataFrame, roles=("feature", "label", "context", "setpoint"),
             keep: Sequence[str] = ()) -> pd.DataFrame:
     """Spalten der genannten Rollen, ``keep`` unveraendert davor.
 
@@ -64,7 +66,7 @@ def _select(df: pd.DataFrame, roles=("feature", "label", "context"),
     want = TAGS.loc[TAGS["role"].isin(roles), "name"].tolist()
     missing = [n for n in want
                if n not in df.columns
-               and TAGS.loc[TAGS["name"] == n, "role"].iloc[0] != "context"]
+               and TAGS.loc[TAGS["name"] == n, "role"].iloc[0] in ("feature", "label")]
     if missing:
         raise KeyError(f"Diese Groessen fehlen im Datensatz: {missing}")
     cols = [c for c in keep if c in df.columns] + [n for n in want if n in df.columns]
@@ -83,7 +85,7 @@ def _finalize(df: pd.DataFrame) -> pd.DataFrame:
 
 def _from_points(raw: pd.DataFrame) -> pd.DataFrame:
     raw.columns = [str(c).strip() for c in raw.columns]
-    meta = [c for c in raw.columns if c not in FEATURES + CONTEXT + [TARGET]]
+    meta = [c for c in raw.columns if c not in FEATURES + CONTEXT + SETPOINTS + [TARGET]]
     d = _select(raw, keep=meta).copy()
     d["start"] = pd.to_datetime(d["start"], errors="coerce")
     if "end" in d.columns:

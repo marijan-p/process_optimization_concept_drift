@@ -16,3 +16,8 @@ roller_height_4,context,mm,,,2
 roller_temperature,context,°C,,,1
 feed_moisture,context,%,,,1
 water_injection,context,l/h,,,0
+sp_feed_rate,setpoint,t/h,0,35,1
+sp_classifier_speed,setpoint,%,0,100,1
+sp_tension_pressure,setpoint,bar,0,250,0
+sp_mill_fan_speed,setpoint,%,0,100,1
+sp_main_drive_speed,setpoint,%,0,100,1
