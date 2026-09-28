@@ -2,46 +2,18 @@
 %---------------------------------------------------------------
 % Kapitel: Viertes Kapitel
 %---------------------------------------------------------------
-% GERUEST (Stand 28.09.2026). Ueberschriften und Labels sind echt, alles andere ist
-% Kommentar. Je Absatz: Rolle -- Inhalt -- Belege (Makro/Abbildung/Notebook).
-% Die Makrodateien entstehen erst mit IS_FINAL = True in den Notebooks:
-%   \input{\resultsdir mill_data.tex}     (mill_data.ipynb)
-%   \input{\resultsdir mill_model.tex}    (mill_model.ipynb)
-%   \input{\resultsdir mill_context.tex}  (mill_context.ipynb)
-% Abbildungen liegen dann als \plotdir mill_<name>.pgf vor.
-% Drift-Erkennung und Drift-Adaption sind bewusst nur Platzhalter.
-%---------------------------------------------------------------
 \chapter{Anwendung} \label{cap:anwendung}
-% Gegenstueck zu "Generalisierung" (Kap. 3): dort vom Anwendungsfall geloest, hier zurueck.
 %
-% [K1] Aufhaenger -- Kapitel~\ref{cap:generalisierung} hat den Adaptionsansatz vom
-%      Anwendungsfall geloest und unter kontrollierten Bedingungen erprobt. Dieses Kapitel
-%      fuehrt ihn an die Anlage zurueck, fuer die er entwickelt wurde: die \ac{VRM} aus
-%      Abschnitt~\ref{sec:funktionsweise}, mit dem \ac{MLP} aus Abschnitt~\ref{sec:modellvergleich}.
+Ausgangspunkt dieser Arbeit ist die Beobachtung, dass der Modellfehler der spezifischen Energie an einer \ac{VRM} im Produktionsbetrieb nicht konstant bleibt, sondern über die Zeit schwankt, wie bereits in Abbildung~\ref{fig:modellfehler} dargestellt. Ein Modell, dessen Güte sich im Betrieb unbemerkt verändert, eignet sich jedoch nur begrenzt als Grundlage einer Betriebspunktoptimierung. Aus dieser Beobachtung sind die Leitfragen in Abschnitt~\ref{sec:zielsetzung} hervorgegangen. Dieses Kapitel kehrt an genau diese Anlage und zu genau diesem Modell zurück. Es geht zunächst der zweiten Leitfrage nach, welche Form von \ac{CD} an der Anlage vorliegt, und untersucht im Sinne der dritten Leitfrage anschließend, welche messbaren Vorteile die Adaption des Modells im realen Betrieb bringt. \par
 %
-% [K2] Abgleich mit den Voraussetzungen -- Die acht Anforderungen aus dem Eingangsabschnitt
-%      von Kapitel~\ref{cap:generalisierung} werden fuer die reale Anlage durchgegangen.
-%      Erfuellt: reale Prozesscharakteristik, Variablenklassen, stationaere Betriebspunkte
-%      (ueber die Verdichtung), drift-freie Referenz (DOE1), kontinuierliche Zielgroesse.
-%      Eingeschraenkt: Betriebspunktabdeckung (Produktion plus zwei Feldexperimente).
-%      Nicht erfuellt: oeffentliche Verfuegbarkeit, und der CD ist zwar vorhanden, aber
-%      weder vorgegeben noch gemessen.
-%      Beleg: Tabelle tab:voraussetzungen (Voraussetzung x synthetisch / TEP / Muehle,
-%      qualitativ). Tabelle ist neu zu bauen, ohne Notebook.
+Die in Kapitel~\ref{cap:generalisierung} erprobte Verarbeitungskette ist bewusst nicht auf die Mühle zugeschnitten, sondern als allgemeine Lösung eingeführt, die sich nun auch am Anwendungsfall bewähren soll. Aufbau und Verfahren der Drift-Erkennung und Drift-Adaption bleiben daher erhalten. Gegenstand sei dabei jetzt die in Abschnitt~\ref{sec:funktionsweise} beschriebene \ac{VRM}, deren Betriebspunkte sich nach Abschnitt~\ref{sec:stellgroessen} über die von den Operatoren vorgegebenen Setpoints definieren. Das verwendete Modell wurde entsprechend der Datenselektion aus Abschnitt~\ref{sec:datenselektion} auf den quasi-stationären Betriebspunkten eines Feldexperiments trainiert. Dieses Feldexperiment hält den Zustand der Anlage zu einem festen Zeitpunkt fest und bildet damit den Bezug, gegenüber dem sich jede spätere Veränderung des Prozessverhaltens abhebt. \par
 %
-% [K3] Die Asymmetrie als Argumentationslinie -- Es gibt keine Ground Truth. An ihre Stelle
-%      treten zwei Referenzen: die protokollierten Kalibrierungen als Ereignisreferenz und das
-%      zweite Feldexperiment als Generalisierungsreferenz. Das ist kein Mangel, sondern der
-%      Unterschied zwischen Benchmark und Anwendung.
+An die Stelle der Generierung eines Datenstroms tritt an der realen Anlage dessen Erhebung aus historischen Betriebsdaten. Der so entstehende Strom erstreckt sich über mehrere Jahre und wird durch betriebsbedingte Stillstände vereinzelt unterbrochen. Zudem ist der \ac{CD} anders als in den generalisierten Fällen weder vorgegeben noch unmittelbar gemessen. Eine Ground Truth, an der sich Erkennung und Adaption direkt bewerten ließen, liegt daher nicht vor. An ihre Stelle treten zwei Referenzen. Die protokollierten Kalibrierungen der Mühle markieren Eingriffe in die Anlage und dienen als Ereignisreferenz für die Drift-Erkennung. Ein zweites Feldexperiment, deutlich später als das erste durchgeführt, dient als Generalisierungsreferenz für die Drift-Adaption. Es zeigt, ob ein adaptiertes Modell auch über den im Betrieb gefahrenen Bereich hinaus gültig bleibt. \par
 %
-% [K4] Kapitelaufbau -- Concept Drift an der Anlage (\ref{sec:mill_drift}), Datenerhebung
-%      (\ref{sec:mill_data}), Modellierung (\ref{sec:mill_modellierung}), Kontextanalyse
-%      (\ref{sec:mill_kontext}), dann Erkennung und Adaption. Einziger Ort mit
-%      Vorwaertsverweisen. Hinweis, dass die Generierung aus Kap. 3 hier zur Erhebung wird
-%      und die Kontextanalyse als eigener Schritt hinzukommt.
+Das Kapitel führt schrittweise vom Prozess und seinen Daten hin zur Erkennung und zur Adaption des \ac{CD}. Zunächst beschreibt Abschnitt~\ref{sec:mill_drift} die möglichen Ursachen von \ac{CD} an der Anlage und welche davon messtechnisch erfasst sind. Abschnitt~\ref{sec:mill_data} behandelt die Erhebung des Datenstroms und seine Verdichtung zu Betriebspunkten. In Abschnitt~\ref{sec:mill_modellierung} wird das Modell auf die erhobenen Daten angewandt und sein Fehler über den Betrachtungszeitraum bewertet. Die Kontextanalyse in Abschnitt~\ref{sec:mill_kontext} erschließt Form und Ursachen des \ac{CD} aus Betriebs- und Wartungsdaten und leitet daraus die Ereignisreferenz ab. Darauf bauen die Drift-Erkennung in Abschnitt~\ref{sec:mill_detection} und die Drift-Adaption in Abschnitt~\ref{sec:mill_adaption} auf. \par
 %
 %---------------------------------------------------------------
-\section{Concept Drift an der Anlage} \label{sec:mill_drift}
+\section{Concept Drift} \label{sec:mill_drift}
 %---------------------------------------------------------------
 % Gegenstueck zu sec:syn_drift / sec:tep_drift. Dort wird der Drift konstruiert, hier wird
 % beschrieben, woher er kommen kann und was davon messbar ist.
