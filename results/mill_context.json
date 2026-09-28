@@ -1,0 +1,749 @@
+{
+  "_provenance": {
+    "id": "db90eeb3",
+    "base_id": "e63cf80b",
+    "sections": {
+      "context": {
+        "plausible": {
+          "feed_moisture": [
+            0.0,
+            25.0
+          ],
+          "roller_temperature": [
+            -20.0,
+            150.0
+          ]
+        },
+        "clip_lower": {
+          "water_injection": 0.0
+        },
+        "var_win_days": 7,
+        "stop_gap_h": 2.0,
+        "stop_win_days": 7,
+        "rmse_win_days": 14,
+        "cal_win_days": 7,
+        "cal_min_points": 10,
+        "n_perm": 2000,
+        "maintenance": [
+          "2022-03-13",
+          "2022-09-18",
+          "2022-11-28",
+          "2023-05-02",
+          "2023-08-14"
+        ],
+        "material_change": "2023-03-17",
+        "match_days": 10,
+        "long_stop_h": 48,
+        "anomaly_offset": 20,
+        "op_k": 40,
+        "op_min_points": 30,
+        "op_min_span_days": 90,
+        "savgol": [
+          9,
+          2
+        ],
+        "event_set": "long",
+        "seed": 42
+      }
+    },
+    "parents": {
+      "model": "e63cf80b"
+    }
+  },
+  "n_points": 11124,
+  "n_context_points": 10085,
+  "spearman_rolling_var_abs_error": -0.019,
+  "rolling_corr_sign_changes": {
+    "feed_rate": 15,
+    "classifier_speed": 12,
+    "tension_pressure": 14,
+    "mill_fan_speed": 4,
+    "main_drive_speed": 9
+  },
+  "context_ranking": {
+    "tension_pressure": {
+      "pearson_e": -0.3091381163679404,
+      "pearson_abs_e": -0.08149695477423761,
+      "mi_e": 0.6090747773610357,
+      "mi_abs_e": 0.369382658456066
+    },
+    "mill_fan_speed": {
+      "pearson_e": 0.7415843890506636,
+      "pearson_abs_e": -0.5778620864356312,
+      "mi_e": 0.5899018428408587,
+      "mi_abs_e": 0.36908402383274597
+    },
+    "hours_since_calib": {
+      "pearson_e": 0.28333301165274677,
+      "pearson_abs_e": 0.04696534241614802,
+      "mi_e": 0.5039810411223655,
+      "mi_abs_e": 0.2876296832255334
+    },
+    "tonnes_since_calib": {
+      "pearson_e": 0.277415243477138,
+      "pearson_abs_e": 0.056039756772474206,
+      "mi_e": 0.47286735737001706,
+      "mi_abs_e": 0.2616376705461132
+    },
+    "roller_height": {
+      "pearson_e": 0.20486649706442248,
+      "pearson_abs_e": -0.0122990268074473,
+      "mi_e": 0.44619582107708133,
+      "mi_abs_e": 0.2526398678817232
+    },
+    "recirculation_damper_position": {
+      "pearson_e": 0.13180678886314223,
+      "pearson_abs_e": 0.0386063024049249,
+      "mi_e": 0.4153773154278546,
+      "mi_abs_e": 0.2856812510368314
+    },
+    "feed_rate": {
+      "pearson_e": 0.05345129734155564,
+      "pearson_abs_e": -0.42863555466359443,
+      "mi_e": 0.3932143427040131,
+      "mi_abs_e": 0.25998827742113373
+    },
+    "rolling_var": {
+      "pearson_e": -0.09653851883400118,
+      "pearson_abs_e": 0.004315745512568339,
+      "mi_e": 0.38305970898276076,
+      "mi_abs_e": 0.24319708922747196
+    },
+    "main_drive_speed": {
+      "pearson_e": 0.15590284066156426,
+      "pearson_abs_e": -0.3410870575617709,
+      "mi_e": 0.32263007918490394,
+      "mi_abs_e": 0.23118877778543845
+    },
+    "water_injection": {
+      "pearson_e": 0.37147582389149075,
+      "pearson_abs_e": -0.16814994303461606,
+      "mi_e": 0.2989619635513354,
+      "mi_abs_e": 0.16495186958156283
+    },
+    "roller_temperature": {
+      "pearson_e": -0.4543381247439645,
+      "pearson_abs_e": 0.27607034491306237,
+      "mi_e": 0.2599998428500436,
+      "mi_abs_e": 0.13922631742025882
+    },
+    "classifier_speed": {
+      "pearson_e": -0.04072900699840368,
+      "pearson_abs_e": -0.005213056258747176,
+      "mi_e": 0.25052278679054707,
+      "mi_abs_e": 0.13632437522755358
+    },
+    "feed_moisture": {
+      "pearson_e": 0.2607498030267357,
+      "pearson_abs_e": -0.018961540234267348,
+      "mi_e": 0.22261200797078518,
+      "mi_abs_e": 0.11297088340411232
+    },
+    "stops_week": {
+      "pearson_e": 0.11313825855960313,
+      "pearson_abs_e": 0.1618514676272576,
+      "mi_e": 0.2080705204073614,
+      "mi_abs_e": 0.10965578592079717
+    },
+    "duration_min": {
+      "pearson_e": -0.00039663995919469905,
+      "pearson_abs_e": -0.11625700531053311,
+      "mi_e": 0.20403308542985377,
+      "mi_abs_e": 0.13772342289990913
+    },
+    "stack_damper_position": {
+      "pearson_e": 0.011681206407659791,
+      "pearson_abs_e": 0.0015936329358057244,
+      "mi_e": 0.18425828524966836,
+      "mi_abs_e": 0.08007844726836488
+    },
+    "hotgas_generator_load": {
+      "pearson_e": -0.14390027476171857,
+      "pearson_abs_e": -0.03735210460364545,
+      "mi_e": 0.16183866002495773,
+      "mi_abs_e": 0.08004784316009772
+    }
+  },
+  "n_calibrations": 22,
+  "n_calibrations_evaluated": 22,
+  "calibration_test": {
+    "|d Bias| [kWh/t]": {
+      "Kalibrierung": 1.5771306649186618,
+      "Zufall": 0.6999419462334512,
+      "p": 0.0004997501249375312
+    },
+    "|d RMSE| [kWh/t]": {
+      "Kalibrierung": 1.070159714170366,
+      "Zufall": 0.5515136632152491,
+      "p": 0.0004997501249375312
+    },
+    "|d rolling_var|": {
+      "Kalibrierung": 0.0017857544052114936,
+      "Zufall": 0.001636985999106969,
+      "p": 0.31984007996002
+    }
+  },
+  "ks_pvalues": {
+    "DOE1-DOE2": {
+      "feed_rate": 0.6757873032725059,
+      "classifier_speed": 0.895016304007743,
+      "tension_pressure": 0.37038572209142157,
+      "mill_fan_speed": 0.38360228277469904,
+      "main_drive_speed": 0.37038572209142157,
+      "recirculation_damper_position": 4.49905818059332e-06,
+      "stack_damper_position": 7.094832478163953e-13,
+      "hotgas_generator_load": 3.104343950820638e-08,
+      "total_specific_energy": 0.30286861501184825
+    },
+    "DOE1-Produktion": {
+      "feed_rate": 0.00015064794861623118,
+      "classifier_speed": 0.2140993518454385,
+      "tension_pressure": 0.005894571454232889,
+      "mill_fan_speed": 0.18097146365186334,
+      "main_drive_speed": 0.010099064365349353,
+      "recirculation_damper_position": 6.620216818098655e-12,
+      "stack_damper_position": 6.311570608145228e-16,
+      "hotgas_generator_load": 0.357377383008734,
+      "total_specific_energy": 0.001993727197201367
+    },
+    "DOE2-Produktion": {
+      "feed_rate": 1.4521968907000149e-05,
+      "classifier_speed": 0.38541573408590724,
+      "tension_pressure": 4.517999529944081e-09,
+      "mill_fan_speed": 0.016260187855132724,
+      "main_drive_speed": 1.1035149655406787e-07,
+      "recirculation_damper_position": 0.006211137707902825,
+      "stack_damper_position": 7.059760549100976e-09,
+      "hotgas_generator_load": 4.920306637703018e-14,
+      "total_specific_energy": 6.332448995368464e-05
+    },
+    "P1-P2": {
+      "feed_rate": 0.0,
+      "classifier_speed": 0.0,
+      "tension_pressure": 0.0,
+      "mill_fan_speed": 0.0,
+      "main_drive_speed": 4.0435491082614056e-249,
+      "recirculation_damper_position": 2.974e-321,
+      "stack_damper_position": 2.342366165828571e-152,
+      "hotgas_generator_load": 9.836797454288098e-38,
+      "total_specific_energy": 3.4801990526010477e-240
+    }
+  },
+  "ks_rejected": {
+    "DOE1-DOE2": 3,
+    "DOE1-Produktion": 6,
+    "DOE2-Produktion": 8,
+    "P1-P2": 9
+  },
+  "ks_statistic": {
+    "DOE1-DOE2": {
+      "feed_rate": 0.20238095238095238,
+      "classifier_speed": 0.15873015873015872,
+      "tension_pressure": 0.2619047619047619,
+      "mill_fan_speed": 0.25793650793650796,
+      "main_drive_speed": 0.2619047619047619,
+      "recirculation_damper_position": 0.7222222222222222,
+      "stack_damper_position": 1.0,
+      "hotgas_generator_load": 0.8333333333333334,
+      "total_specific_energy": 0.2777777777777778
+    },
+    "DOE1-Produktion": {
+      "feed_rate": 0.4922689679971234,
+      "classifier_speed": 0.23984178353110386,
+      "tension_pressure": 0.3884394102840705,
+      "mill_fan_speed": 0.24892125134843585,
+      "main_drive_speed": 0.3702804746494066,
+      "recirculation_damper_position": 0.775170801869831,
+      "stack_damper_position": 0.8624595469255664,
+      "hotgas_generator_load": 0.20954692556634302,
+      "total_specific_energy": 0.4223300970873787
+    },
+    "DOE2-Produktion": {
+      "feed_rate": 0.4446499203780757,
+      "classifier_speed": 0.16540812657317516,
+      "tension_pressure": 0.5681923254738789,
+      "mill_fan_speed": 0.28563723223917403,
+      "main_drive_speed": 0.5238994195304876,
+      "recirculation_damper_position": 0.31283710895361383,
+      "stack_damper_position": 0.5622977346278317,
+      "hotgas_generator_load": 0.6947911850824472,
+      "total_specific_energy": 0.41700056505881755
+    },
+    "P1-P2": {
+      "feed_rate": 0.5741232489558159,
+      "classifier_speed": 0.40691018518263566,
+      "tension_pressure": 0.608236076721598,
+      "mill_fan_speed": 0.45678949277117,
+      "main_drive_speed": 0.31834921482309814,
+      "recirculation_damper_position": 0.37347484814848947,
+      "stack_damper_position": 0.2496637894744685,
+      "hotgas_generator_load": 0.12417484469851517,
+      "total_specific_energy": 0.31267674437099435
+    }
+  },
+  "n_maintenance_matched": 5,
+  "n_maintenance_in_long_stop": 5,
+  "n_long_undocumented_covered": 0,
+  "n_calibrations_anomalous": 2,
+  "stop_test": {
+    "Stillstand >= 48 h": {
+      "n": 7.0,
+      "|d Bias|": 2.949661874725421,
+      "|d RMSE|": 2.0492806937108203,
+      "p Bias": 0.0004997501249375312
+    },
+    "Stillstand < 48 h": {
+      "n": 15.0,
+      "|d Bias|": 0.9366161003421752,
+      "|d RMSE|": 0.6132365903848208,
+      "p Bias": 0.1199400299850075
+    },
+    "ohne auffaellige": {
+      "n": 20.0,
+      "|d Bias|": 1.6686177800897575,
+      "|d RMSE|": 1.1097059433603647,
+      "p Bias": 0.0004997501249375312
+    }
+  },
+  "calibration_info": {
+    "2022-03-19 19:05:20": {
+      "stop_h": 150.39166666666668,
+      "offset_jump": 3.875865936279297,
+      "long_stop": true,
+      "anomalous": false,
+      "doc_maintenance": true
+    },
+    "2022-05-06 10:08:20": {
+      "stop_h": 11.821111111111112,
+      "offset_jump": 2.4683170318603516,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2022-07-06 17:14:40": {
+      "stop_h": 46.611111111111114,
+      "offset_jump": 1.5843448638916016,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2022-09-25 07:21:50": {
+      "stop_h": 171.6611111111111,
+      "offset_jump": 5.407741001674107,
+      "long_stop": true,
+      "anomalous": false,
+      "doc_maintenance": true
+    },
+    "2022-12-02 08:55:20": {
+      "stop_h": 123.46944444444445,
+      "offset_jump": 2.8792686462402344,
+      "long_stop": true,
+      "anomalous": false,
+      "doc_maintenance": true
+    },
+    "2023-01-20 11:03:30": {
+      "stop_h": 19.694444444444443,
+      "offset_jump": 2.4683189392089844,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2023-03-07 13:30:20": {
+      "stop_h": 23.822222222222223,
+      "offset_jump": 87.33622741699219,
+      "long_stop": false,
+      "anomalous": true,
+      "doc_maintenance": false
+    },
+    "2023-05-05 11:06:30": {
+      "stop_h": 90.54166666666667,
+      "offset_jump": 2.0008316040039062,
+      "long_stop": true,
+      "anomalous": false,
+      "doc_maintenance": true
+    },
+    "2023-05-30 23:40:20": {
+      "stop_h": 24.516666666666666,
+      "offset_jump": 2.621309280395508,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2023-06-02 10:55:20": {
+      "stop_h": 12.0,
+      "offset_jump": 3.8894729614257812,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2023-06-27 10:05:20": {
+      "stop_h": 14.488888888888889,
+      "offset_jump": 0.8907718658447266,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2023-08-16 11:58:30": {
+      "stop_h": 65.37777777777778,
+      "offset_jump": 0.9315662384033203,
+      "long_stop": true,
+      "anomalous": false,
+      "doc_maintenance": true
+    },
+    "2023-09-26 14:43:13": {
+      "stop_h": 20.357222222222223,
+      "offset_jump": 3.229888916015625,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2023-11-09 08:33:07": {
+      "stop_h": 98.9636111111111,
+      "offset_jump": 1.9855308532714844,
+      "long_stop": true,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2024-01-10 12:58:02": {
+      "stop_h": 90.215,
+      "offset_jump": 3.0802841186523438,
+      "long_stop": true,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2024-02-15 11:39:36": {
+      "stop_h": 12.408888888888889,
+      "offset_jump": 2.930694580078125,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2024-03-21 11:59:57": {
+      "stop_h": 6.476111111111111,
+      "offset_jump": 259.1459732055664,
+      "long_stop": false,
+      "anomalous": true,
+      "doc_maintenance": false
+    },
+    "2024-04-10 11:14:35": {
+      "stop_h": 14.736666666666666,
+      "offset_jump": 2.094329833984375,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2024-04-16 10:44:51": {
+      "stop_h": 8.483611111111111,
+      "offset_jump": 5.072624206542969,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2024-05-18 07:44:35": {
+      "stop_h": 7.019444444444445,
+      "offset_jump": 11.30801010131836,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2024-07-01 14:46:28": {
+      "stop_h": 7.288611111111111,
+      "offset_jump": 1.7883377075195312,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    },
+    "2024-08-20 04:42:25": {
+      "stop_h": 20.555833333333332,
+      "offset_jump": 2.6791133880615234,
+      "long_stop": false,
+      "anomalous": false,
+      "doc_maintenance": false
+    }
+  },
+  "material_change_percentile": 0.528,
+  "n_operating_points": 40,
+  "n_recurring_ops": 36,
+  "recurring_share": 0.938,
+  "op_mean_dist": 0.0251,
+  "op_error_between_share": 0.643,
+  "eta2_op": 0.776,
+  "tse_dev_std": 1.507,
+  "spearman_tse_dev_tonnes": 0.279,
+  "op_calibration_test": {
+    "cal": 1.275382801717204,
+    "rand": 0.7575207401408774,
+    "p": 0.0069965017491254375,
+    "n": 22.0
+  },
+  "op_weekly_corr": 0.707,
+  "recurring_ops": {
+    "5.0": {
+      "n": 551,
+      "span_days": 674,
+      "tse_mean": 40.7196,
+      "tse_std": 1.2158,
+      "error_mean": 0.6852
+    },
+    "38.0": {
+      "n": 536,
+      "span_days": 718,
+      "tse_mean": 40.6983,
+      "tse_std": 1.1144,
+      "error_mean": 0.5549
+    },
+    "33.0": {
+      "n": 473,
+      "span_days": 858,
+      "tse_mean": 36.0261,
+      "tse_std": 0.9431,
+      "error_mean": -2.4491
+    },
+    "25.0": {
+      "n": 424,
+      "span_days": 152,
+      "tse_mean": 38.3454,
+      "tse_std": 1.7563,
+      "error_mean": -1.2502
+    },
+    "27.0": {
+      "n": 416,
+      "span_days": 666,
+      "tse_mean": 42.8881,
+      "tse_std": 1.1295,
+      "error_mean": 1.673
+    },
+    "35.0": {
+      "n": 413,
+      "span_days": 782,
+      "tse_mean": 39.8068,
+      "tse_std": 1.005,
+      "error_mean": -0.309
+    },
+    "3.0": {
+      "n": 406,
+      "span_days": 135,
+      "tse_mean": 35.4476,
+      "tse_std": 0.922,
+      "error_mean": -2.9574
+    },
+    "1.0": {
+      "n": 383,
+      "span_days": 687,
+      "tse_mean": 42.8808,
+      "tse_std": 1.5374,
+      "error_mean": 0.9396
+    },
+    "23.0": {
+      "n": 373,
+      "span_days": 722,
+      "tse_mean": 38.9452,
+      "tse_std": 1.6225,
+      "error_mean": -1.0275
+    },
+    "28.0": {
+      "n": 372,
+      "span_days": 472,
+      "tse_mean": 39.4855,
+      "tse_std": 1.5432,
+      "error_mean": -0.083
+    },
+    "20.0": {
+      "n": 369,
+      "span_days": 967,
+      "tse_mean": 41.5282,
+      "tse_std": 1.1515,
+      "error_mean": -1.1256
+    },
+    "13.0": {
+      "n": 356,
+      "span_days": 316,
+      "tse_mean": 43.4944,
+      "tse_std": 1.04,
+      "error_mean": 2.306
+    },
+    "36.0": {
+      "n": 344,
+      "span_days": 136,
+      "tse_mean": 43.1448,
+      "tse_std": 1.5891,
+      "error_mean": -2.4975
+    },
+    "21.0": {
+      "n": 331,
+      "span_days": 131,
+      "tse_mean": 39.0784,
+      "tse_std": 1.9385,
+      "error_mean": -5.281
+    },
+    "6.0": {
+      "n": 305,
+      "span_days": 187,
+      "tse_mean": 39.7167,
+      "tse_std": 1.4806,
+      "error_mean": -0.1909
+    },
+    "10.0": {
+      "n": 297,
+      "span_days": 174,
+      "tse_mean": 41.4816,
+      "tse_std": 2.3137,
+      "error_mean": -2.5463
+    },
+    "0.0": {
+      "n": 296,
+      "span_days": 747,
+      "tse_mean": 41.2227,
+      "tse_std": 2.2022,
+      "error_mean": -3.2198
+    },
+    "4.0": {
+      "n": 292,
+      "span_days": 854,
+      "tse_mean": 48.1562,
+      "tse_std": 2.1175,
+      "error_mean": 1.2352
+    },
+    "8.0": {
+      "n": 273,
+      "span_days": 525,
+      "tse_mean": 39.6807,
+      "tse_std": 1.3394,
+      "error_mean": 0.0449
+    },
+    "19.0": {
+      "n": 255,
+      "span_days": 886,
+      "tse_mean": 40.5197,
+      "tse_std": 0.8423,
+      "error_mean": -0.0395
+    },
+    "22.0": {
+      "n": 240,
+      "span_days": 932,
+      "tse_mean": 39.5631,
+      "tse_std": 1.1288,
+      "error_mean": -0.9716
+    },
+    "24.0": {
+      "n": 239,
+      "span_days": 194,
+      "tse_mean": 38.5045,
+      "tse_std": 0.9983,
+      "error_mean": -1.8418
+    },
+    "7.0": {
+      "n": 226,
+      "span_days": 555,
+      "tse_mean": 42.358,
+      "tse_std": 2.222,
+      "error_mean": 0.0594
+    },
+    "29.0": {
+      "n": 221,
+      "span_days": 177,
+      "tse_mean": 37.7039,
+      "tse_std": 1.7695,
+      "error_mean": -1.6112
+    },
+    "2.0": {
+      "n": 220,
+      "span_days": 111,
+      "tse_mean": 37.7157,
+      "tse_std": 0.879,
+      "error_mean": -0.5043
+    },
+    "16.0": {
+      "n": 220,
+      "span_days": 771,
+      "tse_mean": 38.8002,
+      "tse_std": 1.3009,
+      "error_mean": -1.2432
+    },
+    "30.0": {
+      "n": 214,
+      "span_days": 92,
+      "tse_mean": 40.5454,
+      "tse_std": 0.7381,
+      "error_mean": -1.2258
+    },
+    "37.0": {
+      "n": 190,
+      "span_days": 679,
+      "tse_mean": 44.8384,
+      "tse_std": 1.639,
+      "error_mean": 0.5392
+    },
+    "34.0": {
+      "n": 183,
+      "span_days": 931,
+      "tse_mean": 40.8739,
+      "tse_std": 1.4276,
+      "error_mean": -0.9181
+    },
+    "32.0": {
+      "n": 178,
+      "span_days": 604,
+      "tse_mean": 45.0171,
+      "tse_std": 1.1972,
+      "error_mean": 1.2957
+    },
+    "14.0": {
+      "n": 170,
+      "span_days": 429,
+      "tse_mean": 47.4893,
+      "tse_std": 2.3644,
+      "error_mean": 2.1265
+    },
+    "11.0": {
+      "n": 164,
+      "span_days": 859,
+      "tse_mean": 42.5815,
+      "tse_std": 1.8627,
+      "error_mean": -2.7933
+    },
+    "12.0": {
+      "n": 157,
+      "span_days": 966,
+      "tse_mean": 39.2069,
+      "tse_std": 1.6648,
+      "error_mean": -4.4801
+    },
+    "15.0": {
+      "n": 124,
+      "span_days": 1029,
+      "tse_mean": 37.4227,
+      "tse_std": 1.05,
+      "error_mean": -2.1616
+    },
+    "31.0": {
+      "n": 120,
+      "span_days": 648,
+      "tse_mean": 46.3683,
+      "tse_std": 2.3422,
+      "error_mean": 1.5439
+    },
+    "9.0": {
+      "n": 98,
+      "span_days": 462,
+      "tse_mean": 45.1293,
+      "tse_std": 3.0761,
+      "error_mean": 2.108
+    }
+  },
+  "n_sudden_days": 42,
+  "n_incremental_days": 280,
+  "n_sudden_near_calibration": 33,
+  "n_sudden_near_long_calibration": 28,
+  "event_set": "long",
+  "n_events": 7,
+  "event_indices": [
+    1018,
+    3169,
+    3854,
+    5373,
+    6431,
+    7364,
+    7934
+  ]
+}

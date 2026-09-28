@@ -269,6 +269,27 @@ def violin_box(data, x, y, *, order=None, palette=None, box_color=None,
     return fig, ax
 
 
+#: Einheitliche Beschriftung der Zeitachse in allen Abbildungen der Arbeit.
+TIME_LABEL = "Zeit $t$ [Monate]"
+
+
+def time_axis(ax, month_interval=1, date_format="%b", xlabel=TIME_LABEL):
+    """Einheitliche Zeitachse: deutsche Monatsnamen, Ticks alle ``month_interval``
+    Monate. Fuer mehrjaehrige Stroeme ``month_interval=6, date_format="%b %y"``."""
+    import locale
+    import matplotlib.dates as mdates
+
+    try:
+        locale.setlocale(locale.LC_TIME, "de_DE.UTF-8")
+    except locale.Error:
+        pass
+    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=month_interval))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter(date_format))
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    return ax
+
+
 def _symlog_ticks(ylim, linthresh):
     """Dekaden-Ticks fuer eine symlog-Achse: ..., -10^1, 0, 10^1, ... innerhalb ylim."""
     import numpy as np

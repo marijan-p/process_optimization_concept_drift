@@ -1,0 +1,101 @@
+% automatisch erzeugt aus mill_context.ipynb - nicht manuell editieren
+
+% Streuung der Betriebspunkte
+\newcommand{\millCtxRhoVarErr}{-0{,}02}
+
+% Kontextanalyse: Pearson mit dem Modellfehler
+\newcommand{\millCtxPearsonMoisture}{0{,}26}
+\newcommand{\millCtxPearsonRollerHeight}{0{,}20}
+\newcommand{\millCtxPearsonTonnesSinceCalib}{0{,}28}
+\newcommand{\millCtxPearsonRollingVar}{-0{,}10}
+\newcommand{\millCtxPearsonStops}{0{,}11}
+
+% Kalibrierungen
+\newcommand{\millCtxNCalib}{22}
+\newcommand{\millCtxNCalibEval}{22}
+\newcommand{\millCtxCalWinDays}{7}
+\newcommand{\millCtxCalBias}{1{,}58}
+\newcommand{\millCtxRandBias}{0{,}70}
+\newcommand{\millCtxCalBiasP}{0{,}0005}
+\newcommand{\millCtxCalRmseP}{0{,}0005}
+\newcommand{\millCtxCalVarP}{0{,}320}
+
+% Kalibrierungen nach Stillstandsdauer, Abgleich mit der Wartungsliste
+\newcommand{\millCtxLongStopH}{48}
+\newcommand{\millCtxNCalLong}{7}
+\newcommand{\millCtxNCalShort}{15}
+\newcommand{\millCtxCalBiasLong}{2{,}95}
+\newcommand{\millCtxCalBiasShort}{0{,}94}
+\newcommand{\millCtxCalBiasLongP}{0{,}0005}
+\newcommand{\millCtxCalBiasShortP}{0{,}120}
+\newcommand{\millCtxNMaint}{5}
+\newcommand{\millCtxNMaintInLong}{5}
+\newcommand{\millCtxMatchDays}{10}
+\newcommand{\millCtxNCalAnomalous}{2}
+\newcommand{\millCtxMaterialPctl}{53}
+
+% Driftart (KS-Test)
+\newcommand{\millCtxKsN}{9}
+\newcommand{\millCtxKsRejDoeOneDoeTwo}{3}
+\newcommand{\millCtxKsRejDoeOneProd}{6}
+\newcommand{\millCtxKsRejDoeTwoProd}{8}
+\newcommand{\millCtxKsRejHalves}{9}
+\newcommand{\millCtxKsDFeedRateDoeOneDoeTwo}{0{,}20}
+\newcommand{\millCtxKsDClassifierSpeedDoeOneDoeTwo}{0{,}16}
+\newcommand{\millCtxKsDTensionPressureDoeOneDoeTwo}{0{,}26}
+\newcommand{\millCtxKsDMillFanSpeedDoeOneDoeTwo}{0{,}26}
+\newcommand{\millCtxKsDMainDriveSpeedDoeOneDoeTwo}{0{,}26}
+\newcommand{\millCtxKsDRecirculationDamperPositionDoeOneDoeTwo}{0{,}72}
+\newcommand{\millCtxKsDStackDamperPositionDoeOneDoeTwo}{1{,}00}
+\newcommand{\millCtxKsDHotgasGeneratorLoadDoeOneDoeTwo}{0{,}83}
+\newcommand{\millCtxKsDTotalSpecificEnergyDoeOneDoeTwo}{0{,}28}
+\newcommand{\millCtxKsDFeedRateDoeOneProd}{0{,}49}
+\newcommand{\millCtxKsDClassifierSpeedDoeOneProd}{0{,}24}
+\newcommand{\millCtxKsDTensionPressureDoeOneProd}{0{,}39}
+\newcommand{\millCtxKsDMillFanSpeedDoeOneProd}{0{,}25}
+\newcommand{\millCtxKsDMainDriveSpeedDoeOneProd}{0{,}37}
+\newcommand{\millCtxKsDRecirculationDamperPositionDoeOneProd}{0{,}78}
+\newcommand{\millCtxKsDStackDamperPositionDoeOneProd}{0{,}86}
+\newcommand{\millCtxKsDHotgasGeneratorLoadDoeOneProd}{0{,}21}
+\newcommand{\millCtxKsDTotalSpecificEnergyDoeOneProd}{0{,}42}
+\newcommand{\millCtxKsDFeedRateDoeTwoProd}{0{,}44}
+\newcommand{\millCtxKsDClassifierSpeedDoeTwoProd}{0{,}17}
+\newcommand{\millCtxKsDTensionPressureDoeTwoProd}{0{,}57}
+\newcommand{\millCtxKsDMillFanSpeedDoeTwoProd}{0{,}29}
+\newcommand{\millCtxKsDMainDriveSpeedDoeTwoProd}{0{,}52}
+\newcommand{\millCtxKsDRecirculationDamperPositionDoeTwoProd}{0{,}31}
+\newcommand{\millCtxKsDStackDamperPositionDoeTwoProd}{0{,}56}
+\newcommand{\millCtxKsDHotgasGeneratorLoadDoeTwoProd}{0{,}69}
+\newcommand{\millCtxKsDTotalSpecificEnergyDoeTwoProd}{0{,}42}
+\newcommand{\millCtxKsDFeedRateHalves}{0{,}57}
+\newcommand{\millCtxKsDClassifierSpeedHalves}{0{,}41}
+\newcommand{\millCtxKsDTensionPressureHalves}{0{,}61}
+\newcommand{\millCtxKsDMillFanSpeedHalves}{0{,}46}
+\newcommand{\millCtxKsDMainDriveSpeedHalves}{0{,}32}
+\newcommand{\millCtxKsDRecirculationDamperPositionHalves}{0{,}37}
+\newcommand{\millCtxKsDStackDamperPositionHalves}{0{,}25}
+\newcommand{\millCtxKsDHotgasGeneratorLoadHalves}{0{,}12}
+\newcommand{\millCtxKsDTotalSpecificEnergyHalves}{0{,}31}
+
+% Wiederkehrende Betriebspunkte (Sollwerte)
+\newcommand{\millCtxNOps}{40}
+\newcommand{\millCtxNRecOps}{36}
+\newcommand{\millCtxRecSharePct}{94}
+\newcommand{\millCtxOpDistPct}{2{,}5}
+\newcommand{\millCtxOpErrBetweenPct}{64}
+\newcommand{\millCtxEtaSqOp}{0{,}78}
+\newcommand{\millCtxTseDevStd}{1{,}51}
+\newcommand{\millCtxRhoDevTonnes}{0{,}28}
+\newcommand{\millCtxOpCalBias}{1{,}28}
+\newcommand{\millCtxOpRandBias}{0{,}76}
+\newcommand{\millCtxOpCalP}{0{,}0070}
+\newcommand{\millCtxOpCorr}{0{,}71}
+
+% Gradientenbasierte Einordnung
+\newcommand{\millCtxNSuddenDays}{42}
+\newcommand{\millCtxNIncrementalDays}{280}
+\newcommand{\millCtxNSuddenNearCalib}{33}
+\newcommand{\millCtxNSuddenNearLongCalib}{28}
+
+% Ereignisreferenz fuer die Detektion
+\newcommand{\millCtxNEvents}{7}

@@ -1,0 +1,58 @@
+{
+  "_provenance": {
+    "id": "e63cf80b",
+    "base_id": "e63cf80b"
+  },
+  "features": [
+    "feed_rate",
+    "classifier_speed",
+    "tension_pressure",
+    "mill_fan_speed",
+    "main_drive_speed",
+    "recirculation_damper_position",
+    "stack_damper_position",
+    "hotgas_generator_load"
+  ],
+  "arch": [
+    8,
+    8
+  ],
+  "scaler": "fixed_range",
+  "n_params": 153,
+  "n_train_rows": 27402,
+  "n_train_bp": 18,
+  "n_epochs": 61,
+  "norm_mean": 0.5464,
+  "norm_std": 2.2216,
+  "rmse_first_half": 2.802,
+  "rmse_second_half": 1.614,
+  "datasets": {
+    "DOE1": {
+      "n": 18.0,
+      "rmse": 2.2270320338181286,
+      "mae": 1.6513638553618657,
+      "bias": 0.5464078377130784,
+      "sigma": 2.1589604337592267,
+      "r2": 0.8711422092652216,
+      "oor_share": 0.0
+    },
+    "DOE2": {
+      "n": 28.0,
+      "rmse": 1.993771823826346,
+      "mae": 1.549514758314939,
+      "bias": 0.30291971363854003,
+      "sigma": 1.9706257210776934,
+      "r2": 0.583582116834229,
+      "oor_share": 0.17857142857142858
+    },
+    "Produktion": {
+      "n": 11124.0,
+      "rmse": 2.259931599236704,
+      "mae": 1.7559702545884392,
+      "bias": -0.6880038343154344,
+      "sigma": 2.1526591827773918,
+      "r2": 0.47584007631193437,
+      "oor_share": 0.07029845379359942
+    }
+  }
+}

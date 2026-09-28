@@ -1,0 +1,55 @@
+{
+  "_provenance": {
+    "id": "062c6877",
+    "base_id": "062c6877"
+  },
+  "source": "production",
+  "features": [
+    "feed_rate",
+    "classifier_speed",
+    "tension_pressure",
+    "mill_fan_speed",
+    "main_drive_speed",
+    "recirculation_damper_position",
+    "stack_damper_position",
+    "hotgas_generator_load"
+  ],
+  "target": "total_specific_energy",
+  "n_points": 11124,
+  "span_days": 1032.0,
+  "points_per_day": 10.78,
+  "gap_median_days": 0.08,
+  "gap_max_days": 12.2,
+  "duration_median_min": 103.0,
+  "target_mean": 40.65,
+  "target_std": 3.12,
+  "t_start": "2021-11-26 00:36:00",
+  "t_end": "2024-09-22 19:56:36",
+  "seam": "2023-09-04 00:05:00",
+  "n_gaps": 40,
+  "gap_days_total": 126.0,
+  "out_of_range": {
+    "stack_damper_position": {
+      "kind": "Anschlagrauschen",
+      "n_above": 782,
+      "scale_ratio": 1.001
+    }
+  },
+  "n_calibrations": 22,
+  "doe": {
+    "1": {
+      "n": 18,
+      "start": "2021-11-26 14:25:00.993000",
+      "end": "2021-11-28 17:50:00.994000",
+      "n_rows": 27402,
+      "target_mean": 44.45199334526491
+    },
+    "2": {
+      "n": 28,
+      "start": "2023-03-18 06:48:06",
+      "end": "2023-03-20 14:56:59",
+      "n_rows": 76882,
+      "target_mean": 43.77457315380746
+    }
+  }
+}

@@ -1,6 +1,248 @@
 % !TEX root = Dissertation.tex
 %---------------------------------------------------------------
-% Kapitel: Viertes Kapitel 
-%--------------------------------------------------------------
-
-\chapter{Kapitel 4} \label{sec:Kap_4}
+% Kapitel: Viertes Kapitel
+%---------------------------------------------------------------
+% GERUEST (Stand 28.09.2026). Ueberschriften und Labels sind echt, alles andere ist
+% Kommentar. Je Absatz: Rolle -- Inhalt -- Belege (Makro/Abbildung/Notebook).
+% Die Makrodateien entstehen erst mit IS_FINAL = True in den Notebooks:
+%   \input{\resultsdir mill_data.tex}     (mill_data.ipynb)
+%   \input{\resultsdir mill_model.tex}    (mill_model.ipynb)
+%   \input{\resultsdir mill_context.tex}  (mill_context.ipynb)
+% Abbildungen liegen dann als \plotdir mill_<name>.pgf vor.
+% Drift-Erkennung und Drift-Adaption sind bewusst nur Platzhalter.
+%---------------------------------------------------------------
+\chapter{Anwendung} \label{cap:anwendung}
+% Gegenstueck zu "Generalisierung" (Kap. 3): dort vom Anwendungsfall geloest, hier zurueck.
+%
+% [K1] Aufhaenger -- Kapitel~\ref{cap:generalisierung} hat den Adaptionsansatz vom
+%      Anwendungsfall geloest und unter kontrollierten Bedingungen erprobt. Dieses Kapitel
+%      fuehrt ihn an die Anlage zurueck, fuer die er entwickelt wurde: die \ac{VRM} aus
+%      Abschnitt~\ref{sec:funktionsweise}, mit dem \ac{MLP} aus Abschnitt~\ref{sec:modellvergleich}.
+%
+% [K2] Abgleich mit den Voraussetzungen -- Die acht Anforderungen aus dem Eingangsabschnitt
+%      von Kapitel~\ref{cap:generalisierung} werden fuer die reale Anlage durchgegangen.
+%      Erfuellt: reale Prozesscharakteristik, Variablenklassen, stationaere Betriebspunkte
+%      (ueber die Verdichtung), drift-freie Referenz (DOE1), kontinuierliche Zielgroesse.
+%      Eingeschraenkt: Betriebspunktabdeckung (Produktion plus zwei Feldexperimente).
+%      Nicht erfuellt: oeffentliche Verfuegbarkeit, und der CD ist zwar vorhanden, aber
+%      weder vorgegeben noch gemessen.
+%      Beleg: Tabelle tab:voraussetzungen (Voraussetzung x synthetisch / TEP / Muehle,
+%      qualitativ). Tabelle ist neu zu bauen, ohne Notebook.
+%
+% [K3] Die Asymmetrie als Argumentationslinie -- Es gibt keine Ground Truth. An ihre Stelle
+%      treten zwei Referenzen: die protokollierten Kalibrierungen als Ereignisreferenz und das
+%      zweite Feldexperiment als Generalisierungsreferenz. Das ist kein Mangel, sondern der
+%      Unterschied zwischen Benchmark und Anwendung.
+%
+% [K4] Kapitelaufbau -- Concept Drift an der Anlage (\ref{sec:mill_drift}), Datenerhebung
+%      (\ref{sec:mill_data}), Modellierung (\ref{sec:mill_modellierung}), Kontextanalyse
+%      (\ref{sec:mill_kontext}), dann Erkennung und Adaption. Einziger Ort mit
+%      Vorwaertsverweisen. Hinweis, dass die Generierung aus Kap. 3 hier zur Erhebung wird
+%      und die Kontextanalyse als eigener Schritt hinzukommt.
+%
+%---------------------------------------------------------------
+\section{Concept Drift an der Anlage} \label{sec:mill_drift}
+%---------------------------------------------------------------
+% Gegenstueck zu sec:syn_drift / sec:tep_drift. Dort wird der Drift konstruiert, hier wird
+% beschrieben, woher er kommen kann und was davon messbar ist.
+%
+% [D1] Driftquellen -- Verschleiss (Walzenmaentel, Mahlteller), Wartung (Mantelwechsel,
+%      Aufschweissen), Kalibrierung des Walzen-Offsets, Materialeigenschaften (Feuchte,
+%      Zusammensetzung), Fahrweise der Operatoren, aeussere Bedingungen.
+%      Quelle: Expose Abschnitt 5.2 (Liste der aeusseren Einfluesse), MA Igel 2024 Kap. 4.2.
+%
+% [D2] Was davon gemessen ist -- Walzenhoehen (A56-HS01.ZZ01..04), Kalibriersignal als
+%      protokollierte Nullsetzung (A56-HS01.ZO01..04), Materialfeuchte (A53-2N01.QZ01),
+%      Wassereindüsung (A56-WI01.FC01), Durchsatzzaehler. Nicht gemessen: Zusammensetzung
+%      des Materials, Mahlfeinheit. Keine Tag-Namen im Text, nur in einer Fussnote oder im
+%      Anhang.
+%
+% [D3] Was eine Kalibrierung ist -- Offset wird genullt, wenn die Walzen auf dem Teller
+%      liegen: nach jeder Wartung, aber auch beim Ausraeumen einer vollgelaufenen Muehle oder
+%      versehentlich. Kalibrierung markiert damit einen Eingriff, nicht zwingend eine Wartung.
+%
+% [D4] Einordnung nach Tabelle~\ref{tab:cd_definitionen} -- Verschleiss aendert bei gleichen
+%      Stellgroessen die Zielgroesse, erwartet wird Real Concept Drift. Die Fahrweise
+%      verschiebt die Eingangsverteilung (Covariate Shift). Unterschied zu Kap. 3: Ursache
+%      und Verlauf des Drifts sind nicht bekannt, nur indirekt beobachtbar.
+%
+% [D5] Abgrenzung Messkette -- Die Umbauten am Sichter (09/2024) und am Hauptantrieb
+%      (05/2025) aendern die Messkette, nicht den Prozess im Sinne eines Drifts. Sie begrenzen
+%      den Betrachtungszeitraum. Kann alternativ in sec:mill_data stehen.
+%      Quelle: _shelf/mill (Mission Report, Site Report KW19/2025), wissen/muehlendaten.
+%
+%---------------------------------------------------------------
+\section{Datenerhebung} \label{sec:mill_data}
+%---------------------------------------------------------------
+% \input{\resultsdir mill_data.tex}
+% Gegenstueck zu sec:tep_generation. Notebook: ipynb/mill/mill_data.ipynb
+%
+% [E1] Rohdaten und Zeitraum -- Sensordaten der Anlage mit zwei Erfassungsraten (0,1 Hz
+%      aelterer Teil, 1 Hz ab 09/2023). Zeitraum vom ersten Feldexperiment bis vor den
+%      Sichterumbau. Davor fehlen Setpoint-Signale bzw. sind Sensoren falsch konfiguriert.
+%      Belege: \millSpanDays, Anfang/Ende aus data_stream (t_start, t_end im JSON).
+%
+% [E2] Verdichtung zu Betriebspunkten -- Regel aus Abschnitt~\ref{sec:datenselektion}
+%      (zehn Minuten unveraenderte Regelgroessen) umgesetzt ueber die Setpoints selbst, da
+%      diese stufenfoermig und exakt vergleichbar sind. Einschwingzeit, Mindesthaltezeit,
+%      Teilung langer Intervalle, Laufmeldung als zweites Segmentierungssignal. Kalibriert
+%      an den handgeschnittenen Segmenten des ersten Feldexperiments.
+%      Belege: \millAggSettleMin, \millAggMinHoldMin, \millAggMaxHoldMin (Minuten),
+%      Kalibrierung 0,12 % Abweichung (wissen/muehlendaten, ohne Makro).
+%
+% [E3] Der entstehende Strom -- Zahl der Betriebspunkte, Punkte je Tag, Luecken, Naht
+%      zwischen den Erfassungsraten, mittlere Dauer. Folge: der Strom ist unregelmaessig und
+%      um Groessenordnungen kuerzer als in Kap. 3, Fenster sind in Tagen zu bemessen.
+%      Belege: \millNPoints, \millPointsPerDay, \millDurationMedianMin, \millNGaps,
+%      \millGapDays, \millKswinMinInstDays, \millKswinWindowDays.
+%
+% [E4] Abbildung Zeitverlauf -- erst was zu sehen ist, dann Detail: Zielgroesse ueber der
+%      Zeit mit gleitendem Mittel (ohne Kalibrierungen, die stehen in der Kontextanalyse).
+%      Belege: fig:mill_data_timeline (\plotdir mill_data_timeline.pgf),
+%      \millTargetMean, \millTargetStd, \millNCalibrations, \millCalibIntervalDays.
+%
+% [E5] Die zwei Feldexperimente -- DOE1 (Trainingsbasis, drift-freie Referenz) und DOE2
+%      rund anderthalb Jahre spaeter (Generalisierungsreferenz). Als Betriebspunkte und als
+%      Abtastzeilen verfuegbar.
+%      Belege: \millDoeOneN, \millDoeTwoN, \millDoeOneRows, \millDoeTwoRows.
+%
+% [E6] Abbildungen Abdeckung -- Produktion gegen die Feldexperimente im Stellgroessenraum,
+%      zuerst die Erweiterung durch die DOE, dann die Verschiebung des Betriebs nach DOE2
+%      bis an die Nenngrenzen. Zwei getrennte pgf, je halbe Textbreite (Subfigures oder
+%      einzeln, offen).
+%      Belege: \plotdir mill_data_coverage_doe.pgf, \plotdir mill_data_coverage_shift.pgf,
+%      out_of_range im JSON.
+%
+% [E7] Kontextgroessen -- welche Groessen zusaetzlich zum Modell mitgefuehrt werden
+%      (Walzenhoehen und -temperatur, Feuchte, Wassereindüsung, Durchsatz, Setpoints,
+%      Kalibrierungen). Kurz, ohne Ergebnisse.
+%
+%---------------------------------------------------------------
+\section{Modellierung} \label{sec:mill_modellierung}
+%---------------------------------------------------------------
+% \input{\resultsdir mill_model.tex}
+% Gegenstueck zu sec:tep_modellierung, bewusst kurz: Auswahl und Begruendung stehen in
+% Abschnitt~\ref{sec:modellvergleich}. Notebook: ipynb/mill/mill_model.ipynb
+%
+% [M1] Uebernahme des Modells -- statisches \ac{MLP} aus Abschnitt~\ref{sec:modellvergleich},
+%      neu trainiert auf den Abtastzeilen der stationaeren Phasen des ersten Feldexperiments.
+%      Feste Skalierung auf Anlagengrenzen, Aufteilung nach Betriebspunkt statt nach Zeile,
+%      phasenweise Glaettung.
+%      Belege: \millParamNeurons, \millParamNLayers, \millParamEpochs, \millParamBatch,
+%      \millParamValSplitPct, \millNParams, \millNTrainRows, \millNTrainBp.
+%
+% [M2] Bewertung auf drei Stroemen -- DOE1 (Bezug der Normierung), DOE2 (Generalisierung),
+%      Produktion (Betrieb). Tabelle tab:mill_model_error.
+%      Belege: \millRmseDoeOne, \millRmseDoeTwo, \millRmseProduction, \millBias*,
+%      \millRsq*.
+%
+% [M3] Modellfehler -- Rueckverweis auf Abbildung~\ref{fig:modellfehler} in Kapitel 1
+%      (dort eingebunden, hier nicht wiederholt). Jetzt erst beschreiben: normierter Fehler
+%      ueber der Zeit, saegezahnartige Abschnitte, Spruenge. Die gruene Driftkurve der
+%      Kap.-3-Abbildungen fehlt, weil die Ursache nicht gemessen ist.
+%      Beleg: \plotdir mill_model_error.pgf (eingebunden in Kapitel_1.tex).
+%
+% [M4] Entwicklung ueber den Zeitraum -- erste gegen zweite Haelfte, Anteil der Punkte
+%      ausserhalb des Nennbereichs (Extrapolation ist kein Drift, sieht im Fehler aber gleich
+%      aus).
+%      Belege: \millRmseFirstHalf, \millRmseSecondHalf, oor_share (JSON).
+%      Optional: fig mill_model_rmse_rolling -- vermutlich entbehrlich.
+%
+%---------------------------------------------------------------
+\section{Kontextanalyse} \label{sec:mill_kontext}
+%---------------------------------------------------------------
+% \input{\resultsdir mill_context.tex}
+% Ohne Gegenstueck in Kap. 3: ersetzt das dort bekannte Driftsignal. Nach Antworten
+% gegliedert, nicht nach Methoden. Notebook: ipynb/mill/mill_context.ipynb
+% Vorlage: MA Igel 2024 Kap. 4.1--4.3, Expose Abschnitt 5.2 -- zitieren, nicht wiederholen.
+%
+% [C1] Einleitung -- drei Fragen: Liegt Drift vor oder nur schlechte Abdeckung? Woher kommt
+%      er? Wie ist er beschaffen? Moegliche Unterabschnitte oder Absatzbloecke.
+%
+% --- Liegt Drift vor? --------------------------------------------------------
+% [C2] Streuung der Betriebspunkte -- kein Zusammenhang zwischen unruhigem Betrieb und
+%      Fehler, eine Abdeckungserklaerung scheidet aus. Ein Satz, keine Abbildung.
+%      Beleg: \millCtxRhoVarErr.
+%
+% [C3] Verteilungsvergleich -- KS-Tests zwischen DOE1, DOE2, Produktion und den Haelften
+%      der Produktion. Kovariaten- und A-priori-Verschiebung. Tabelle zeigt die
+%      Teststatistik D als Effektstaerke, da bei vielen zeitlich abhaengigen Punkten jeder
+%      Test signifikant wird.
+%      Belege: Tabelle tab:mill_ks mit \millCtxKsD<Groesse><Paar>, z. B.
+%      \millCtxKsDFeedRateDoeOneProd; Paare DoeOneDoeTwo, DoeOneProd, DoeTwoProd, Halves;
+%      Groessen in CamelCase (FeedRate ... TotalSpecificEnergy).
+%
+% [C4] Real Concept Drift bei gleichen Setpoints -- Betriebspunkte als k-Means-Cluster ueber
+%      die Setpoints (Setpoints sind Entscheidung des Operators, Messwerte schon Antwort der
+%      Anlage). Abweichung der Zielgroesse vom Mittel des eigenen Betriebspunkts springt an
+%      den Kalibrierungen und waechst mit dem Durchsatz seit der letzten Kalibrierung --
+%      unabhaengig vom Modell. Nur als Zahlen.
+%      Belege: \millCtxNOps, \millCtxNRecOps, \millCtxRecSharePct, \millCtxOpDistPct,
+%      \millCtxOpCalBias, \millCtxOpRandBias, \millCtxOpCalP, \millCtxRhoDevTonnes.
+%
+% --- Woher kommt er? --------------------------------------------------------
+% [C5] Abbildung Kalibrierungen -- oben Walzenhoehen, Mitte gleitender RMSE, unten Streuung
+%      der Betriebspunkte, senkrecht die Kalibrierungen. Beschreibung: Spruenge der
+%      Walzenhoehe an jeder Kalibrierung, RMSE-Spruenge an einem Teil davon.
+%      Beleg: fig:mill_context_calibrations (\plotdir mill_context_calibrations.pgf).
+%
+% [C6] Test gegen das Zufallsniveau -- Verschiebung des Fehlermittels in einem Fenster um
+%      jede Kalibrierung gegen dieselbe Groesse an Zufallstagen. Keine Aenderung der
+%      Fahrweise nach Kalibrierungen (widerspricht MA 4.2.3).
+%      Belege: \millCtxCalWinDays, \millCtxCalBias, \millCtxRandBias, \millCtxCalBiasP,
+%      \millCtxCalVarP.
+%
+% [C7] Anlass ueber die Stillstandsdauer -- lange Stillstaende (wartungsartig) gegen kurze
+%      (Ausraeumen u. a.). Der Effekt haengt an den langen. Abgleich mit der Wartungsliste
+%      (vollstaendig bis zu ihrem Ende): jede dokumentierte Wartung faellt in die lange
+%      Gruppe, bis dahin keine lange ohne Wartung. Zwei auffaellige Nullsetzungen mit sehr
+%      grossem Offset-Sprung, vermutlich ohne mechanische Ursache. Materialwechsel ohne
+%      Effekt, ein Halbsatz.
+%      Belege: \millCtxLongStopH, \millCtxNCalLong, \millCtxNCalShort, \millCtxCalBiasLong,
+%      \millCtxCalBiasShort, \millCtxCalBiasLongP, \millCtxCalBiasShortP, \millCtxNMaint,
+%      \millCtxNMaintInLong, \millCtxNCalAnomalous, \millCtxMaterialPctl.
+%
+% [C8] Weitere Kontextsignale -- Zusammenhang des Fehlers mit Durchsatz seit Kalibrierung,
+%      Walzenhoehe, Feuchte, Stillstaenden. Nur die Zeile des Fehlers, keine vollen
+%      Matrizen (Pearson/MI-Heatmaps bleiben Diagnose im Notebook). Ventilator als
+%      Merkmal mit hoher Korrelation: Hinweis auf Modellschwaeche, ein Satz.
+%      Belege: \millCtxPearsonTonnesSinceCalib, \millCtxPearsonRollerHeight,
+%      \millCtxPearsonMoisture, \millCtxPearsonStops.
+%
+% --- Wie ist er beschaffen? ------------------------------------------------
+% [C9] Abbildung Modellfehler nach Betriebspunkt -- gleiche Darstellung wie
+%      fig:modellfehler, eingefaerbt nach Betriebspunkt (Expose Abb. 6). Grosser Teil
+%      der Fehlervarianz liegt zwischen den Betriebspunkten. Lesehilfe: Betriebspunkte
+%      werden wochenweise gefahren, Farbe und Zeit sind vermischt -- die Trennung leistet C4.
+%      Belege: fig:mill_context_op_error (\plotdir mill_context_op_error.pgf),
+%      \millCtxOpErrBetweenPct, \millCtxEtaSqOp.
+%
+% [C10] Global oder lokal -- Abweichungen verschiedener Betriebspunkte laufen gemeinsam,
+%      der Drift ist eher global. Einschraenkung: nur wenige Betriebspunkte laufen oft genug
+%      gleichzeitig. Folge fuer die Adaption nicht vorwegnehmen (Stilregel), nur Befund.
+%      Beleg: \millCtxOpCorr.
+%
+% [C11] Sprunghaft oder schleichend -- gradientenbasierte Einordnung, die meisten
+%      sprunghaften Tage liegen an Kalibrierungen. Ein bis zwei Saetze, keine Abbildung.
+%      Belege: \millCtxNSuddenDays, \millCtxNIncrementalDays, \millCtxNSuddenNearCalib,
+%      \millCtxNSuddenNearLongCalib (die meisten sprunghaften Tage liegen an den langen).
+%
+% [C12] Zwischenfazit und Referenz -- Als Ereignisreferenz dienen die Kalibrierungen nach
+%      langem Stillstand (EVENT_SET = "long" in mill_context). Begruendung: die kurzen
+%      verschieben den Fehler kaum staerker als ein Zufallstag und waeren Ereignisse, die
+%      kein Detektor finden kann. Beide Listen liegen im Artefakt, Gegenprobe mit allen
+%      moeglich. Noch nicht endgueltig entschieden.
+%      Belege: \millCtxNEvents, \millCtxNCalLong, \millCtxNCalib.
+%
+%---------------------------------------------------------------
+\section{Drift-Erkennung} \label{sec:mill_detection}
+%---------------------------------------------------------------
+% PLATZHALTER. Gegenstueck zu sec:tep_detection. Notebook: mill_detection (noch in
+% _claude_output/werkzeuge/kapitel4_mill/, noch nicht portiert).
+%
+%---------------------------------------------------------------
+\section{Drift-Adaption} \label{sec:mill_adaption}
+%---------------------------------------------------------------
+% PLATZHALTER. Gegenstueck zu sec:tep_adaption. Notebook: mill_adaptation (noch nicht
+% portiert). Hier wird DOE2 als Generalisierungsreferenz wirksam (MA-Befund: Fehler auf
+% DOE2 und auf Produktion korrelieren negativ).
