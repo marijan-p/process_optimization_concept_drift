@@ -67,6 +67,7 @@ __all__ = [
     "assert_current",
     "adapt_space_id",
     "selector_space_id",
+    "passive_space_id",
     "ADAPTATION_MODES",
     "SELECTORS",
     "REC_SUFFIX",
@@ -134,6 +135,12 @@ def selector_space_id(n: int = 8) -> str:
     :func:`adapt_space_id`."""
     assert_current()
     return dd._space_id_of(_suggest_selector_params, n)
+
+
+def passive_space_id(n: int = 8) -> str:
+    """Kennung des Suchraums von :func:`_suggest_passive_params`."""
+    assert_current()
+    return dd._space_id_of(_suggest_passive_params, n)
 
 
 # Unterstuetzte Adaptionsstrategien (Reihenfolge wie in der Auswertung).
@@ -670,6 +677,21 @@ def _suggest_selector_params(trial, chunk: int = 144) -> dict:
     )
 
 
+def _suggest_passive_params(trial, chunk: int = 144) -> dict:
+    """Parameter der passiven Strategie ohne Periode, fuer das Tuning bei fester
+    Periode (``base_params`` in :func:`tune_adaptation`). Das Fenster reicht bis
+    auf einen Chunk herab, damit ein Nachtraining auf dem jeweils letzten Chunk
+    im Suchraum liegt.
+    """
+    return dict(
+        lr=trial.suggest_float("lr", 1e-4, 1.5e-2, log=True),
+        epochs=trial.suggest_int("epochs", 1, 30),
+        freeze=FREEZE_CHOICES[trial.suggest_categorical("freeze", list(FREEZE_CHOICES))],
+        reset=trial.suggest_categorical("reset", [False, True]),
+        blind_window=trial.suggest_int("blind_window", chunk, 400),
+    )
+
+
 def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
                     detector_factory=None, rmse_baseline: float = None,
                     n_trials: int = 20, weights: Tuple[float, float] = (1.0, 0.1),
@@ -694,8 +716,9 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
         :func:`encode_adapt_params`), die als Startkandidaten eingereiht werden
         (Warmstart, z. B. Vereinigung der Einzeloptima fuer ``combined``).
     base_params : feste, dekodierte Strategieparameter (Tuning-Aufloesung). Ist
-        der Satz gesetzt, werden nur die Selektorparameter gesucht
-        (:func:`_suggest_selector_params`); ``strategy`` braucht dann ``_rec``.
+        der Satz gesetzt, wird nur ein Teilraum gesucht, bei ``_rec`` die
+        Selektorparameter (:func:`_suggest_selector_params`), bei ``blind`` die
+        Parameter ohne Periode (:func:`_suggest_passive_params`).
 
     Returns
     -------
@@ -706,8 +729,14 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
 
     strategy = strategy.lower()
     mode, selector = split_strategy(strategy)
-    if base_params is not None and selector != "recurrence":
-        raise ValueError(f"base_params verlangt eine Strategie mit {REC_SUFFIX!r}")
+    subspace = None
+    if base_params is not None:
+        if selector == "recurrence":
+            subspace = _suggest_selector_params
+        elif mode == "blind":
+            subspace = _suggest_passive_params
+        else:
+            raise ValueError(f"base_params verlangt 'blind' oder eine Strategie mit {REC_SUFFIX!r}")
     n = len(X)
     chunk = int(fixed.get("chunk", 144))
     n_units = int(np.ceil(n / chunk))
@@ -725,7 +754,7 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
         if base_params is None:
             params = _suggest_adapt_params(strategy, trial, chunk=chunk, det_name=det_name)
         else:
-            params = {**base_params, **_suggest_selector_params(trial, chunk=chunk)}
+            params = {**base_params, **subspace(trial, chunk=chunk)}
         detector = (detector_factory()
                     if (mode in ("informed", "combined") and detector_factory is not None)
                     else None)
