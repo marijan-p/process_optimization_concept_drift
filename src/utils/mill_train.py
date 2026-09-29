@@ -43,6 +43,8 @@ BATCH = 64
 LR = 1e-3
 VAL_SPLIT = 0.2
 PATIENCE = 50
+LR_FACTOR = 0.5
+LR_MIN = 1e-5
 
 #: Regel der Vorarbeit fuer Betriebspunkte: mindestens 70 Minuten Dauer. Die
 #: eigene Verdichtung laesst schon ab zehn Minuten zu; fuer einen Vergleich mit
@@ -251,5 +253,5 @@ def fit_model(model, X, y, groups=None, epochs: int = EPOCHS, batch: int = BATCH
             tf.keras.callbacks.EarlyStopping(
                 monitor="val_loss", patience=PATIENCE, restore_best_weights=True),
             tf.keras.callbacks.ReduceLROnPlateau(
-                monitor="val_loss", factor=0.5, patience=PATIENCE // 2, min_lr=1e-5)])
+                monitor="val_loss", factor=LR_FACTOR, patience=PATIENCE // 2, min_lr=LR_MIN)])
     return model, {k: [float(x) for x in v] for k, v in hist.history.items()}

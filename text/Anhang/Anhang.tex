@@ -10,7 +10,7 @@
 %---------------------------------------------------------------------
 % Anhang A: 
 %---------------------------------------------------------------------
-\section{Appendix A}\label{app:A}
+\section{A: Tennessee-Eastman-Prozess}\label{app:tep}
 %
 Tabelle~\ref{tab:tep-stoerungen} listet die im Tennessee-Eastman-Prozess vordefinierten Prozessstörungen auf. Die Störungen IDV(1)--IDV(20) entstammen der ursprünglichen Prozessbeschreibung von \cite{downs.1993} und umfassen Sprünge, zufällige Schwankungen, eine langsame Drift sowie klemmende Ventile; IDV(16)--IDV(20) sind dabei nicht näher spezifiziert. Die Erweiterung um IDV(21)--IDV(28) nach \cite{bathelt.2015} ergänzt zusätzliche, als zufällige Schwankungen modellierte Temperatur- und Druckstörungen der Zulaufströme sowie der Kühlwasser-Umwälzeinheiten. Die Störung IDV(29) stellt die eigene Ergänzung dar. Sie modelliert nach Abschnitt~\ref{sec:tep_drift} eine schleichende Kalibrierdrift des Strippertemperatursensors, die allein den aufgezeichneten Messwert verfälscht und den Prozess selbst unberührt lässt, und dient damit als Grundlage für einen Datenstrom mit driftbehafteten Zusammenhängen.
 %
@@ -85,6 +85,38 @@ Rührerdrehzahl          & \si{\percent}              & 100    & 100    & 100   
 \bottomrule
 \end{tabular}
 \end{table}
-
-\section{Appendix B}\label{app:B}
-Und der zweite Anhangteil
+\newpage
+%
+\section{B: Vertikalrollenmühle}\label{app:mill_model}
+%
+Tabelle~\ref{tab:mill_model_params} fasst Aufbau und Training des in Abschnitt~\ref{sec:mill_modellierung} eingesetzten statischen \ac{MLP} zusammen. Das Netz bildet die Stellgrößen eines Betriebspunkts über zwei hidden Layer auf die spezifische Energie ab. Trainiert wird mit dem Adam-Optimierer auf den mittleren quadratischen Fehler. Stagniert der Fehler auf den Validierungsdaten, wird zunächst die Lernrate schrittweise reduziert und das Training schließlich vorzeitig beendet. Übernommen werden die Gewichte der Epoche mit dem geringsten Validierungsfehler. Die Trainingsdaten werden vorab je Betriebspunkt mit einem Butterworth-Filter geglättet und nach Betriebspunkten in Trainings- und Validierungsdaten getrennt.
+%
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Aufbau und Training des statischen \ac{MLP} der Mühle}
+\label{tab:mill_model_params}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{ll}
+\toprule
+Eingangsgrößen        & Aufgabemenge, Mahltellergeschwindigkeit, Sichtergeschwindigkeit, \\
+                      & Ventilatorgeschwindigkeit, Spanndruck, Last des Heißgaserzeugers, \\
+                      & Stellung von Rezirkulations- und Kaminklappe \\
+Zielgröße             & Spezifische Energie \\
+Verdeckte Schichten   & \millParamNLayers{} mit je \millParamNeurons{} Neuronen \\
+Aktivierungsfunktion  & $\tanh$, Ausgangsschicht linear \\
+Trainierbare Parameter & \millNParams \\
+\midrule
+Optimierer            & Adam, Lernrate \millParamLr \\
+Verlustfunktion       & Mittlerer quadratischer Fehler \\
+Batchgröße            & \millParamBatch \\
+Epochen               & höchstens \millParamEpochs \\
+Early Stopping        & nach \millParamPatience{} Epochen ohne Verbesserung \\
+Lernratenreduktion    & Faktor \millParamLrFactor{} nach \millParamLrPatience{} Epochen ohne Verbesserung, bis \millParamLrMin \\
+\midrule
+Trainingsdaten        & \millNTrainRows{} Abtastwerte aus \millNTrainBp{} Betriebspunkten (DOE1) \\
+Validierungsanteil    & \millParamValSplitPct{}\,\%, getrennt nach Betriebspunkten \\
+Glättung              & Butterworth-Filter \millParamButterOrder.~Ordnung, normierte Grenzfrequenz \millParamButterWn \\
+\bottomrule
+\end{tabular}
+\end{table}
