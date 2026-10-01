@@ -8,7 +8,7 @@ Ausgangspunkt dieser Arbeit ist die Beobachtung, dass der Modellfehler der spezi
 %
 Die in Kapitel~\ref{cap:generalisierung} erprobte Verarbeitungskette ist bewusst nicht auf die Mühle zugeschnitten, sondern als allgemeine Lösung eingeführt, die sich nun auch am Anwendungsfall bewähren soll. Aufbau und Verfahren der Drift-Erkennung und Drift-Adaption bleiben daher erhalten. Gegenstand sei dabei jetzt die in Abschnitt~\ref{sec:funktionsweise} beschriebene \ac{VRM}, deren Betriebspunkte sich nach Abschnitt~\ref{sec:stellgroessen} über die von den Operatoren vorgegebenen Setpoints definieren. Das verwendete Modell wurde entsprechend der Datenselektion aus Abschnitt~\ref{sec:datenselektion} auf den quasi-stationären Betriebspunkten eines Feldexperiments trainiert. Dieses Feldexperiment hält den Zustand der Anlage zu einem festen Zeitpunkt fest und bildet damit den Bezug, gegenüber dem sich jede spätere Veränderung des Prozessverhaltens abhebt. \par
 %
-An die Stelle der Generierung eines Datenstroms tritt an der realen Anlage dessen Erhebung aus historischen Betriebsdaten. Der so entstehende Strom erstreckt sich über mehrere Jahre und wird durch betriebsbedingte Stillstände vereinzelt unterbrochen. Zudem ist der \ac{CD} anders als in den generalisierten Fällen weder vorgegeben noch unmittelbar gemessen. Eine Ground Truth, an der sich Erkennung und Adaption direkt bewerten ließen, liegt daher nicht vor. An ihre Stelle treten zwei Referenzen. Die protokollierten Kalibrierungen der Mühle markieren Eingriffe in die Anlage und dienen als Ereignisreferenz für die Drift-Erkennung. Ein zweites Feldexperiment, deutlich später als das erste durchgeführt, dient als Generalisierungsreferenz für die Drift-Adaption. Es zeigt, ob ein adaptiertes Modell auch über den im Betrieb gefahrenen Bereich hinaus gültig bleibt. Beide Feldexperimente dienten bereits in \cite{igel.2024} als Grundlage einer eingehenden Untersuchung des \ac{CD} an dieser Anlage, auf der aufbauend \cite{marijan.2025} Form des Drifts und Nutzen der Adaption betrachtet. An die Befunde beider Arbeiten knüpft dieses Kapitel an. \par
+An die Stelle der Generierung eines Datenstroms tritt an der realen Anlage dessen Erhebung aus historischen Betriebsdaten. Der so entstehende Strom erstreckt sich über mehrere Jahre und wird durch betriebsbedingte Stillstände vereinzelt unterbrochen. Zudem ist der \ac{CD} anders als in den generalisierten Fällen weder vorgegeben noch unmittelbar gemessen. Eine Ground Truth, an der sich Erkennung und Adaption direkt bewerten ließen, liegt daher nicht vor. An ihre Stelle treten zwei Referenzen. Die Wartungen der Mühle, die sich über das Kalibriersignal der Walzen erschließen lassen, dienen als Ereignisreferenz für die Drift-Erkennung. Ein zweites Feldexperiment, deutlich später als das erste durchgeführt, dient als Generalisierungsreferenz für die Drift-Adaption. Es zeigt, ob ein adaptiertes Modell auch über den im Betrieb gefahrenen Bereich hinaus gültig bleibt. Beide Feldexperimente dienten bereits in \cite{igel.2024} als Grundlage einer eingehenden Untersuchung des \ac{CD} an dieser Anlage, auf der aufbauend \cite{marijan.2025} Form des Drifts und Nutzen der Adaption betrachtet. An die Befunde beider Arbeiten knüpft dieses Kapitel an. \par
 %
 Das Kapitel führt schrittweise vom Prozess und seinen Daten hin zur Erkennung und zur Adaption des \ac{CD}. Zunächst beschreibt Abschnitt~\ref{sec:mill_drift} die möglichen Ursachen von \ac{CD} an der Anlage und welche davon messtechnisch erfasst sind. Abschnitt~\ref{sec:mill_data} behandelt die Erhebung des Datenstroms und seine Verdichtung zu Betriebspunkten. In Abschnitt~\ref{sec:mill_modellierung} wird das Modell auf die erhobenen Daten angewandt und sein Fehler über den Betrachtungszeitraum bewertet. Die Kontextanalyse in Abschnitt~\ref{sec:mill_kontext} erschließt Form und Ursachen des \ac{CD} aus Betriebs- und Wartungsdaten und leitet daraus die Ereignisreferenz ab. Darauf bauen die Drift-Erkennung in Abschnitt~\ref{sec:mill_detection} und die Drift-Adaption in Abschnitt~\ref{sec:mill_adaption} auf. \par
 %
@@ -20,9 +20,9 @@ Als Ursachen für \ac{CD} kommen an der \ac{VRM} mehrere Einflüsse in Frage, di
 %
 Neben dem Zustand der Anlage kann sich auch das Aufgabematerial über die Zeit verändern. Anders als viele Zementhersteller, die auf derselben Mühle mehrere Produkte vermahlen, stellt der Betreiber der betrachteten Anlage ausschließlich gemahlene Hochofenschlacke her. Die Schlacke stammt jedoch aus mehreren Herkunftsländern und wird per Schiff angeliefert, sodass sich die Lieferungen in Eigenschaften wie Feuchte und Feinheit unterscheiden können. Hinzu kommt die Lagerung vor Ort, die teils überdacht und teils unter freiem Himmel erfolgt und damit insbesondere die Feuchte des Materials zusätzlich beeinflusst. Schließlich können auch die Fahrweise der Operatoren und äußere Bedingungen das Prozessverhalten über die Zeit verändern. \par
 %
-Nur ein Teil dieser Einflüsse ist messtechnisch erfasst. Die Lage der vier Walzen über dem Mahlteller wird fortlaufend gemessen und gibt im Betrieb die Höhe des Mahlbetts wieder. Mit zunehmendem Abtrag an Walzen und Mahlteller verschiebt sich jedoch der Nullpunkt dieser Messung, sodass die gemessene Mahlbetthöhe allmählich verfälscht wird. Sichtbar wird diese Verschiebung erst bei der Kalibrierung des Signals. Liegen die Walzen bei stehender Mühle direkt auf dem Mahlteller auf, wird der Nullpunkt neu gesetzt, und der Sprung des Signals spiegelt die Veränderung an Walzen und Mahlteller seit der vorherigen Kalibrierung wider. Eine Kalibrierung ist dabei nicht mit einer Wartung gleichzusetzen. Zwar folgt auf jede Wartung eine Kalibrierung, dieselbe Situation kann jedoch auch eintreten, wenn beispielsweise eine vollgelaufene Mühle ausgeräumt werden muss oder eine Kalibrierung versehentlich ausgelöst wird. Eine Kalibrierung markiert damit zunächst nur einen Stillstand mit aufliegenden Walzen, ohne dass sich aus dem Signal ablesen ließe, ob und in welchem Umfang an der Anlage gearbeitet wurde. Genauer sind die offiziellen größeren Wartungen, die zusätzlich in einer Liste dokumentiert sind. Diese deckt jedoch nicht den gesamten Betrachtungszeitraum ab, sodass die Kalibrierungen der einzige durchgehend verfügbare Hinweis auf Eingriffe an der Anlage bleiben. \par
+Nur ein Teil dieser Einflüsse ist messtechnisch erfasst. Die Lage der vier Walzen über dem Mahlteller wird fortlaufend gemessen und gibt im Betrieb die Höhe des Mahlbetts wieder. Mit zunehmendem Abtrag an Walzen und Mahlteller verschiebt sich jedoch der Nullpunkt dieser Messung. Neu gesetzt wird er bei stehender Mühle mit aufliegenden Walzen, was nach jeder Wartung, aber auch bei kürzeren Eingriffen geschieht. Da eine Wartung stets einen längeren Stillstand erfordert, lässt sie sich über die Kalibrierung und die Dauer des vorausgehenden Stillstands im gesamten Datenstrom erkennen. Für einen Teil des Betrachtungszeitraums sind die größeren Wartungen zusätzlich in einer Liste dokumentiert. \par
 %
-Neben dem Kalibriersignal lässt sich über die Durchsatzmessung die seit der letzten Kalibrierung vermahlene Menge bestimmen. Vom Aufgabematerial wird daneben allein die Feuchte erfasst, die einerseits zu einem ruhigen Mahlbetrieb beitragen kann, andererseits aber durch Heißgas wieder entzogen werden muss, um eine möglichst geringe Restfeuchte des Endprodukts zu gewährleisten. Reicht die Feuchte des Materials für einen ruhigen Lauf nicht aus, wird als Gegenmaßnahme Wasser eingedüst, dessen Menge ebenfalls gemessen wird. Zusammensetzung und Feinheit des Materials sowie Herkunft und Lagerung einzelner Lieferungen liegen dagegen nicht vor. Die Fahrweise der Operatoren ist über die Setpoints vollständig erfasst. \par
+Über die Durchsatzmessung lässt sich zudem die seit der letzten Wartung vermahlene Menge bestimmen. Vom Aufgabematerial wird daneben allein die Feuchte erfasst, die einerseits zu einem ruhigen Mahlbetrieb beitragen kann, andererseits aber durch Heißgas wieder entzogen werden muss, um eine möglichst geringe Restfeuchte des Endprodukts zu gewährleisten. Reicht die Feuchte des Materials für einen ruhigen Lauf nicht aus, wird als Gegenmaßnahme Wasser eingedüst, dessen Menge ebenfalls gemessen wird. Zusammensetzung und Feinheit des Materials sowie Herkunft und Lagerung einzelner Lieferungen liegen dagegen nicht vor. Die Fahrweise der Operatoren ist über die Setpoints vollständig erfasst. \par
 %
 Bei unveränderten Setpoints verändert sich mit dem Zustand von Walzen und Mahlteller der Zusammenhang zwischen Betriebspunkt und spezifischer Energie, also $P_t(y \mid X)$. Nach Tabelle~\ref{tab:cd_definitionen} ist durch den Verschleiß daher ein Real Concept Drift zu erwarten. Phänomenologisch entspricht der fortschreitende Abtrag einem Incremental Drift nach Abbildung~\ref{fig:phenomenon}, während Wartungen einen Sudden Drift hervorrufen. 
 Auch Veränderungen des Aufgabematerials wirken auf diesen Zusammenhang. Da Wartungen die Anlage in einen ähnlichen Ausgangszustand zurückversetzen, können sich frühere Verschleißzustände wiederholen, was einem Recurring Drift entspricht. Streng genommen kehrt ein Concept jedoch nur dann wieder, wenn neben dem Verschleißzustand auch die übrigen Einflüsse wie das Aufgabematerial übereinstimmen, sodass eine Wiederkehr allenfalls näherungsweise zu erwarten ist. Die Fahrweise der Operatoren verschiebt dagegen die Verteilung der Betriebspunkte und damit $P_t(X)$, was einem Covariate Shift entspricht. Dieser lässt den Zusammenhang selbst unberührt, kann den Modellfehler aber dennoch erhöhen, wenn Bereiche angefahren werden, die im Feldexperiment kaum abgedeckt waren. \par
@@ -71,7 +71,7 @@ Neben dem Produktionsstrom stehen die beiden Feldexperimente zur Verfügung, die
 %
 Abbildung~\ref{fig:mill_data_coverage} zeigt, welche Bereiche des Stellgrößenraums vom Produktionsbetrieb und von den beiden Feldexperimenten abgedeckt werden. Dargestellt sind jeweils zwei Stellgrößen, über denen die Betriebspunkte eingetragen sind. In Abbildung~\ref{fig:mill_data_coverage_doe} sind Hauptantriebsdrehzahl und Spanndruck gegenübergestellt. Der Produktionsbetrieb konzentriert sich auf einen schmalen Bereich mittlerer Drehzahlen und hoher Spanndrücke. Beide Feldexperimente (DOE1, DOE2) erweitern diesen Raum in alle Richtungen deutlich, das zweite reicht dabei zu niedrigen Spanndrücken hin noch etwas weiter als das erste. \par
 %
-Abbildung~\ref{fig:mill_data_coverage_shift} zeigt dagegen nur den Produktionsbetrieb, aufgeteilt in die Zeit vor und nach dem zweiten Feldexperiment (DOE2), über Aufgabemenge und Sichterdrehzahl. Die gestrichelten Linien markieren die Nenngrenzen der Anlage. Nach dem zweiten Feldexperiment verschiebt sich der Betrieb deutlich zu höherem Durchsatz und höheren Sichterdrehzahlen, die teils bis an die Nenngrenze reichen. Damit werden im späteren Teil des Stroms zunehmend Bereiche angefahren, die außerhalb der Trainingsdaten liegen und in denen das Modell extrapolieren muss. Eine solche Verschiebung der Betriebspunkte entspricht dem in Abschnitt~\ref{sec:mill_drift} beschriebenen Covariate Shift. \par
+Abbildung~\ref{fig:mill_data_coverage_shift} zeigt dagegen nur den Produktionsbetrieb, aufgeteilt in die Zeit vor und nach dem zweiten Feldexperiment (DOE2), über Aufgabemenge und Sichterdrehzahl. Die gestrichelten Linien markieren die Nenngrenzen der Anlage. Nach dem zweiten Feldexperiment verschiebt sich der Betrieb deutlich zu höherem Durchsatz und höheren Sichterdrehzahlen, die teils bis an die Nenngrenze reichen. Damit werden im späteren Teil des Stroms zunehmend Bereiche angefahren, die am Rand des bisherigen Betriebs und der Feldexperimente liegen. Eine solche Verschiebung der Betriebspunkte entspricht dem in Abschnitt~\ref{sec:mill_drift} beschriebenen Covariate Shift. \par
 %
 %---------------------------------------------------------------
 \section{Modellierung} \label{sec:mill_modellierung}
@@ -81,84 +81,129 @@ Abbildung~\ref{fig:mill_data_coverage_shift} zeigt dagegen nur den Produktionsbe
 %
 Als Modell dient das statische \ac{MLP} aus Abschnitt~\ref{sec:modellvergleich}, das auf den Abtastwerten der stationären Phasen von DOE1 neu trainiert wird. Die Vorverarbeitung folgt dem dort beschriebenen Vorgehen mit zwei Abweichungen, die beide der Struktur der Betriebspunkte geschuldet sind. Der Butterworth-Filter wird je Betriebspunkt angewandt, damit Setpoint-Änderungen nicht zu Rampen verändert werden. Zudem werden Trainings- und Validierungsdaten nach Betriebspunkten statt nach Abtastwerten getrennt, da benachbarte Abtastwerte nahezu identisch sind und sonst nur die Interpolation innerhalb eines Betriebspunkts geprüft würde. Architektur und Hyperparameter sind in Anhang~\ref{app:mill_model} zusammengefasst. \par
 %
-% [M2] Bewertung auf drei Stroemen -- DOE1 (Bezug der Normierung), DOE2 (Generalisierung),
-%      Produktion (Betrieb). Tabelle tab:mill_model_error.
-%      Belege: \millRmseDoeOne, \millRmseDoeTwo, \millRmseProduction, \millBias*,
-%      \millRsq*.
+\begin{table}[tbp]
+\centering
+\caption{Kennzahlen des Simulationsfehlers je Datensatz}
+\label{tab:mill_model_error}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Datensatz} & \ac{RMSE} [kWh/t] & Mittelwert $\bar{e}$ [kWh/t] & Streuung $\sigma$ [kWh/t] & $R^2$ \\
+\midrule
+DOE1       & $\millRmseDoeOne$       & $\millBiasDoeOne$       & $\millSigmaDoeOne$       & $\millRsqDoeOne$ \\
+DOE2       & $\millRmseDoeTwo$       & $\millBiasDoeTwo$       & $\millSigmaDoeTwo$       & $\millRsqDoeTwo$ \\
+Produktion & $\millRmseProduction$   & $\millBiasProduction$   & $\millSigmaProduction$   & $\millRsqProduction$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 %
-% [M3] Modellfehler -- Rueckverweis auf Abbildung~\ref{fig:modellfehler} in Kapitel 1
-%      (dort eingebunden, hier nicht wiederholt). Jetzt erst beschreiben: normierter Fehler
-%      ueber der Zeit, saegezahnartige Abschnitte, Spruenge. Die gruene Driftkurve der
-%      Kap.-3-Abbildungen fehlt, weil die Ursache nicht gemessen ist.
-%      Beleg: \plotdir mill_model_error.pgf (eingebunden in Kapitel_1.tex).
+Bewertet wird das Modell auf drei Datensätzen, deren Kennzahlen Tabelle~\ref{tab:mill_model_error} zusammenfasst. DOE1 dient dabei als Bezug, da das Modell auf ihm trainiert wurde. Mittelwert und Streuung des Simulationsfehlers auf diesem Datensatz bilden zugleich die Normierung, mit der der Fehler im Weiteren dargestellt wird. DOE2 prüft die Übertragung auf einem späteren Zustand der Anlage, der Produktionsstrom den laufenden Betrieb. Über alle drei Datensätze bleibt der \ac{RMSE} auf ähnlichem Niveau. Das Bestimmtheitsmaß fällt auf DOE2 und im Produktionsbetrieb dagegen deutlich ab, sodass das Modell die Unterschiede zwischen den Betriebspunkten dort weniger gut erklärt. Auffällig ist zudem das Vorzeichen des mittleren Fehlers, der auf beiden Feldexperimenten positiv, im Produktionsbetrieb aber negativ ist. Im Betrieb überschätzt das Modell die spezifische Energie also im Mittel. Als Mittel über den gesamten Zeitraum verdecken diese Kennzahlen jedoch, wie sich der Fehler über die Zeit entwickelt. \par
 %
-% [M4] Entwicklung ueber den Zeitraum -- erste gegen zweite Haelfte, Anteil der Punkte
-%      ausserhalb des Nennbereichs (Extrapolation ist kein Drift, sieht im Fehler aber gleich
-%      aus).
-%      Belege: \millRmseFirstHalf, \millRmseSecondHalf, oor_share (JSON).
-%      Optional: fig mill_model_rmse_rolling -- vermutlich entbehrlich.
+Wie sich der Fehler über die Zeit entwickelt, zeigt der normierte Simulationsfehler in Abbildung~\ref{fig:modellfehler}, die bereits in Kapitel~\ref{cap:einleitung} als Ausgangspunkt der Arbeit eingeführt wurde. Anders als die Zielgröße in Abbildung~\ref{fig:mill_data_timeline} folgt er einem deutlich geordneteren Verlauf, da der Einfluss der Betriebspunkte durch das Modell weitgehend berücksichtigt ist. Über den gesamten Zeitraum wiederholt sich dabei ein Muster aus allmählichem Anstieg und plötzlichem Abfall. Innerhalb eines Abschnitts steigt der Fehler über Wochen bis Monate stetig an, die gemessene spezifische Energie liegt also zunehmend über der Vorhersage. An den Grenzen der Abschnitte fällt er dagegen sprunghaft auf ein niedrigeres Niveau zurück. Dieses sägezahnartige Muster entspricht dem Zusammenspiel aus Verschleiß und Wartung, wie es in Abschnitt~\ref{sec:mill_drift} beschrieben wurde. Die Ausschläge reichen dabei deutlich über die Streuung auf dem ersten Feldexperiment hinaus. Anders als in Kapitel~\ref{cap:generalisierung} fehlt jedoch ein ursächliches Driftsignal, an dem sich dieser Verlauf überprüfen ließe, da die Ursache des Drifts an der Anlage nicht gemessen ist. \par
+%
+Über den Betrachtungszeitraum nimmt der Fehler dabei nicht stetig zu. In der zweiten Hälfte des Stroms fällt der \ac{RMSE} sogar geringer aus als in der ersten, in der die größten Ausschläge liegen. Der Drift äußert sich damit nicht als fortschreitende Verschlechterung des Modells, sondern als wiederkehrende Abweichung, die mit jedem Abfall zumindest teilweise zurückgesetzt wird. Bemerkenswert ist dies, da sich der Betrieb in der zweiten Hälfte zu höherem Durchsatz verschiebt und damit Bereiche anfährt, die am Rand der Feldexperimente liegen. Eine solche Verschiebung ist für sich genommen kein Drift, könnte sich im Fehler aber ähnlich äußern. Dass der Fehler in dieser Phase dennoch kleiner ausfällt, spricht dafür, dass sein Verlauf weniger von der Lage der Betriebspunkte als vom Zustand der Anlage bestimmt wird. \par
 %
 %---------------------------------------------------------------
 \section{Kontextanalyse} \label{sec:mill_kontext}
 %---------------------------------------------------------------
-% \input{\resultsdir mill_context.tex}
-% Ohne Gegenstueck in Kap. 3: ersetzt das dort bekannte Driftsignal. Nach Antworten
-% gegliedert, nicht nach Methoden. Notebook: ipynb/mill/mill_context.ipynb
-% Vorlage: MA Igel 2024 Kap. 4.1--4.3, Expose Abschnitt 5.2 -- zitieren, nicht wiederholen.
 %
-% [C1] Einleitung -- drei Fragen: Liegt Drift vor oder nur schlechte Abdeckung? Woher kommt
-%      er? Wie ist er beschaffen? Moegliche Unterabschnitte oder Absatzbloecke.
+\input{\resultsdir mill_context.tex}
 %
-% --- Liegt Drift vor? --------------------------------------------------------
-% [C2] Streuung der Betriebspunkte -- kein Zusammenhang zwischen unruhigem Betrieb und
-%      Fehler, eine Abdeckungserklaerung scheidet aus. Ein Satz, keine Abbildung.
-%      Beleg: \millCtxRhoVarErr.
+Der Verlauf des Simulationsfehlers legt nahe, dass Verschleiß und Wartung das Verhalten der Anlage verändern. Da die Ursache des Drifts nicht gemessen ist, lässt sich diese Vermutung am Fehler allein jedoch nicht belegen. Die Kontextanalyse soll Informationen zum Drift daher aus den Betriebs- und Wartungsdaten erschließen, die neben dem Modell zur Verfügung stehen. Sie folgt dabei drei Fragen. Zunächst ist zu klären, ob sich der Zusammenhang zwischen Betriebspunkt und spezifischer Energie tatsächlich verändert oder lediglich die Verteilung der Betriebspunkte verschiebt. Daran schließt die Frage an, welche Ereignisse und Kontextgrößen mit dem Drift einhergehen und damit als Ursache in Betracht kommen. Schließlich wird untersucht, wie der Drift beschaffen ist, ob er also sprunghaft oder allmählich verläuft und die Anlage als Ganzes oder nur einzelne Betriebspunkte betrifft. Als Ereignisse dienen dabei die Wartungen, erkannt an einer Kalibrierung nach mindestens \millCtxLongStopH~Stunden Stillstand. Für den Zeitraum der Wartungsliste stimmen beide vollständig überein. Die Wartungen lassen sich damit über den gesamten Datenstrom bestimmen. \par
 %
-% [C3] Verteilungsvergleich -- KS-Tests zwischen DOE1, DOE2, Produktion und den Haelften
-%      der Produktion. Kovariaten- und A-priori-Verschiebung. Tabelle zeigt die
-%      Teststatistik D als Effektstaerke, da bei vielen zeitlich abhaengigen Punkten jeder
-%      Test signifikant wird.
-%      Belege: Tabelle tab:mill_ks mit \millCtxKsD<Groesse><Paar>, z. B.
-%      \millCtxKsDFeedRateDoeOneProd; Paare DoeOneDoeTwo, DoeOneProd, DoeTwoProd, Halves;
-%      Groessen in CamelCase (FeedRate ... TotalSpecificEnergy).
+% --- Drift-Nachweis --------------------------------------------------------
+\subsection{Drift-Nachweis} \label{sec:mill_kontext_nachweis}
 %
-% [C4] Real Concept Drift bei gleichen Setpoints -- Betriebspunkte als k-Means-Cluster ueber
-%      die Setpoints (Setpoints sind Entscheidung des Operators, Messwerte schon Antwort der
-%      Anlage). Abweichung der Zielgroesse vom Mittel des eigenen Betriebspunkts springt an
-%      den Kalibrierungen und waechst mit dem Durchsatz seit der letzten Kalibrierung --
-%      unabhaengig vom Modell. Nur als Zahlen.
-%      Belege: \millCtxNOps, \millCtxNRecOps, \millCtxRecSharePct, \millCtxOpDistPct,
-%      \millCtxOpCalBias, \millCtxOpRandBias, \millCtxOpCalP, \millCtxRhoDevTonnes.
+Eine naheliegende Erklärung für eine schwankende Modellgüte wäre ein unruhiger Betrieb, in dem häufig wechselnde Betriebspunkte den Stellgrößenraum ungleichmäßig abdecken. Die Streuung der Betriebspunkte in einem gleitenden Fenster steht jedoch in keinem Zusammenhang mit dem Betrag des Simulationsfehlers ($\rho = \millCtxRhoVarErr$), sodass sich seine Schwankungen nicht auf einen unruhigen Betrieb zurückführen lassen.
+Dass sich die Verteilung der Betriebspunkte dennoch verändert, zeigt ein Vergleich der Datensätze mit dem Kolmogorov-Smirnov-Test aus Abschnitt~\ref{sec:drift_erkennung}, der prüft, ob zwei Stichproben derselben Verteilung entstammen. Gegenübergestellt werden die beiden Feldexperimente untereinander, jedes von ihnen mit dem Produktionsstrom sowie der Produktionsstrom vor und nach dem zweiten Feldexperiment. Tabelle~\ref{tab:mill_ks} gibt dafür die Teststatistik $D$ an, also den größten Abstand der empirischen Verteilungsfunktionen. Bei der großen Zahl an zeitlich abhängigen Betriebspunkten weist der Test nahezu jeden Unterschied als signifikant aus. Aussagekräftiger ist deshalb die Größe von $D$ selbst, die angibt, wie stark sich zwei Verteilungen unterscheiden. \par
+%
+\begin{table}[tbp]
+\centering
+\caption{Kolmogorov-Smirnov-Statistik $D$ je Größe und Datensatzpaar}
+\label{tab:mill_ks}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Größe} & DOE1--DOE2 & DOE1--Prod. & DOE2--Prod. & vor/nach DOE2 \\
+\midrule
+Aufgabemenge               & $\millCtxKsDFeedRateDoeOneDoeTwo$ & $\millCtxKsDFeedRateDoeOneProd$ & $\millCtxKsDFeedRateDoeTwoProd$ & $\millCtxKsDFeedRateHalves$ \\
+Sichtergeschwindigkeit     & $\millCtxKsDClassifierSpeedDoeOneDoeTwo$ & $\millCtxKsDClassifierSpeedDoeOneProd$ & $\millCtxKsDClassifierSpeedDoeTwoProd$ & $\millCtxKsDClassifierSpeedHalves$ \\
+Spanndruck                 & $\millCtxKsDTensionPressureDoeOneDoeTwo$ & $\millCtxKsDTensionPressureDoeOneProd$ & $\millCtxKsDTensionPressureDoeTwoProd$ & $\millCtxKsDTensionPressureHalves$ \\
+Ventilatorgeschwindigkeit  & $\millCtxKsDMillFanSpeedDoeOneDoeTwo$ & $\millCtxKsDMillFanSpeedDoeOneProd$ & $\millCtxKsDMillFanSpeedDoeTwoProd$ & $\millCtxKsDMillFanSpeedHalves$ \\
+Mahltellergeschwindigkeit  & $\millCtxKsDMainDriveSpeedDoeOneDoeTwo$ & $\millCtxKsDMainDriveSpeedDoeOneProd$ & $\millCtxKsDMainDriveSpeedDoeTwoProd$ & $\millCtxKsDMainDriveSpeedHalves$ \\
+Rezirkulationsklappe       & $\millCtxKsDRecirculationDamperPositionDoeOneDoeTwo$ & $\millCtxKsDRecirculationDamperPositionDoeOneProd$ & $\millCtxKsDRecirculationDamperPositionDoeTwoProd$ & $\millCtxKsDRecirculationDamperPositionHalves$ \\
+Kaminklappe                & $\millCtxKsDStackDamperPositionDoeOneDoeTwo$ & $\millCtxKsDStackDamperPositionDoeOneProd$ & $\millCtxKsDStackDamperPositionDoeTwoProd$ & $\millCtxKsDStackDamperPositionHalves$ \\
+Last des Heißgaserzeugers  & $\millCtxKsDHotgasGeneratorLoadDoeOneDoeTwo$ & $\millCtxKsDHotgasGeneratorLoadDoeOneProd$ & $\millCtxKsDHotgasGeneratorLoadDoeTwoProd$ & $\millCtxKsDHotgasGeneratorLoadHalves$ \\
+\midrule
+Spezifische Energie        & $\millCtxKsDTotalSpecificEnergyDoeOneDoeTwo$ & $\millCtxKsDTotalSpecificEnergyDoeOneProd$ & $\millCtxKsDTotalSpecificEnergyDoeTwoProd$ & $\millCtxKsDTotalSpecificEnergyHalves$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+%
+Die beiden Feldexperimente unterscheiden sich in den meisten Stellgrößen nur wenig, deutlich dagegen in den Klappenstellungen und der Last des Heißgaserzeugers. Der Produktionsbetrieb weicht von beiden vor allem in Aufgabemenge, Spanndruck und Mahltellergeschwindigkeit ab, da er nur einen Ausschnitt des Stellgrößenraums nutzt. Vor und nach DOE2 verschieben sich diese Größen ebenfalls deutlich, was die Verlagerung des Betriebs aus Abbildung~\ref{fig:mill_data_coverage_shift} bestätigt. Neben diesem Covariate Shift verändert sich auch die Verteilung der spezifischen Energie selbst, sodass auf einen Prior Probability Shift geschlossen werden kann. \par
+%
+Damit verschieben sich sowohl die Eingangsgrößen gemäß \eqref{eq:covariate_shift} als auch die Ausgangsgrößen gemäß \eqref{eq:prior_prob_shift}. Ein Actual Drift gemäß \eqref{eq:actual_drift}, der eine unveränderte Verteilung der Eingangsgrößen voraussetzt, lässt sich damit ausschließen. Offen bleibt dagegen, ob sich auch der Zusammenhang $P_t(y \mid X)$ zwischen Betriebspunkt und spezifischer Energie verändert. Da sich die Verteilung der Zielgröße über 
+%
+\begin{equation}
+    P_t(y) = \int P_t(y \mid X)\, P_t(X)\, \mathrm{d}X
+    \label{eq:mill_marginal}
+\end{equation}
+%
+aus diesem Zusammenhang und der Verteilung der Eingangsgrößen ergibt, lässt sich ihre Verschiebung auf zwei Weisen erklären. Entweder folgt sie allein aus dem Covariate Shift, während der Zusammenhang unverändert bleibt, was einem Virtual Drift gemäß \eqref{eq:virtual_drift} entspricht. Oder der Zusammenhang verändert sich zusätzlich selbst, sodass ein Real Concept Drift gemäß \eqref{eq:real_concept_drift} vorliegt. Unterscheiden lassen sich beide nur, wenn die Zielgröße bei gleichen Betriebspunkten über die Zeit verglichen wird. \par
+%
+Ein direkter Nachweis gelingt über Betriebspunkte, die im Betrachtungszeitraum wiederholt gefahren werden. Kehrt derselbe Betriebspunkt nach Wochen oder Monaten wieder und weicht die spezifische Energie dann von ihrem früheren Niveau ab, hat sich der Zusammenhang bei festgehaltenen Eingangsgrößen verändert. Gebildet werden die Betriebspunkte dafür über die Setpoints und nicht über die gemessenen Stellgrößen. Die Setpoints geben die Entscheidung des Operators wieder, während die Messwerte bereits die Antwort der Anlage und damit selbst vom Drift betroffen sind. Da exakt gleiche Kombinationen der Setpoints kaum wiederkehren, werden ähnliche Kombinationen per k-Means zu \millCtxNOps~Betriebspunkten zusammengefasst, innerhalb derer die Setpoints nur wenig streuen. Nahezu alle Punkte des Stroms entfallen dabei auf Betriebspunkte, die wiederholt gefahren werden. \par
+%
+Mittelt man die spezifische Energie eines Betriebspunkts über den gesamten Betrachtungszeitraum, erhält man sein typisches Energieniveau. Die Abweichung davon beantwortet für jeden Zeitpunkt die Frage, ob die Mühle bei denselben Setpoints mehr oder weniger Energie benötigt als üblich. Da der Einfluss des Betriebspunkts damit herausgerechnet ist und kein Modell eingeht, bleibt allein die Veränderung der Anlage. Diese Abweichung wird daher, obwohl es keine Ground Truth ist, im Folgenden als \emph{"Driftsignal"} bezeichnet. \par
+%
+\begin{figure}[tbp]
+    \centering
+    \input{\plotdir mill_context_op_recurrence.pgf}
+    \caption{Wochenmittel von Driftsignal und Simulationsfehler}
+    \label{fig:mill_context_op_recurrence}
+\end{figure}
+%
+Abbildung~\ref{fig:mill_context_op_recurrence} zeigt in Grün den Verlauf des Driftsignals als Wochenmittel über die wiederholt gefahrenen Betriebspunkte, zentriert um sein Gesamtmittel. Obwohl die Setpoints ähnlicher Betriebspunkte nahezu gleich bleiben, schwankt die spezifische Energie über die Zeit um mehrere kWh/t. Das Driftsignal steigt zwischen den Wartungen tendenziell an und fällt an den meisten von ihnen sprunghaft ab. Die Anlage verändert damit ihr Verhalten bei unveränderten Setpoints. \par
+%
+Zum Vergleich ist in Orange der Simulationsfehler auf denselben Betriebspunkten eingetragen, ebenfalls um sein Gesamtmittel zentriert. Da er die Messung mit der Vorhersage vergleicht und nicht mit dem Mittel des Betriebspunkts, setzt er sich aus zwei Anteilen zusammen. Zum einen beinhaltet er wie das Driftsignal auch die Veränderung der Anlage. Darüber hinaus enthält er aber einen Fehleranteil, der von der Lage des jeweiligen Betriebspunkts im Stellgrößenraum und damit von dessen Abdeckung durch die Trainingsdaten abhängt. Dieser Anteil ist für sich zeitlich konstant und tritt im Verlauf erst dadurch hervor, dass sich die Fahrweise verschiebt, also durch den Covariate Shift.
+Bis etwa Mitte 2023 dominiert dieser Anteil die Ausschläge des Simulationsfehlers, sodass beide Verläufe deutlich auseinanderlaufen. Danach liegen beide Verläufe dagegen eng beieinander. Der betriebspunktabhängige Anteil des Simulationsfehlers scheint hier also kaum noch zu schwanken, sodass der Simulationsfehler weitgehend dem Driftsignal folgt; auch dort, wo dieses deutlich ausschlägt. Der Simulationsfehler bildet den Drift somit nur dann unverfälscht ab, wenn sich dieser Anteil über die Zeit wenig ändert. \par
+%
+Bestätigt wird die Veränderung der Anlage durch das Verhalten des Driftsignals an den Wartungen. Dort verschiebt sich sein Mittel in einem Fenster von \millCtxCalWinDays~Tagen vor und nach dem Ereignis deutlich stärker als an zufällig gewählten Tagen ($\millCtxOpCalBias$ gegenüber $\millCtxOpRandBias$~kWh/t, $p = \millCtxOpCalP$). Zwischen zwei Wartungen nimmt das Driftsignal zudem tendenziell mit der seitdem vermahlenen Menge zu ($\rho = \millCtxRhoDevTonnes$). Die Mühle benötigt bei gleichen Setpoints also umso mehr Energie, je mehr Material seit der letzten Wartung vermahlen wurde. Beide Befunde bestätigen, dass sich der Zusammenhang $P_t(y \mid X)$ bei festgehaltenen Setpoints verändert, und belegen damit einen Real Concept Drift gemäß \eqref{eq:real_concept_drift}, der sich dem Covariate Shift überlagert. \par
 %
 % --- Woher kommt er? --------------------------------------------------------
-% [C5] Abbildung Kalibrierungen -- oben Walzenhoehen, Mitte gleitender RMSE, unten Streuung
-%      der Betriebspunkte, senkrecht die Kalibrierungen. Beschreibung: Spruenge der
-%      Walzenhoehe an jeder Kalibrierung, RMSE-Spruenge an einem Teil davon.
-%      Beleg: fig:mill_context_calibrations (\plotdir mill_context_calibrations.pgf).
 %
-% [C6] Test gegen das Zufallsniveau -- Verschiebung des Fehlermittels in einem Fenster um
-%      jede Kalibrierung gegen dieselbe Groesse an Zufallstagen. Keine Aenderung der
-%      Fahrweise nach Kalibrierungen (widerspricht MA 4.2.3).
-%      Belege: \millCtxCalWinDays, \millCtxCalBias, \millCtxRandBias, \millCtxCalBiasP,
-%      \millCtxCalVarP.
+\subsection{Ursachen} \label{sec:mill_kontext_ursachen}
 %
-% [C7] Anlass ueber die Stillstandsdauer -- lange Stillstaende (wartungsartig) gegen kurze
-%      (Ausraeumen u. a.). Der Effekt haengt an den langen. Abgleich mit der Wartungsliste
-%      (vollstaendig bis zu ihrem Ende): jede dokumentierte Wartung faellt in die lange
-%      Gruppe, bis dahin keine lange ohne Wartung. Zwei auffaellige Nullsetzungen mit sehr
-%      grossem Offset-Sprung, vermutlich ohne mechanische Ursache. Materialwechsel ohne
-%      Effekt, ein Halbsatz.
-%      Belege: \millCtxLongStopH, \millCtxNCalLong, \millCtxNCalShort, \millCtxCalBiasLong,
-%      \millCtxCalBiasShort, \millCtxCalBiasLongP, \millCtxCalBiasShortP, \millCtxNMaint,
-%      \millCtxNMaintInLong, \millCtxNCalAnomalous, \millCtxMaterialPctl.
+\begin{figure}[tbp]
+    \centering
+    \input{\plotdir mill_context_calibrations.pgf}
+    \caption{Gemessene Höhe der vier Walzen mit den Wartungen}
+    \label{fig:mill_context_calibrations}
+\end{figure}
 %
-% [C8] Weitere Kontextsignale -- Zusammenhang des Fehlers mit Durchsatz seit Kalibrierung,
-%      Walzenhoehe, Feuchte, Stillstaenden. Nur die Zeile des Fehlers, keine vollen
-%      Matrizen (Pearson/MI-Heatmaps bleiben Diagnose im Notebook). Ventilator als
-%      Merkmal mit hoher Korrelation: Hinweis auf Modellschwaeche, ein Satz.
-%      Belege: \millCtxPearsonTonnesSinceCalib, \millCtxPearsonRollerHeight,
-%      \millCtxPearsonMoisture, \millCtxPearsonStops.
+Als Ursache des Drifts kommen damit vor allem die Wartungen in Betracht. Abbildung~\ref{fig:mill_context_calibrations} zeigt dazu die gemessene Höhe der vier Walzen zusammen mit den Wartungen als gestrichelte Linien. Zwischen zwei Wartungen nimmt die Walzenhöhe allmählich ab, was auf den Verschleiß zurückzuführen ist. Mit jeder Wartung springt sie durch das Zurücksetzen des Nullpunkts auf ein neues Niveau. Blass eingetragen sind die übrigen Kalibrierungen, an denen die Walzenhöhe ebenfalls springt, ohne dass eine Wartung vorausging. Wie stark die Anlage auf eine Wartung reagiert, zeigt erst das Driftsignal in Abbildung~\ref{fig:mill_context_op_recurrence}, das an den meisten Wartungen deutlich abfällt. \par
 %
+Denkbar wäre auch, dass sich nach einer Wartung weniger die Anlage als die Fahrweise verändert, etwa indem die Anlage danach unruhiger betrieben wird. Ob dies der Fall ist, lässt sich in Anlehnung an \cite{igel.2024} über die Streuung der Betriebspunkte prüfen. Mit demselben Vergleich gegen zufällig gewählte Tage lässt sich eine Veränderung dieser Streuung an den Wartungen jedoch nicht nachweisen ($p = \millCtxCalVarP$). Die Operatoren fahren die Anlage nach einer Wartung also nicht anders als zuvor, und die Veränderung geht auf die Anlage selbst zurück. Auch der Simulationsfehler verschiebt sich an den Wartungen deutlich stärker als an zufällig gewählten Tagen ($\millCtxCalBias$ gegenüber $\millCtxRandBias$~kWh/t, $p = \millCtxCalBiasP$). Die Wartungen schlagen sich damit trotz des betriebspunktabhängigen Anteils auch im Fehler des Modells nieder. Die übrigen Kalibrierungen gehen dagegen mit keiner Veränderung der Anlage einher. An ihnen verschiebt sich das Driftsignal nicht stärker als an zufällig gewählten Tagen ($\millCtxOpCalBiasShort$~kWh/t, $p = \millCtxOpCalBiasShortP$). Auch der dokumentierte Wechsel des Aufgabematerials hinterlässt keine erkennbare Veränderung. \par
+%
+\begin{table}[tbp]
+\centering
+\caption{Korrelation der Kontextgrößen mit dem Simulationsfehler}
+\label{tab:mill_context_signals}
+\begin{tabular}{lc}
+\toprule
+\textbf{Kontextgröße} & $r$ \\
+\midrule
+Menge seit Wartung         & $\millCtxPearsonTonnesSinceCalib$ \\
+Walzenhöhe                 & $\millCtxPearsonRollerHeight$ \\
+Materialfeuchte            & $\millCtxPearsonMoisture$ \\
+Stillstände je Woche       & $\millCtxPearsonStops$ \\
+Wassereindüsung            & $\millCtxPearsonWaterInjection$ \\
+Walzentemperatur           & $\millCtxPearsonRollerTemperature$ \\
+Ventilatorgeschwindigkeit  & $\millCtxPearsonFanSpeed$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+%
+Neben den Wartungen stehen weitere Kontextgrößen zur Verfügung, deren Zusammenhang mit dem Simulationsfehler Tabelle~\ref{tab:mill_context_signals} als Korrelationskoeffizient $r$ nach Pearson angibt. Mit der seit der letzten Wartung vermahlenen Menge, der Walzenhöhe, der Materialfeuchte und der Zahl der Stillstände hängt der Fehler nur schwach zusammen. Dass die vermahlene Menge dennoch mit dem Drift verknüpft ist, zeigt ihr deutlich stärkerer Zusammenhang mit dem Driftsignal in Abschnitt~\ref{sec:mill_kontext_nachweis}. Im Simulationsfehler wird er durch dessen betriebspunktabhängigen Anteil überdeckt. Stärker hängt der Fehler mit Wassereindüsung und Walzentemperatur zusammen, ohne dass sich daraus eine Ursache des Drifts ableiten ließe. \par
+%
+Am stärksten hängt der Simulationsfehler mit der Ventilatorgeschwindigkeit zusammen, die selbst als Eingangsgröße in das Modell eingeht. Denkbar wäre, dass die Operatoren den Ventilator mit zunehmendem Verschleiß anders fahren und er den Drift damit lediglich widerspiegelt. Mit der seit der Wartung vermahlenen Menge und dem Driftsignal hängt die Ventilatorgeschwindigkeit jedoch kaum zusammen, und auch an den Wartungen verschiebt sie sich nicht stärker als an zufällig gewählten Tagen. Naheliegender ist daher, dass das Modell den Einfluss des Ventilators nicht vollständig abbildet. Dafür spricht, dass der Zusammenhang auch auf beiden Feldexperimenten besteht, in denen der Ventilator gezielt und unabhängig vom Verschleiß variiert wurde. Ursache ist wahrscheinlich die geringe Abdeckung durch das erste Feldexperiment, das nur wenige Stufen der Ventilatorgeschwindigkeit umfasst. Der Zusammenhang gehört damit zum betriebspunktabhängigen Anteil des Simulationsfehlers aus Abschnitt~\ref{sec:mill_kontext_nachweis} und nicht zu den Ursachen des Drifts. Keine der gemessenen Kontextgrößen erklärt den Drift somit für sich allein. \par
 % --- Wie ist er beschaffen? ------------------------------------------------
 % [C9] Abbildung Modellfehler nach Betriebspunkt -- gleiche Darstellung wie
 %      fig:modellfehler, eingefaerbt nach Betriebspunkt (Expose Abb. 6). Grosser Teil
@@ -173,16 +218,13 @@ Als Modell dient das statische \ac{MLP} aus Abschnitt~\ref{sec:modellvergleich},
 %      Beleg: \millCtxOpCorr.
 %
 % [C11] Sprunghaft oder schleichend -- gradientenbasierte Einordnung, die meisten
-%      sprunghaften Tage liegen an Kalibrierungen. Ein bis zwei Saetze, keine Abbildung.
+%      sprunghaften Tage liegen an Wartungen. Ein bis zwei Saetze, keine Abbildung.
 %      Belege: \millCtxNSuddenDays, \millCtxNIncrementalDays, \millCtxNSuddenNearCalib,
 %      \millCtxNSuddenNearLongCalib (die meisten sprunghaften Tage liegen an den langen).
 %
-% [C12] Zwischenfazit und Referenz -- Als Ereignisreferenz dienen die Kalibrierungen nach
-%      langem Stillstand (EVENT_SET = "long" in mill_context). Begruendung: die kurzen
-%      verschieben den Fehler kaum staerker als ein Zufallstag und waeren Ereignisse, die
-%      kein Detektor finden kann. Beide Listen liegen im Artefakt, Gegenprobe mit allen
-%      moeglich. Noch nicht endgueltig entschieden.
-%      Belege: \millCtxNEvents, \millCtxNCalLong, \millCtxNCalib.
+% [C12] Zwischenfazit -- Ereignisreferenz sind die Wartungen (in C1 gesetzt,
+%      EVENT_SET = "long"), hier nur Rueckverweis.
+%      Belege: \millCtxNEvents.
 %
 %---------------------------------------------------------------
 \section{Drift-Erkennung} \label{sec:mill_detection}

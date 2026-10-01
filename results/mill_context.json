@@ -61,6 +61,18 @@
     "main_drive_speed": 9
   },
   "context_ranking": {
+    "hours_since_calib": {
+      "pearson_e": 0.19538537951894577,
+      "pearson_abs_e": -0.24323941717396655,
+      "mi_e": 0.867389908260503,
+      "mi_abs_e": 0.5546408337347026
+    },
+    "tonnes_since_calib": {
+      "pearson_e": 0.18402194953292314,
+      "pearson_abs_e": -0.24117230863944794,
+      "mi_e": 0.8369946255792646,
+      "mi_abs_e": 0.5161386329983237
+    },
     "tension_pressure": {
       "pearson_e": -0.3091381163679404,
       "pearson_abs_e": -0.08149695477423761,
@@ -72,18 +84,6 @@
       "pearson_abs_e": -0.5778620864356312,
       "mi_e": 0.5899018428408587,
       "mi_abs_e": 0.36908402383274597
-    },
-    "hours_since_calib": {
-      "pearson_e": 0.28333301165274677,
-      "pearson_abs_e": 0.04696534241614802,
-      "mi_e": 0.5039810411223655,
-      "mi_abs_e": 0.2876296832255334
-    },
-    "tonnes_since_calib": {
-      "pearson_e": 0.277415243477138,
-      "pearson_abs_e": 0.056039756772474206,
-      "mi_e": 0.47286735737001706,
-      "mi_abs_e": 0.2616376705461132
     },
     "roller_height": {
       "pearson_e": 0.20486649706442248,
@@ -165,22 +165,23 @@
     }
   },
   "n_calibrations": 22,
-  "n_calibrations_evaluated": 22,
+  "n_calibrations_long": 7,
+  "n_calibrations_evaluated": 7,
   "calibration_test": {
     "|d Bias| [kWh/t]": {
-      "Kalibrierung": 1.5771306649186618,
+      "Kalibrierung": 2.949661874725421,
       "Zufall": 0.6999419462334512,
       "p": 0.0004997501249375312
     },
     "|d RMSE| [kWh/t]": {
-      "Kalibrierung": 1.070159714170366,
+      "Kalibrierung": 2.0492806937108203,
       "Zufall": 0.5515136632152491,
       "p": 0.0004997501249375312
     },
     "|d rolling_var|": {
-      "Kalibrierung": 0.0017857544052114936,
+      "Kalibrierung": 0.0022361932628004156,
       "Zufall": 0.001636985999106969,
-      "p": 0.31984007996002
+      "p": 0.19990004997501248
     }
   },
   "ks_pvalues": {
@@ -219,14 +220,14 @@
     },
     "P1-P2": {
       "feed_rate": 0.0,
-      "classifier_speed": 0.0,
+      "classifier_speed": 1.07e-321,
       "tension_pressure": 0.0,
       "mill_fan_speed": 0.0,
-      "main_drive_speed": 4.0435491082614056e-249,
-      "recirculation_damper_position": 2.974e-321,
-      "stack_damper_position": 2.342366165828571e-152,
-      "hotgas_generator_load": 9.836797454288098e-38,
-      "total_specific_energy": 3.4801990526010477e-240
+      "main_drive_speed": 8.361430476509764e-291,
+      "recirculation_damper_position": 4.99e-321,
+      "stack_damper_position": 2.095539369644466e-234,
+      "hotgas_generator_load": 2.5258306319932492e-101,
+      "total_specific_energy": 1.6322568744068472e-116
     }
   },
   "ks_rejected": {
@@ -270,15 +271,15 @@
       "total_specific_energy": 0.41700056505881755
     },
     "P1-P2": {
-      "feed_rate": 0.5741232489558159,
-      "classifier_speed": 0.40691018518263566,
-      "tension_pressure": 0.608236076721598,
-      "mill_fan_speed": 0.45678949277117,
-      "main_drive_speed": 0.31834921482309814,
-      "recirculation_damper_position": 0.37347484814848947,
-      "stack_damper_position": 0.2496637894744685,
-      "hotgas_generator_load": 0.12417484469851517,
-      "total_specific_energy": 0.31267674437099435
+      "feed_rate": 0.5298593613789697,
+      "classifier_speed": 0.4463033977132879,
+      "tension_pressure": 0.5289748438094577,
+      "mill_fan_speed": 0.49240375918329654,
+      "main_drive_speed": 0.3453102885014026,
+      "recirculation_damper_position": 0.3962453358972663,
+      "stack_damper_position": 0.31059246630744536,
+      "hotgas_generator_load": 0.20490863041574617,
+      "total_specific_energy": 0.21968069603444018
     }
   },
   "n_maintenance_matched": 5,
@@ -296,7 +297,7 @@
       "n": 15.0,
       "|d Bias|": 0.9366161003421752,
       "|d RMSE|": 0.6132365903848208,
-      "p Bias": 0.1199400299850075
+      "p Bias": 0.13343328335832083
     },
     "ohne auffaellige": {
       "n": 20.0,
@@ -469,12 +470,85 @@
   "op_error_between_share": 0.643,
   "eta2_op": 0.776,
   "tse_dev_std": 1.507,
-  "spearman_tse_dev_tonnes": 0.279,
+  "spearman_tse_dev_tonnes": 0.314,
+  "spearman_error_tonnes": 0.219,
+  "context_table": {
+    "model_error": {
+      "r": 1.0,
+      "r_deseason": 1.0,
+      "season_r2": 0.11241483967784538
+    },
+    "tonnes_since_calib": {
+      "r": 0.18402194953292314,
+      "r_deseason": 0.3130711565416883,
+      "season_r2": 0.2954426154196279
+    },
+    "roller_height": {
+      "r": 0.20486649706442248,
+      "r_deseason": 0.13329374669024782,
+      "season_r2": 0.062164116502989586
+    },
+    "feed_moisture": {
+      "r": 0.2607498030267357,
+      "r_deseason": 0.16741343215576499,
+      "season_r2": 0.16218140411610293
+    },
+    "stops_week": {
+      "r": 0.11313825855960313,
+      "r_deseason": 0.10112843435101378,
+      "season_r2": 0.08335028952973456
+    },
+    "water_injection": {
+      "r": 0.37147582389149075,
+      "r_deseason": 0.47814397655393115,
+      "season_r2": 0.09951460618565566
+    },
+    "roller_temperature": {
+      "r": -0.4543381247439645,
+      "r_deseason": -0.39662238038955405,
+      "season_r2": 0.18570828474770873
+    },
+    "mill_fan_speed": {
+      "r": 0.7415843890506636,
+      "r_deseason": 0.7206443909989971,
+      "season_r2": 0.12631585036429804
+    }
+  },
+  "spearman_fan_tonnes": 0.098,
+  "spearman_fan_drift_signal": 0.255,
+  "pearson_fan_error_doe": {
+    "1": 0.356109865781081,
+    "2": 0.6266520820171041
+  },
+  "fan_shift_at_maintenance": {
+    "sp_mill_fan_speed": {
+      "wartung": 1.2383222702826637,
+      "zufall": 1.1298576463861565,
+      "p": 0.3333333333333333
+    },
+    "mill_fan_speed": {
+      "wartung": 1.2372823616693762,
+      "zufall": 1.1288361599427899,
+      "p": 0.33033483258370816
+    }
+  },
   "op_calibration_test": {
-    "cal": 1.275382801717204,
+    "cal": 2.636587182994703,
     "rand": 0.7575207401408774,
-    "p": 0.0069965017491254375,
-    "n": 22.0
+    "p": 0.0009995002498750624,
+    "n": 7.0
+  },
+  "op_stop_test": {
+    "Stillstand >= 48 h": {
+      "n": 7.0,
+      "|d Bias|": 2.636587182994703,
+      "p Bias": 0.0004997501249375312
+    },
+    "Stillstand < 48 h": {
+      "n": 15.0,
+      "|d Bias|": 0.6401540904543704,
+      "p Bias": 0.6781609195402298
+    }
   },
   "op_weekly_corr": 0.707,
   "recurring_ops": {

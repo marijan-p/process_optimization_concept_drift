@@ -6,19 +6,46 @@
 % Kontextanalyse: Pearson mit dem Modellfehler
 \newcommand{\millCtxPearsonMoisture}{0{,}26}
 \newcommand{\millCtxPearsonRollerHeight}{0{,}20}
-\newcommand{\millCtxPearsonTonnesSinceCalib}{0{,}28}
+\newcommand{\millCtxPearsonTonnesSinceCalib}{0{,}18}
 \newcommand{\millCtxPearsonRollingVar}{-0{,}10}
 \newcommand{\millCtxPearsonStops}{0{,}11}
+\newcommand{\millCtxPearsonFanSpeed}{0{,}74}
+\newcommand{\millCtxPearsonWaterInjection}{0{,}37}
+\newcommand{\millCtxPearsonRollerTemperature}{-0{,}45}
+
+% Weitere Kontextgroessen: Pearson mit dem Modellfehler, jahreszeitlich bereinigt
+\newcommand{\millCtxPearsonDsTonnesSinceCalib}{0{,}31}
+\newcommand{\millCtxSeasonRsqTonnesSinceCalib}{0{,}30}
+\newcommand{\millCtxPearsonDsRollerHeight}{0{,}13}
+\newcommand{\millCtxSeasonRsqRollerHeight}{0{,}06}
+\newcommand{\millCtxPearsonDsMoisture}{0{,}17}
+\newcommand{\millCtxSeasonRsqMoisture}{0{,}16}
+\newcommand{\millCtxPearsonDsStops}{0{,}10}
+\newcommand{\millCtxSeasonRsqStops}{0{,}08}
+\newcommand{\millCtxPearsonDsWaterInjection}{0{,}48}
+\newcommand{\millCtxSeasonRsqWaterInjection}{0{,}10}
+\newcommand{\millCtxPearsonDsRollerTemperature}{-0{,}40}
+\newcommand{\millCtxSeasonRsqRollerTemperature}{0{,}19}
+\newcommand{\millCtxPearsonDsFanSpeed}{0{,}72}
+\newcommand{\millCtxSeasonRsqFanSpeed}{0{,}13}
+\newcommand{\millCtxSeasonRsqErr}{0{,}11}
+\newcommand{\millCtxRhoFanTonnes}{0{,}10}
+\newcommand{\millCtxRhoFanDev}{0{,}26}
+\newcommand{\millCtxPearsonFanDoeOne}{0{,}36}
+\newcommand{\millCtxPearsonFanDoeTwo}{0{,}63}
+\newcommand{\millCtxFanSpShiftP}{0{,}333}
+\newcommand{\millCtxFanShiftP}{0{,}330}
 
 % Kalibrierungen
 \newcommand{\millCtxNCalib}{22}
-\newcommand{\millCtxNCalibEval}{22}
+\newcommand{\millCtxNCalibLong}{7}
+\newcommand{\millCtxNCalibEval}{7}
 \newcommand{\millCtxCalWinDays}{7}
-\newcommand{\millCtxCalBias}{1{,}58}
+\newcommand{\millCtxCalBias}{2{,}95}
 \newcommand{\millCtxRandBias}{0{,}70}
 \newcommand{\millCtxCalBiasP}{0{,}0005}
 \newcommand{\millCtxCalRmseP}{0{,}0005}
-\newcommand{\millCtxCalVarP}{0{,}320}
+\newcommand{\millCtxCalVarP}{0{,}200}
 
 % Kalibrierungen nach Stillstandsdauer, Abgleich mit der Wartungsliste
 \newcommand{\millCtxLongStopH}{48}
@@ -27,7 +54,7 @@
 \newcommand{\millCtxCalBiasLong}{2{,}95}
 \newcommand{\millCtxCalBiasShort}{0{,}94}
 \newcommand{\millCtxCalBiasLongP}{0{,}0005}
-\newcommand{\millCtxCalBiasShortP}{0{,}120}
+\newcommand{\millCtxCalBiasShortP}{0{,}133}
 \newcommand{\millCtxNMaint}{5}
 \newcommand{\millCtxNMaintInLong}{5}
 \newcommand{\millCtxMatchDays}{10}
@@ -67,15 +94,15 @@
 \newcommand{\millCtxKsDStackDamperPositionDoeTwoProd}{0{,}56}
 \newcommand{\millCtxKsDHotgasGeneratorLoadDoeTwoProd}{0{,}69}
 \newcommand{\millCtxKsDTotalSpecificEnergyDoeTwoProd}{0{,}42}
-\newcommand{\millCtxKsDFeedRateHalves}{0{,}57}
-\newcommand{\millCtxKsDClassifierSpeedHalves}{0{,}41}
-\newcommand{\millCtxKsDTensionPressureHalves}{0{,}61}
-\newcommand{\millCtxKsDMillFanSpeedHalves}{0{,}46}
-\newcommand{\millCtxKsDMainDriveSpeedHalves}{0{,}32}
-\newcommand{\millCtxKsDRecirculationDamperPositionHalves}{0{,}37}
-\newcommand{\millCtxKsDStackDamperPositionHalves}{0{,}25}
-\newcommand{\millCtxKsDHotgasGeneratorLoadHalves}{0{,}12}
-\newcommand{\millCtxKsDTotalSpecificEnergyHalves}{0{,}31}
+\newcommand{\millCtxKsDFeedRateHalves}{0{,}53}
+\newcommand{\millCtxKsDClassifierSpeedHalves}{0{,}45}
+\newcommand{\millCtxKsDTensionPressureHalves}{0{,}53}
+\newcommand{\millCtxKsDMillFanSpeedHalves}{0{,}49}
+\newcommand{\millCtxKsDMainDriveSpeedHalves}{0{,}35}
+\newcommand{\millCtxKsDRecirculationDamperPositionHalves}{0{,}40}
+\newcommand{\millCtxKsDStackDamperPositionHalves}{0{,}31}
+\newcommand{\millCtxKsDHotgasGeneratorLoadHalves}{0{,}20}
+\newcommand{\millCtxKsDTotalSpecificEnergyHalves}{0{,}22}
 
 % Wiederkehrende Betriebspunkte (Sollwerte)
 \newcommand{\millCtxNOps}{40}
@@ -85,10 +112,18 @@
 \newcommand{\millCtxOpErrBetweenPct}{64}
 \newcommand{\millCtxEtaSqOp}{0{,}78}
 \newcommand{\millCtxTseDevStd}{1{,}51}
-\newcommand{\millCtxRhoDevTonnes}{0{,}28}
-\newcommand{\millCtxOpCalBias}{1{,}28}
+\newcommand{\millCtxRhoDevTonnes}{0{,}31}
+\newcommand{\millCtxRhoErrTonnes}{0{,}22}
+\newcommand{\millCtxRWeekDevErr}{0{,}57}
+\newcommand{\millCtxOpCalBias}{2{,}64}
 \newcommand{\millCtxOpRandBias}{0{,}76}
-\newcommand{\millCtxOpCalP}{0{,}0070}
+\newcommand{\millCtxOpCalP}{0{,}0010}
+\newcommand{\millCtxOpNCalLong}{7}
+\newcommand{\millCtxOpNCalShort}{15}
+\newcommand{\millCtxOpCalBiasLong}{2{,}64}
+\newcommand{\millCtxOpCalBiasShort}{0{,}64}
+\newcommand{\millCtxOpCalBiasLongP}{0{,}0005}
+\newcommand{\millCtxOpCalBiasShortP}{0{,}678}
 \newcommand{\millCtxOpCorr}{0{,}71}
 
 % Gradientenbasierte Einordnung
