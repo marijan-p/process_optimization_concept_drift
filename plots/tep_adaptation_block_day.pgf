@@ -24,9 +24,9 @@
 %%   
 %%   \ifdefined\pdftexversion\else  % non-pdftex case.
 %%     \usepackage{fontspec}
-%%     \setmainfont{DejaVuSerif.ttf}[Path=\detokenize{C:/git/process_optimization_concept_drift/.venv/Lib/site-packages/matplotlib/mpl-data/fonts/ttf/}]
-%%     \setsansfont{DejaVuSans.ttf}[Path=\detokenize{C:/git/process_optimization_concept_drift/.venv/Lib/site-packages/matplotlib/mpl-data/fonts/ttf/}]
-%%     \setmonofont{DejaVuSansMono.ttf}[Path=\detokenize{C:/git/process_optimization_concept_drift/.venv/Lib/site-packages/matplotlib/mpl-data/fonts/ttf/}]
+%%     \setmainfont{DejaVuSerif.ttf}[Path=\detokenize{/opt/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/}]
+%%     \setsansfont{DejaVuSans.ttf}[Path=\detokenize{/opt/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/}]
+%%     \setmonofont{DejaVuSansMono.ttf}[Path=\detokenize{/opt/venv/lib/python3.11/site-packages/matplotlib/mpl-data/fonts/ttf/}]
 %%   \fi
 %%   \makeatletter\@ifpackageloaded{underscore}{}{\usepackage[strings]{underscore}}\makeatother
 %%
@@ -482,12 +482,12 @@
 \definecolor{currentstroke}{rgb}{0.400000,0.760784,0.647059}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{1.062790in}{0.994696in}}%
-\pgfpathlineto{\pgfqpoint{1.706767in}{1.779943in}}%
-\pgfpathlineto{\pgfqpoint{2.350744in}{1.876037in}}%
-\pgfpathlineto{\pgfqpoint{2.994721in}{1.945321in}}%
-\pgfpathlineto{\pgfqpoint{3.638698in}{1.264162in}}%
-\pgfpathlineto{\pgfqpoint{4.282675in}{1.016497in}}%
+\pgfpathmoveto{\pgfqpoint{1.062790in}{1.057503in}}%
+\pgfpathlineto{\pgfqpoint{1.706767in}{1.003195in}}%
+\pgfpathlineto{\pgfqpoint{2.350744in}{1.100543in}}%
+\pgfpathlineto{\pgfqpoint{2.994721in}{0.863126in}}%
+\pgfpathlineto{\pgfqpoint{3.638698in}{1.131268in}}%
+\pgfpathlineto{\pgfqpoint{4.282675in}{1.060519in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
@@ -516,27 +516,27 @@
 \pgfusepath{stroke,fill}%
 }%
 \begin{pgfscope}%
-\pgfsys@transformshift{1.062790in}{0.994696in}%
+\pgfsys@transformshift{1.062790in}{1.057503in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{1.706767in}{1.779943in}%
+\pgfsys@transformshift{1.706767in}{1.003195in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{2.350744in}{1.876037in}%
+\pgfsys@transformshift{2.350744in}{1.100543in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{2.994721in}{1.945321in}%
+\pgfsys@transformshift{2.994721in}{0.863126in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{3.638698in}{1.264162in}%
+\pgfsys@transformshift{3.638698in}{1.131268in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{4.282675in}{1.016497in}%
+\pgfsys@transformshift{4.282675in}{1.060519in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
 \end{pgfscope}%

@@ -31,7 +31,8 @@ KANAELE (loest die Farbknappheit auf):
     bleibt Farbe == Drift.
 
 Weitere eigenstaendige Rollen:
-  * gruen    -> Driftursache selbst (drift_signal c[k], drift_event)
+  * gruen    -> Driftursache selbst (drift_signal c[k])
+  * grau gestrichelt -> Driftereignis bzw. Kalibrierung (drift_event)
   * schwarz  -> treibendes Fuehrungssignal / Setpoint als Kontext (setpoint)
   * grau     -> verrauschtes Signal im lokalen Rausch-Vergleich (noise)
   * hellblau -> algorithmische Detektion (detection)
@@ -104,7 +105,7 @@ ROLES = {
     "setpoint":       dict(color=PALETTE["black"],     linestyle="--", marker=None, alpha=1.0),
     # --- Driftursache ----------------------------------------------------- #
     "drift_signal":   dict(color=PALETTE["green"],     linestyle="-",  marker=None, alpha=0.9),
-    "drift_event":    dict(color=PALETTE["green"],     linestyle="--", marker=None, alpha=0.6),
+    "drift_event":    dict(color=PALETTE["grey"],      linestyle="--", marker=None, alpha=0.6),
     # --- algorithmische Detektion ----------------------------------------- #
     "detection":      dict(color=PALETTE["skyblue"],   linestyle=":",  marker=None, alpha=1.0),
     # --- verrauschtes Signal im LOKALEN Rausch-Vergleich (nur drift-frei) -- #
