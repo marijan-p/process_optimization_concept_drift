@@ -204,13 +204,17 @@ Ventilatorgeschwindigkeit  & $\millCtxPearsonFanSpeed$ \\
 Neben den Wartungen stehen weitere Kontextgrößen zur Verfügung, deren Zusammenhang mit dem Simulationsfehler Tabelle~\ref{tab:mill_context_signals} als Korrelationskoeffizient $r$ nach Pearson angibt. Mit der seit der letzten Wartung vermahlenen Menge, der Walzenhöhe, der Materialfeuchte und der Zahl der Stillstände hängt der Fehler nur schwach zusammen. Dass die vermahlene Menge dennoch mit dem Drift verknüpft ist, zeigt ihr deutlich stärkerer Zusammenhang mit dem Driftsignal in Abschnitt~\ref{sec:mill_kontext_nachweis}. Im Simulationsfehler wird er durch dessen betriebspunktabhängigen Anteil überdeckt. Stärker hängt der Fehler mit Wassereindüsung und Walzentemperatur zusammen, ohne dass sich daraus eine Ursache des Drifts ableiten ließe. \par
 %
 Am stärksten hängt der Simulationsfehler mit der Ventilatorgeschwindigkeit zusammen, die selbst als Eingangsgröße in das Modell eingeht. Denkbar wäre, dass die Operatoren den Ventilator mit zunehmendem Verschleiß anders fahren und er den Drift damit lediglich widerspiegelt. Mit der seit der Wartung vermahlenen Menge und dem Driftsignal hängt die Ventilatorgeschwindigkeit jedoch kaum zusammen, und auch an den Wartungen verschiebt sie sich nicht stärker als an zufällig gewählten Tagen. Naheliegender ist daher, dass das Modell den Einfluss des Ventilators nicht vollständig abbildet. Dafür spricht, dass der Zusammenhang auch auf beiden Feldexperimenten besteht, in denen der Ventilator gezielt und unabhängig vom Verschleiß variiert wurde. Ursache ist wahrscheinlich die geringe Abdeckung durch das erste Feldexperiment, das nur wenige Stufen der Ventilatorgeschwindigkeit umfasst. Der Zusammenhang gehört damit zum betriebspunktabhängigen Anteil des Simulationsfehlers aus Abschnitt~\ref{sec:mill_kontext_nachweis} und nicht zu den Ursachen des Drifts. Keine der gemessenen Kontextgrößen erklärt den Drift somit für sich allein. \par
+%
 % --- Wie ist er beschaffen? ------------------------------------------------
-% [C9] Abbildung Modellfehler nach Betriebspunkt -- gleiche Darstellung wie
-%      fig:modellfehler, eingefaerbt nach Betriebspunkt (Expose Abb. 6). Grosser Teil
-%      der Fehlervarianz liegt zwischen den Betriebspunkten. Lesehilfe: Betriebspunkte
-%      werden wochenweise gefahren, Farbe und Zeit sind vermischt -- die Trennung leistet C4.
-%      Belege: fig:mill_context_op_error (\plotdir mill_context_op_error.pgf),
-%      \millCtxOpErrBetweenPct, \millCtxEtaSqOp.
+%
+\subsection{Beschaffenheit} \label{sec:mill_kontext_beschaffenheit}
+%
+\begin{figure}[tbp]
+    \centering
+    \input{\plotdir mill_context_op_error.pgf}
+    \caption{Normierter Simulationsfehler nach Betriebspunkt}
+    \label{fig:mill_context_op_error}
+\end{figure}
 %
 % [C10] Global oder lokal -- Abweichungen verschiedener Betriebspunkte laufen gemeinsam,
 %      der Drift ist eher global. Einschraenkung: nur wenige Betriebspunkte laufen oft genug
