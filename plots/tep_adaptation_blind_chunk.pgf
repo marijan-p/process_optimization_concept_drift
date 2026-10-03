@@ -591,8 +591,8 @@
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{0.736667in}{0.739125in}%
-\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=0.826667in]{tep_adaptation_blind_chunk-img0.png}}%
+\pgfsys@transformshift{0.736667in}{0.679125in}%
+\pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=0.893333in]{tep_adaptation_blind_chunk-img0.png}}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
