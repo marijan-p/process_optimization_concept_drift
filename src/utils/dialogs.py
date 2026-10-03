@@ -300,9 +300,12 @@ def copy_to_clipboard(text: str) -> bool:
         root.destroy()
 
 
-def notify(title: str, message: str) -> None:
-    """Konsolen-Fallback ohne GUI-Abhängigkeit."""
+def notify(title: str, message: str, remote: bool = False) -> None:
+    """Konsolenausgabe; mit ``remote=True`` zusätzlich per Telegram (s. run_status)."""
     print(f"\n--- {title} ---\n{message}\n", flush=True)
+    if remote:
+        from .run_status import telegram
+        telegram(f"{title}\n{message}")
 
 
 def show_with_copy_button(title: str, message: str, copy_value: str,

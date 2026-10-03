@@ -67,7 +67,7 @@ __all__ = [
     "assert_current",
     "adapt_space_id",
     "selector_space_id",
-    "passive_space_id",
+    "TPE_SETTINGS",
     "ADAPTATION_MODES",
     "SELECTORS",
     "REC_SUFFIX",
@@ -137,11 +137,8 @@ def selector_space_id(n: int = 8) -> str:
     return dd._space_id_of(_suggest_selector_params, n)
 
 
-def passive_space_id(n: int = 8) -> str:
-    """Kennung des Suchraums von :func:`_suggest_passive_params`."""
-    assert_current()
-    return dd._space_id_of(_suggest_passive_params, n)
-
+# Sampler-Einstellungen des Tunings; gehen in die Cache-Schluessel ein.
+TPE_SETTINGS = dict(multivariate=True)
 
 # Unterstuetzte Adaptionsstrategien (Reihenfolge wie in der Auswertung).
 ADAPTATION_MODES = ("baseline", "blind", "informed", "combined")
@@ -607,7 +604,9 @@ def _suggest_adapt_params(strategy: str, trial, chunk: int = 144,
     optimiert, da sie sich als detektorspezifischer Haupthebel erwiesen hat.
     Mit Suffix ``_rec`` kommen die Parameter des Recurrence-Selektors hinzu
     (``err_tol`` in Einheiten des normierten Fehlers, ``rec_horizon`` und
-    ``rec_max`` in Punkten der Tuning-Aufloesung).
+    ``rec_max`` in Punkten der Tuning-Aufloesung). Perioden und Fenster sind
+    logarithmisch skaliert, damit kurze Werte (taegliches Nachtraining, Fenster
+    von einem Chunk) dieselbe Dichte erhalten wie lange.
     """
     strategy, selector = split_strategy(strategy)
     det_name = (det_name or "").upper()
@@ -621,11 +620,11 @@ def _suggest_adapt_params(strategy: str, trial, chunk: int = 144,
         reset=trial.suggest_categorical("reset", [False, True]),
     )
     if strategy in ("blind", "combined"):
-        params["blind_window"] = trial.suggest_int("blind_window", 15, 400)
-        params["blind_period"] = trial.suggest_int("blind_period", chunk, 30 * chunk)
+        params["blind_window"] = trial.suggest_int("blind_window", 5, 400, log=True)
+        params["blind_period"] = trial.suggest_int("blind_period", chunk, 30 * chunk, log=True)
     if strategy in ("informed", "combined"):
-        params["window_prev"] = trial.suggest_int("window_prev", 5, 300)
-        params["window_post"] = trial.suggest_int("window_post", 5, 300)
+        params["window_prev"] = trial.suggest_int("window_prev", 5, 300, log=True)
+        params["window_post"] = trial.suggest_int("window_post", 5, 300, log=True)
         params["cooldown_x"] = trial.suggest_float("cooldown_x", 0.0, 60.0)
         if det_name == "KSWIN":
             _mi = trial.suggest_int("det_min_num_instances", 50, 400)
@@ -677,28 +676,17 @@ def _suggest_selector_params(trial, chunk: int = 144) -> dict:
     )
 
 
-def _suggest_passive_params(trial, chunk: int = 144) -> dict:
-    """Parameter der passiven Strategie ohne Periode, fuer das Tuning bei fester
-    Periode (``base_params`` in :func:`tune_adaptation`). Das Fenster reicht bis
-    auf einen Chunk herab, damit ein Nachtraining auf dem jeweils letzten Chunk
-    im Suchraum liegt.
-    """
-    return dict(
-        lr=trial.suggest_float("lr", 1e-4, 1.5e-2, log=True),
-        epochs=trial.suggest_int("epochs", 1, 30),
-        freeze=FREEZE_CHOICES[trial.suggest_categorical("freeze", list(FREEZE_CHOICES))],
-        reset=trial.suggest_categorical("reset", [False, True]),
-        blind_window=trial.suggest_int("blind_window", chunk, 400),
-    )
-
-
 def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
                     detector_factory=None, rmse_baseline: float = None,
                     n_trials: int = 20, weights: Tuple[float, float] = (1.0, 0.1),
                     seed: int = 42, show_progress_bar: bool = False,
                     enqueue: List[dict] = None, t_stat: float = 1.0,
-                    base_params: dict = None):
-    """Optimiert die Adaptions-Hyperparameter einer Strategie mit Optuna (TPE).
+                    base_params: dict = None, callbacks: list = None):
+    """Optimiert die Adaptions-Hyperparameter einer Strategie mit Optuna.
+
+    Der Sampler ist ein multivariater TPE (:data:`TPE_SETTINGS`): Periode und
+    Fenster der passiven Strategie, Lernrate und Epochen wirken nur gemeinsam,
+    ein univariater TPE verfehlt deshalb schmale Optima entlang solcher Kanten.
 
     Parameters
     ----------
@@ -713,30 +701,24 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
     rmse_baseline : RMSE ohne Adaption; falls None, wird er einmal bestimmt.
     weights : (w_rmse, w_train) der Zielfunktion :func:`score_adaptation`.
     enqueue : Liste roher Optuna-Parameterdicts (Freeze als String, vgl.
-        :func:`encode_adapt_params`), die als Startkandidaten eingereiht werden
-        (Warmstart, z. B. Vereinigung der Einzeloptima fuer ``combined``).
-    base_params : feste, dekodierte Strategieparameter (Tuning-Aufloesung). Ist
-        der Satz gesetzt, wird nur ein Teilraum gesucht, bei ``_rec`` die
-        Selektorparameter (:func:`_suggest_selector_params`), bei ``blind`` die
-        Parameter ohne Periode (:func:`_suggest_passive_params`).
+        :func:`encode_adapt_params`), die als Startkandidaten eingereiht werden.
+    base_params : feste, dekodierte Strategieparameter (Tuning-Aufloesung). Nur
+        mit Suffix ``_rec``: gesucht werden dann allein die Selektorparameter
+        (:func:`_suggest_selector_params`).
+    callbacks : Optuna-Callbacks ``f(study, trial)``, z. B. fuer Fortschritt.
 
     Returns
     -------
     (study, rmse_baseline) : Optuna-Study (beste Parameter in ``study.best_params``,
     via :func:`decode_adapt_params` dekodierbar) und der verwendete Baseline-RMSE.
     """
+    import warnings
     import optuna   # lazy: Modul bleibt ohne Optuna importierbar
 
     strategy = strategy.lower()
     mode, selector = split_strategy(strategy)
-    subspace = None
-    if base_params is not None:
-        if selector == "recurrence":
-            subspace = _suggest_selector_params
-        elif mode == "blind":
-            subspace = _suggest_passive_params
-        else:
-            raise ValueError(f"base_params verlangt 'blind' oder eine Strategie mit {REC_SUFFIX!r}")
+    if base_params is not None and selector != "recurrence":
+        raise ValueError(f"base_params verlangt eine Strategie mit {REC_SUFFIX!r}")
     n = len(X)
     chunk = int(fixed.get("chunk", 144))
     n_units = int(np.ceil(n / chunk))
@@ -745,7 +727,6 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
         base_res = run_adaptation(base, X, y, mode="baseline", **fixed)
         rmse_baseline = float(np.sqrt(np.mean(np.asarray(base_res["errors"], float) ** 2)))
 
-    # Welche Detektorparameter mitgetunt werden, haengt vom Detektortyp ab
     det_name = (getattr(detector_factory(), "name", None)
                 if (mode in ("informed", "combined") and detector_factory is not None)
                 else None)
@@ -754,7 +735,7 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
         if base_params is None:
             params = _suggest_adapt_params(strategy, trial, chunk=chunk, det_name=det_name)
         else:
-            params = {**base_params, **subspace(trial, chunk=chunk)}
+            params = {**base_params, **_suggest_selector_params(trial, chunk=chunk)}
         detector = (detector_factory()
                     if (mode in ("informed", "combined") and detector_factory is not None)
                     else None)
@@ -767,13 +748,14 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
             trial.set_user_attr(k, v)
         return s["score"]
 
-    study = optuna.create_study(
-        direction="minimize",
-        sampler=optuna.samplers.TPESampler(seed=seed),
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", optuna.exceptions.ExperimentalWarning)
+        sampler = optuna.samplers.TPESampler(seed=seed, **TPE_SETTINGS)
+    study = optuna.create_study(direction="minimize", sampler=sampler)
     for _p in (enqueue or []):
         study.enqueue_trial(_p, skip_if_exists=True)
-    study.optimize(objective, n_trials=n_trials, show_progress_bar=show_progress_bar)
+    study.optimize(objective, n_trials=n_trials, show_progress_bar=show_progress_bar,
+                   callbacks=callbacks)
     return study, rmse_baseline
 
 
