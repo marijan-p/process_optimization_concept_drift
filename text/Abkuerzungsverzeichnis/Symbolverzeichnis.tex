@@ -11,6 +11,7 @@
 \noindent\textit{Lateinische Buchstaben}
 \begin{longtable}{@{}p{0.20\textwidth}p{0.74\textwidth}@{}}
     $c[k]$        & Driftsignal \\                                       % Setpoint-Variante $c_w[k]$; Niveaus $c_{\min}, c_{\max}, c_i^{\pm}$
+    $\hat{c}$     & geschätztes Driftsignal (Abweichung vom Betriebspunktmittel) \\
     $\bar{d}$     & mittlerer Detektionsverzug \\
     $\mathcal{D}$ & Datensatz bzw.\ Datenfenster \\
     $e$           & Simulationsfehler (Residuum) \\                      % Mittelwert $\bar{e}$ als Bias
@@ -28,6 +29,7 @@
     $w$           & Setpoint-Zeitreihe \\                                % Stellgrößen $w_i$
     $W$           & ADWIN-Datenfenster \\                                % Teilfenster $W_0, W_1$
     $x$           & Systemzustand \\
+    $X$           & Eingangsgrößen \\
     $y$           & Systemausgang \\                                     % Modellprädiktion $\hat{y}$
 \end{longtable}
 
@@ -36,7 +38,7 @@
     $\alpha_i$                                 & Gewichtungskoeffizienten des Wiener-Modells \\
     $\gamma_{\tau}$                            & Verschiebungsanteil der Segmentgrenzen \\
     $\delta,\ \delta'$                         & globales bzw.\ angepasstes Signifikanzniveau \\
-    $\eta_u,\ \eta_y$                          & injiziertes Rauschen am Ein- bzw.\ Ausgang \\
+    $\eta$                                     & zufällige Abweichung \\                  % injiziertes Rauschen am Ein- bzw.\ Ausgang $\eta_u,\ \eta_y$
     $\zeta_{\mathrm{p}},\ \zeta_{\mathrm{m}}$  & Prozess- bzw.\ Messrauschen des KF/EKF \\
     $\theta$                                   & Modellparameter \\                       % Initialisierung $\theta_0$
     $\kappa,\ \kappa_w$                        & Driftkoeffizient am Ausgang bzw.\ Setpoint \\
@@ -58,13 +60,14 @@
     $N_{\ast}$ & Anzahl
     %: $N$ (Stichproben), $N_{\mathrm{in}}$ (Eingangskanäle), $N_{\mathrm{q}}$ (Rauschquellen), $N_c$ (Änderungsindizes), $N_{\mathrm{seg}}$ (Segmente), $N_{\mathrm{sd}}$ (Sudden Drifts), $N_{\mathrm{fa}}$ (Fehlalarme), $N_{\mathrm{train}}$ (Nachtrainings), $N_{\mathrm{chunk}}$ (Chunks), $N_{\mathrm{rec}}$ (zurückgeholte Punkte) 
     \\
-    weitere    & $k$ (Zeitschritt), $i, j$ (Laufindizes), $_d$ (Detektion), $_w$ (Setpoint), $_{\mathrm{p}}/_{\mathrm{m}}$ (Prozess/Messung), $_s$ (Abtastung), $_{\mathrm{a}}$ (Adaption), $_{\min}/_{\max}$ (Extrema) \\
+    weitere    & $k$ (Zeitschritt), $t$ (Zeitpunkt), $t_0$ (Trainingsdatenerfassung), $_{\mathrm{BP}}$ (Betriebspunkt), $i, j$ (Laufindizes), $_d$ (Detektion), $_w$ (Setpoint), $_{\mathrm{p}}/_{\mathrm{m}}$ (Prozess/Messung), $_s$ (Abtastung), $_{\mathrm{a}}$ (Adaption), $_{\min}/_{\max}$ (Extrema) \\
 \end{longtable}
 
 \noindent\textit{Operatoren, Akzente und Superskripte}
 \begin{longtable}{@{}p{0.20\textwidth}p{0.74\textwidth}@{}}
     $\hat{(\cdot)}$         & Schätzwert bzw.\ identifiziertes Modell \\
     $\bar{(\cdot)}$         & zeitlicher Mittelwert \\
+    $\mathrm{E}_t[\cdot \mid \cdot]$ & bedingter Erwartungswert zum Zeitpunkt $t$ \\
     $\tilde{(\cdot)}$       & drift-behaftete Größe \\
     $(\cdot)^o$            & rauschfreie Größe \\
     $(\cdot)^{\mathrm{f}}$ & gefilterte (geglättete) Größe \\

@@ -89,6 +89,8 @@ Rührerdrehzahl          & \si{\percent}              & 100    & 100    & 100   
 %
 \section{Vertikalrollenmühle}\label{app:mill_model}
 %
+\subsection{Statisches Modell}\label{app:mill_model}
+%
 Tabelle~\ref{tab:mill_model_params} fasst Aufbau und Training des in Abschnitt~\ref{sec:mill_modellierung} eingesetzten statischen \ac{MLP} zusammen. Das Netz bildet die Stellgrößen eines Betriebspunkts über zwei hidden Layer auf die spezifische Energie ab. Trainiert wird mit dem Adam-Optimierer auf den mittleren quadratischen Fehler. Stagniert der Fehler auf den Validierungsdaten, wird zunächst die Lernrate schrittweise reduziert und das Training schließlich vorzeitig beendet. Übernommen werden die Gewichte der Epoche mit dem geringsten Validierungsfehler. Die Trainingsdaten werden vorab je Betriebspunkt mit einem Butterworth-Filter geglättet und nach Betriebspunkten in Trainings- und Validierungsdaten getrennt.
 %
 \begin{table}[htbp]
@@ -117,6 +119,35 @@ Lernratenreduktion    & Faktor \millParamLrFactor{} nach \millParamLrPatience{} 
 Trainingsdaten        & \millNTrainRows{} Abtastwerte aus \millNTrainBp{} Betriebspunkten (DOE1) \\
 Validierungsanteil    & \millParamValSplitPct{}\,\%, getrennt nach Betriebspunkten \\
 Glättung              & Butterworth-Filter \millParamButterOrder.~Ordnung, normierte Grenzfrequenz \millParamButterWn \\
+\bottomrule
+\end{tabular}
+\end{table}
+%
+\subsection{Verteilungsvergleich der Datensätze}\label{app:mill_ks}
+%
+Tabelle~\ref{tab:mill_ks} gibt für jede Stellgröße und die spezifische Energie die Kolmogorov-Smirnov-Statistik $D$ an, also den größten Abstand der empirischen Verteilungsfunktionen zweier Datensätze. Verglichen werden die beiden Feldexperimente untereinander, jedes von ihnen mit dem Produktionsbetrieb sowie der Produktionsbetrieb vor und nach dem zweiten Feldexperiment. Bei der großen Zahl zeitlich abhängiger Betriebspunkte weist der Test nahezu jeden Unterschied als signifikant aus. $D$ dient daher als Maß für die Größe des Unterschieds, wobei Werte nahe null auf nahezu gleiche und Werte nahe eins auf nahezu getrennte Verteilungen hindeuten.
+%
+%
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{Kolmogorov-Smirnov-Statistik $D$ je Größe und Datensatzpaar}
+\label{tab:mill_ks}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Größe} & DOE1--DOE2 & DOE1--Prod. & DOE2--Prod. & vor/nach DOE2 \\
+\midrule
+Aufgabemenge               & $\millCtxKsDFeedRateDoeOneDoeTwo$ & $\millCtxKsDFeedRateDoeOneProd$ & $\millCtxKsDFeedRateDoeTwoProd$ & $\millCtxKsDFeedRateHalves$ \\
+Sichtergeschwindigkeit     & $\millCtxKsDClassifierSpeedDoeOneDoeTwo$ & $\millCtxKsDClassifierSpeedDoeOneProd$ & $\millCtxKsDClassifierSpeedDoeTwoProd$ & $\millCtxKsDClassifierSpeedHalves$ \\
+Spanndruck                 & $\millCtxKsDTensionPressureDoeOneDoeTwo$ & $\millCtxKsDTensionPressureDoeOneProd$ & $\millCtxKsDTensionPressureDoeTwoProd$ & $\millCtxKsDTensionPressureHalves$ \\
+Ventilatorgeschwindigkeit  & $\millCtxKsDMillFanSpeedDoeOneDoeTwo$ & $\millCtxKsDMillFanSpeedDoeOneProd$ & $\millCtxKsDMillFanSpeedDoeTwoProd$ & $\millCtxKsDMillFanSpeedHalves$ \\
+Mahltellergeschwindigkeit  & $\millCtxKsDMainDriveSpeedDoeOneDoeTwo$ & $\millCtxKsDMainDriveSpeedDoeOneProd$ & $\millCtxKsDMainDriveSpeedDoeTwoProd$ & $\millCtxKsDMainDriveSpeedHalves$ \\
+Rezirkulationsklappe       & $\millCtxKsDRecirculationDamperPositionDoeOneDoeTwo$ & $\millCtxKsDRecirculationDamperPositionDoeOneProd$ & $\millCtxKsDRecirculationDamperPositionDoeTwoProd$ & $\millCtxKsDRecirculationDamperPositionHalves$ \\
+Kaminklappe                & $\millCtxKsDStackDamperPositionDoeOneDoeTwo$ & $\millCtxKsDStackDamperPositionDoeOneProd$ & $\millCtxKsDStackDamperPositionDoeTwoProd$ & $\millCtxKsDStackDamperPositionHalves$ \\
+Last des Heißgaserzeugers  & $\millCtxKsDHotgasGeneratorLoadDoeOneDoeTwo$ & $\millCtxKsDHotgasGeneratorLoadDoeOneProd$ & $\millCtxKsDHotgasGeneratorLoadDoeTwoProd$ & $\millCtxKsDHotgasGeneratorLoadHalves$ \\
+\midrule
+Spezifische Energie        & $\millCtxKsDTotalSpecificEnergyDoeOneDoeTwo$ & $\millCtxKsDTotalSpecificEnergyDoeOneProd$ & $\millCtxKsDTotalSpecificEnergyDoeTwoProd$ & $\millCtxKsDTotalSpecificEnergyHalves$ \\
 \bottomrule
 \end{tabular}
 \end{table}

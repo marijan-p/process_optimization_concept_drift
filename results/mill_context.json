@@ -1,6 +1,6 @@
 {
   "_provenance": {
-    "id": "db90eeb3",
+    "id": "9ef30507",
     "base_id": "e63cf80b",
     "sections": {
       "context": {
@@ -38,6 +38,8 @@
         "op_k": 40,
         "op_min_points": 30,
         "op_min_span_days": 90,
+        "op_corr_min_weeks": 20,
+        "op_corr_min_overlap": 10,
         "savgol": [
           9,
           2
