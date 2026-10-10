@@ -676,12 +676,31 @@ def _suggest_selector_params(trial, chunk: int = 144) -> dict:
     )
 
 
+class _BoundedTrial:
+    """Optuna-Trial mit abweichenden Obergrenzen einzelner Ganzzahl-Parameter.
+
+    Haelt den Code von :func:`_suggest_adapt_params` und damit
+    :func:`adapt_space_id` unveraendert; die Abweichung gehoert deshalb in den
+    Cache-Schluessel des Aufrufers.
+    """
+
+    def __init__(self, trial, int_upper: dict):
+        self._trial, self._int_upper = trial, int_upper
+
+    def suggest_int(self, name, low, high, **kwargs):
+        return self._trial.suggest_int(name, low, self._int_upper.get(name, high), **kwargs)
+
+    def __getattr__(self, attr):
+        return getattr(self._trial, attr)
+
+
 def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
                     detector_factory=None, rmse_baseline: float = None,
                     n_trials: int = 20, weights: Tuple[float, float] = (1.0, 0.1),
                     seed: int = 42, show_progress_bar: bool = False,
                     enqueue: List[dict] = None, t_stat: float = 1.0,
-                    base_params: dict = None, callbacks: list = None):
+                    base_params: dict = None, callbacks: list = None,
+                    int_upper: dict = None):
     """Optimiert die Adaptions-Hyperparameter einer Strategie mit Optuna.
 
     Der Sampler ist ein multivariater TPE (:data:`TPE_SETTINGS`): Periode und
@@ -706,6 +725,8 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
         mit Suffix ``_rec``: gesucht werden dann allein die Selektorparameter
         (:func:`_suggest_selector_params`).
     callbacks : Optuna-Callbacks ``f(study, trial)``, z. B. fuer Fortschritt.
+    int_upper : abweichende Obergrenzen von Ganzzahl-Parametern, z. B.
+        ``{"epochs": 60}`` (:class:`_BoundedTrial`).
 
     Returns
     -------
@@ -733,7 +754,8 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
 
     def objective(trial):
         if base_params is None:
-            params = _suggest_adapt_params(strategy, trial, chunk=chunk, det_name=det_name)
+            _t = _BoundedTrial(trial, int_upper) if int_upper else trial
+            params = _suggest_adapt_params(strategy, _t, chunk=chunk, det_name=det_name)
         else:
             params = {**base_params, **_suggest_selector_params(trial, chunk=chunk)}
         detector = (detector_factory()
