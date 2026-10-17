@@ -17,6 +17,7 @@
         }
     ],
     "latex-workshop.latex.autoBuild.run": "onSave",
+    "latex-workshop.latex.autoClean.run": "never",
     "latex-workshop.latex.tools": [
         {
             "name": "xelatex",
@@ -33,6 +34,8 @@
             "name": "biber",
             "command": "biber",
             "args": [
+                "--input-directory=%DIR%",
+                "--output-directory=%DIR%",
                 "%DOCFILE%"
             ]
         }

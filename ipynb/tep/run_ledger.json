@@ -32,12 +32,12 @@
       "updated": "2026-09-25T12:25:57"
     },
     "tep:adaptation": {
-      "id": "b3d32349",
+      "id": "262fb0a2",
       "base_id": "818d4690",
       "parents": {
         "tep:model": "4f0275a4"
       },
-      "updated": "2026-10-07T21:43:42"
+      "updated": "2026-10-14T11:43:22"
     }
   }
 }

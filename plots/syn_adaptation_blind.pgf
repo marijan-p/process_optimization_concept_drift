@@ -708,7 +708,7 @@
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsys@transformshift{0.736667in}{0.365791in}%
+\pgfsys@transformshift{0.736667in}{0.349125in}%
 \pgftext[left,bottom]{\includegraphics[interpolate=true,width=4.593333in,height=1.236667in]{syn_adaptation_blind-img0.png}}%
 \end{pgfscope}%
 \begin{pgfscope}%
