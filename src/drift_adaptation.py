@@ -56,6 +56,7 @@ Voraussetzung: ``tensorflow``/``keras`` (lazy importiert) sowie ``frouros``
 from __future__ import annotations
 
 import hashlib
+import json
 import pathlib
 from typing import Dict, List, Sequence, Tuple
 
@@ -89,6 +90,11 @@ __all__ = [
     "estimate_cooldown",
     "crosscheck_candidates",
     "resolve_cooldown",
+    "search_bounds",
+    "bound_position",
+    "edge_report",
+    "score_params",
+    "trial_records",
 ]
 
 try:
@@ -127,14 +133,21 @@ def adapt_space_id(n: int = 8) -> str:
     wuerde sonst die neue Datei melden und den alten Code ausfuehren.
     """
     assert_current()
-    return dd._space_id_of(_suggest_adapt_params, n)
+    return _with_bounds(dd._space_id_of(_suggest_adapt_params, 40), n)
 
 
 def selector_space_id(n: int = 8) -> str:
     """Kennung des Suchraums von :func:`_suggest_selector_params`, analog zu
     :func:`adapt_space_id`."""
     assert_current()
-    return dd._space_id_of(_suggest_selector_params, n)
+    return _with_bounds(dd._space_id_of(_suggest_selector_params, 40), n)
+
+
+def _with_bounds(code_id: str, n: int) -> str:
+    """Verknuepft die Code-Kennung mit dem Inhalt von :func:`search_bounds`, der
+    in keinem ``co_consts`` der Suchraumfunktionen steht."""
+    probe = {d: search_bounds(7, 1009, d) for d in ("", *sorted(_DET_BOUNDS))}
+    return hashlib.sha1((code_id + json.dumps(probe, sort_keys=True)).encode()).hexdigest()[:n]
 
 
 # Sampler-Einstellungen des Tunings; gehen in die Cache-Schluessel ein.
@@ -595,85 +608,137 @@ def resolve_cooldown(params: dict, t_stat: float) -> dict:
     return p
 
 
+_WINDOW_CHUNKS = 120
+_DET_BOUNDS = {
+    "KSWIN": {"det_min_num_instances": (40, 400, False, (True, False)),
+              "det_alpha": (1e-6, 5e-3, True, (False, False)),
+              "det_num_test_instances": (20, None, False, (False, False))},
+    "ADWIN": {"det_delta": (1e-3, 0.4, True, (False, False)),
+              "det_clock": (1, 64, False, (True, False)),
+              "det_min_window_size": (5, 64, False, (False, False))},
+    "DDM": {"det_drift_level": (1.2, 3.5, False, (False, False)),
+            "det_min_num_instances": (30, 300, False, (False, False)),
+            "det_err_threshold": (0.5, 2.5, False, (False, False))},
+    "EDDM": {"det_alpha": (0.92, 0.999, False, (False, False)),
+             "det_beta": (0.80, None, False, (False, False)),
+             "det_min_num_misclassified_instances": (20, 200, False, (False, False)),
+             "det_err_threshold": (0.5, 2.5, False, (False, False))},
+    "RMSE": {"det_window": (5, 100, False, (False, False)),
+             "det_threshold": (0.5, 3.0, False, (False, False))},
+}
+
+
+def search_bounds(chunk: int, n_tune: int = None, det_name: str = None) -> dict:
+    """Grenzen des Suchraums: ``name -> (low, high, log, (natuerlich_unten, natuerlich_oben))``.
+
+    Fensterlaengen und Rueckholmengen sind in Chunks festgelegt, damit sie in
+    jedem Fall dieselbe Zeitspanne abdecken. Detektorparameter bleiben in
+    Punkten, weil sie Stichprobenumfaenge der Tests sind. Eine natuerliche
+    Grenze ist durch das Verfahren selbst gesetzt (taeglich, keine
+    Refraktaerzeit, ganzer Strom, ein Punkt); ein Optimum dort ist ein Befund.
+    ``high = None`` steht fuer eine Grenze, die von einem anderen Parameter abhaengt.
+    """
+    c = int(chunk)
+    win = (max(1, c // 5), _WINDOW_CHUNKS * c, True, (False, False))
+    bounds = {
+        "lr": (1e-4, 1.5e-2, True, (False, False)),
+        "epochs": (1, 60, False, (True, False)),
+        "blind_window": win,
+        "blind_period": (c, 30 * c, True, (True, False)),
+        "window_prev": win,
+        "window_post": win,
+        "cooldown_x": (0.0, 60.0, False, (True, False)),
+        "err_tol": (0.05, 30.0, True, (False, False)),
+        "rec_horizon": (c, max(c, int(n_tune or 365 * c)), True, (True, True)),
+        "rec_max": (1, _WINDOW_CHUNKS * c, True, (True, False)),
+    }
+    bounds.update(_DET_BOUNDS.get((det_name or "").upper(), {}))
+    return bounds
+
+
+def _dependent_high(name: str, params: dict):
+    if name == "det_num_test_instances":
+        return max(20, int(params["det_min_num_instances"]) // 2)
+    if name == "det_beta":
+        return float(params["det_alpha"])
+    return None
+
+
+def _suggest(trial, bounds: dict, name: str, high=None):
+    low, hi, log, _ = bounds[name]
+    hi = high if hi is None else hi
+    if isinstance(low, int) and isinstance(hi, int):
+        return trial.suggest_int(name, low, hi, log=log)
+    return trial.suggest_float(name, float(low), float(hi), log=log)
+
+
 def _suggest_adapt_params(strategy: str, trial, chunk: int = 144,
-                          det_name: str = None) -> dict:
-    """Optuna-Suchraum je Strategie. Detektorparameter werden im geschlossenen
-    Regelkreis mitgetunt (die im Detektions-Notebook getunten Werte sind am
-    offenen Fehlerstrom kalibriert und dort systematisch fehlangepasst). Die
-    Refraktaerzeit wird als Vielfaches der stationaeren Phasendauer (cooldown_x)
-    optimiert, da sie sich als detektorspezifischer Haupthebel erwiesen hat.
-    Mit Suffix ``_rec`` kommen die Parameter des Recurrence-Selektors hinzu
-    (``err_tol`` in Einheiten des normierten Fehlers, ``rec_horizon`` und
-    ``rec_max`` in Punkten der Tuning-Aufloesung). Perioden und Fenster sind
-    logarithmisch skaliert, damit kurze Werte (taegliches Nachtraining, Fenster
-    von einem Chunk) dieselbe Dichte erhalten wie lange.
+                          det_name: str = None, n_tune: int = None) -> dict:
+    """Optuna-Suchraum je Strategie, Grenzen aus :func:`search_bounds`.
+    Detektorparameter werden im geschlossenen Regelkreis mitgetunt (die im
+    Detektions-Notebook getunten Werte sind am offenen Fehlerstrom kalibriert
+    und dort systematisch fehlangepasst). Die Refraktaerzeit wird als Vielfaches
+    der stationaeren Phasendauer (cooldown_x) optimiert. Mit Suffix ``_rec``
+    kommen die Parameter des Recurrence-Selektors hinzu (``err_tol`` in
+    Einheiten des normierten Fehlers).
     """
     strategy, selector = split_strategy(strategy)
     det_name = (det_name or "").upper()
+    b = search_bounds(chunk, n_tune, det_name)
     freeze_choices = list(FREEZE_CHOICES)
     if strategy in ("informed", "combined"):
         freeze_choices = [c for c in freeze_choices if c != "TTF"]
     params = dict(
-        lr=trial.suggest_float("lr", 1e-4, 1.5e-2, log=True),
-        epochs=trial.suggest_int("epochs", 1, 30),
+        lr=_suggest(trial, b, "lr"),
+        epochs=_suggest(trial, b, "epochs"),
         freeze=FREEZE_CHOICES[trial.suggest_categorical("freeze", freeze_choices)],
         reset=trial.suggest_categorical("reset", [False, True]),
     )
     if strategy in ("blind", "combined"):
-        params["blind_window"] = trial.suggest_int("blind_window", 5, 400, log=True)
-        params["blind_period"] = trial.suggest_int("blind_period", chunk, 30 * chunk, log=True)
+        params["blind_window"] = _suggest(trial, b, "blind_window")
+        params["blind_period"] = _suggest(trial, b, "blind_period")
     if strategy in ("informed", "combined"):
-        params["window_prev"] = trial.suggest_int("window_prev", 5, 300, log=True)
-        params["window_post"] = trial.suggest_int("window_post", 5, 300, log=True)
-        params["cooldown_x"] = trial.suggest_float("cooldown_x", 0.0, 60.0)
+        params["window_prev"] = _suggest(trial, b, "window_prev")
+        params["window_post"] = _suggest(trial, b, "window_post")
+        params["cooldown_x"] = _suggest(trial, b, "cooldown_x")
         if det_name == "KSWIN":
-            _mi = trial.suggest_int("det_min_num_instances", 50, 400)
-            params["det_alpha"] = trial.suggest_float("det_alpha", 1e-6, 5e-3, log=True)
+            _mi = _suggest(trial, b, "det_min_num_instances")
+            params["det_alpha"] = _suggest(trial, b, "det_alpha")
             params["det_min_num_instances"] = _mi
-            params["det_num_test_instances"] = trial.suggest_int(
-                "det_num_test_instances", 20, max(20, _mi // 2))
+            params["det_num_test_instances"] = _suggest(
+                trial, b, "det_num_test_instances", high=max(20, _mi // 2))
         elif det_name == "ADWIN":
-            params["det_delta"] = trial.suggest_float("det_delta", 1e-3, 0.4, log=True)
-            params["det_clock"] = trial.suggest_int("det_clock", 1, 64)
-            params["det_min_window_size"] = trial.suggest_int("det_min_window_size", 5, 64)
+            params["det_delta"] = _suggest(trial, b, "det_delta")
+            params["det_clock"] = _suggest(trial, b, "det_clock")
+            params["det_min_window_size"] = _suggest(trial, b, "det_min_window_size")
         elif det_name == "DDM":
-            _dl = trial.suggest_float("det_drift_level", 1.2, 3.5)
+            _dl = _suggest(trial, b, "det_drift_level")
             params["det_drift_level"] = _dl
-            # warning_level an drift_level koppeln (frouros verlangt
-            # drift_level > warning_level; ueberschreibt zudem einen evtl. aus
-            # dem Detektions-Warmstart stammenden, hoeheren warning_level)
+            # frouros verlangt drift_level > warning_level
             params["det_warning_level"] = _dl / 2.0
-            params["det_min_num_instances"] = trial.suggest_int("det_min_num_instances", 30, 300)
-            params["det_err_threshold"] = trial.suggest_float("det_err_threshold", 0.5, 2.5)
+            params["det_min_num_instances"] = _suggest(trial, b, "det_min_num_instances")
+            params["det_err_threshold"] = _suggest(trial, b, "det_err_threshold")
         elif det_name == "EDDM":
-            _a = trial.suggest_float("det_alpha", 0.92, 0.999)
+            _a = _suggest(trial, b, "det_alpha")
             params["det_alpha"] = _a
-            params["det_beta"] = trial.suggest_float("det_beta", 0.80, _a)
-            params["det_min_num_misclassified_instances"] = trial.suggest_int(
-                "det_min_num_misclassified_instances", 20, 200)
-            params["det_err_threshold"] = trial.suggest_float("det_err_threshold", 0.5, 2.5)
+            params["det_beta"] = _suggest(trial, b, "det_beta", high=_a)
+            params["det_min_num_misclassified_instances"] = _suggest(
+                trial, b, "det_min_num_misclassified_instances")
+            params["det_err_threshold"] = _suggest(trial, b, "det_err_threshold")
         elif det_name == "RMSE":
-            params["det_window"] = trial.suggest_int("det_window", 5, 100)
-            params["det_threshold"] = trial.suggest_float("det_threshold", 0.5, 3.0)
+            params["det_window"] = _suggest(trial, b, "det_window")
+            params["det_threshold"] = _suggest(trial, b, "det_threshold")
     if selector == "recurrence":
         params["selector"] = "recurrence"
-        params["err_tol"] = trial.suggest_float("err_tol", 0.05, 3.0, log=True)
-        params["rec_horizon"] = trial.suggest_int("rec_horizon", chunk, 365 * chunk, log=True)
-        params["rec_max"] = trial.suggest_int("rec_max", 15, 400)
+        params.update(_suggest_selector_params(trial, chunk, n_tune))
     return params
 
 
-def _suggest_selector_params(trial, chunk: int = 144) -> dict:
+def _suggest_selector_params(trial, chunk: int = 144, n_tune: int = None) -> dict:
     """Nur die Parameter des Recurrence-Selektors, fuer das Tuning bei festen
-    Strategieparametern (``base_params`` in :func:`tune_adaptation`). Grenzen wie
-    in :func:`_suggest_adapt_params`; dort nicht ausgelagert, weil jede Aenderung
-    an deren Code-Objekt ``adapt_space_id`` und damit alle Tuning-Caches verschiebt.
-    """
-    return dict(
-        err_tol=trial.suggest_float("err_tol", 0.05, 3.0, log=True),
-        rec_horizon=trial.suggest_int("rec_horizon", chunk, 365 * chunk, log=True),
-        rec_max=trial.suggest_int("rec_max", 15, 400),
-    )
+    Strategieparametern (``base_params`` in :func:`tune_adaptation`)."""
+    b = search_bounds(chunk, n_tune)
+    return {k: _suggest(trial, b, k) for k in ("err_tol", "rec_horizon", "rec_max")}
 
 
 class _BoundedTrial:
@@ -755,9 +820,10 @@ def tune_adaptation(strategy: str, base, X, y, *, fixed: dict,
     def objective(trial):
         if base_params is None:
             _t = _BoundedTrial(trial, int_upper) if int_upper else trial
-            params = _suggest_adapt_params(strategy, _t, chunk=chunk, det_name=det_name)
+            params = _suggest_adapt_params(strategy, _t, chunk=chunk, det_name=det_name,
+                                           n_tune=n)
         else:
-            params = {**base_params, **_suggest_selector_params(trial, chunk=chunk)}
+            params = {**base_params, **_suggest_selector_params(trial, chunk=chunk, n_tune=n)}
         detector = (detector_factory()
                     if (mode in ("informed", "combined") and detector_factory is not None)
                     else None)
@@ -904,3 +970,59 @@ def crosscheck_candidates(base, X, y, *, best_params: dict, fixed: dict,
 
     best = _pick_candidate(table, len(_seeds), tie_alpha, tie_max_rel, verbose)
     return dict(table[best]["params"]), table
+
+
+def bound_position(value: float, low: float, high: float, log: bool) -> float:
+    """Lage im Suchraum, 0 = Untergrenze, 1 = Obergrenze (log-Achse, wo log-skaliert)."""
+    if log:
+        return float(np.log(value / low) / np.log(high / low))
+    return float((value - low) / (high - low))
+
+
+def edge_report(params: dict, bounds: dict, tol: float = 0.03) -> List[dict]:
+    """Parameter mit Lage <= ``tol`` oder >= ``1 - tol``, je mit Seite und der
+    Angabe, ob die Grenze natuerlich ist (:func:`search_bounds`)."""
+    rows = []
+    for k, v in params.items():
+        if k not in bounds or isinstance(v, (bool, str, tuple, list)):
+            continue
+        low, high, log, natural = bounds[k]
+        high = _dependent_high(k, params) if high is None else high
+        if high is None or high <= low:
+            continue
+        pos = bound_position(v, low, high, log)
+        if pos <= tol:
+            rows.append(dict(param=k, value=v, pos=pos, side="unten", natural=natural[0]))
+        elif pos >= 1.0 - tol:
+            rows.append(dict(param=k, value=v, pos=pos, side="oben", natural=natural[1]))
+    return rows
+
+
+def score_params(strategy: str, base, X, y, params: dict, *, fixed: dict,
+                 t_stat: float = 1.0, detector_factory=None,
+                 weights: Tuple[float, float] = (1.0, 0.1),
+                 rmse_baseline: float = None, seed: int = None) -> dict:
+    """Bewertet einen Parametersatz mit der Zielfunktion des Tunings
+    (:func:`score_adaptation`), auf demselben Strom und mit festem Seed."""
+    import tensorflow as tf
+
+    mode, _ = split_strategy(strategy)
+    n_units = int(np.ceil(len(X) / int(fixed.get("chunk", 144))))
+    if rmse_baseline is None:
+        base_res = run_adaptation(base, X, y, mode="baseline", **fixed)
+        rmse_baseline = float(np.sqrt(np.mean(np.asarray(base_res["errors"], float) ** 2)))
+    if seed is not None:
+        tf.keras.utils.set_random_seed(seed)
+    det = (detector_factory() if (mode in ("informed", "combined") and detector_factory)
+           else None)
+    det, p = apply_det_params(det, dict(params))
+    p = resolve_cooldown(p, t_stat)
+    res = run_adaptation(base, X, y, mode=strategy, detector=det, **{**fixed, **p})
+    return score_adaptation(res, rmse_baseline, n_units, weights=weights)
+
+
+def trial_records(study) -> List[dict]:
+    """Abgeschlossene Trials einer Studie (dekodierte Parameter, Score, Kennzahlen)."""
+    return [dict(number=t.number, value=float(t.value),
+                 params=decode_adapt_params(t.params), attrs=dict(t.user_attrs))
+            for t in study.trials if t.value is not None]

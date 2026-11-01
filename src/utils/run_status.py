@@ -70,7 +70,7 @@ class RunStatus:
     """Stufenweiser Fortschritt mit Restzeit, Statusdatei und gedrosselten Telegram-Meldungen."""
 
     def __init__(self, name: str, status_dir: str | Path = DEFAULT_DIR,
-                 notify_every: float = 3600.0, print_every: float = 30.0):
+                 notify_every: float = 6 * 3600.0, print_every: float = 30.0):
         self.name = name
         self.host = socket.gethostname()
         self.path = Path(status_dir) / f"{name}.json"
