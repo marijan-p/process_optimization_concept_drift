@@ -31,8 +31,43 @@
 %
 
 \section{Evaluation and results} \label{sec:evaluation}
-
-
+%
+\subsection{Drift-induced model degradation} \label{subsec:eval_degradation}
+%
+The model is evaluated based on its simulation error, i.e., the deviation between the operating costs calculated by the simulator and the model's estimate. The evaluation is performed over the entire course of both the nominal run and the fault run, including the ramps between operating points that are not part of the training data. The drift signal $c(t)$ serves as a reference. Since the calibration drift does not affect the process, the ratio of the recorded stripper temperatures from both runs corresponds to the calibration factor. \par
+%
+\begin{figure}[tb]
+    \centering
+    \input{figures/model_error.pgf}
+    \caption{Normalized simulation error of the nominal and the fault run.}
+    \label{fig:model_error}
+\end{figure}
+%
+Figure~\ref{fig:model_error} shows the normalized simulation error for both runs over the first six months of the stream, along with the drift signal $c(t)$. During nominal operation, it fluctuates around zero, while its variance changes from one operating point to the next, thereby replicating the block structure of the stream. In the fault run, the error deviates from the nominal error as the drift signal progresses. Within each segment, it initially lies above the nominal error, decreases along with $c(t)$, and falls below it as soon as the signal changes sign, until the jump at the segment boundary restores the initial offset. The drift thus remains visible in the error curve despite the variation between operating points. \par
+%
+\begin{table}[tb]
+    \centering
+    \caption{Simulation error of the nominal and the fault run.}
+    \label{tab:model_error}
+    \begin{tabular}{lrrr}
+        \toprule
+        & \multicolumn{2}{c}{RMSE} & Error \\
+        \cmidrule(lr){2-3}
+        Operating points & nominal & fault & ratio \\
+        \midrule
+        Campaign  & \modelCampaignRmseFree  & \modelCampaignRmseFault  & \modelCampaignErrorRatio \\
+        Remaining & \modelRemainingRmseFree & \modelRemainingRmseFault & \modelRemainingErrorRatio \\
+        \midrule
+        All       & \modelAllRmseFree       & \modelAllRmseFault       & \modelAllErrorRatio \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+%
+Table~\ref{tab:model_error} lists the RMSE of both runs for the operating points of the campaign, for the remaining points of the stream and for all points together. The RMSE is given as a fraction of the cost range of the isolated operating points, on which the min-max normalization is determined. The error ratio relates the RMSE of the fault run to that of the nominal run and thus quantifies the degradation caused by the drift. Across all operating points, the RMSE increases markedly from the nominal to the fault run. Across all operating points, the RMSE increases markedly from the nominal to the fault run. As can be seen in figure~\ref{fig:model_error}, the offset changes its sign within each segment, so that the drift raises the error in proportion to the magnitude of $c(t)$ rather than shifting it as a whole. \par
+%
+\subsection{Drift detection} \label{subsec:eval_detection}
+%
+The detectors introduced in section~\ref{subsec:detection} monitor the simulation error of the model on the fault run. It is normalized with the mean and the standard deviation of the error on the nominal run, so that the nominal run sets the scale against which a change has to become visible. KSWIN, ADWIN and the threshold detector process its absolute value as a continuous signal. DDM and EDDM, in contrast, require the binary signal described in section~\ref{subsec:detection}, for which an error is counted as a misprediction once its absolute value exceeds the threshold $\lambda_\mathrm{bin}$. Due to normalization, this threshold corresponds to a multiple of the standard deviation of the nominal error and is adjusted together with the other parameters of the two detectors. \par
 %
 % ---------------------------------------------------------------------------
 % Beispielcode aus dem IOP-Template, hier als Vorlage abgelegt.
