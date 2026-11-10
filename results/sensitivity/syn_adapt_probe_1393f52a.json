@@ -1,0 +1,187 @@
+{
+  "stem": "syn_adapt_probe_1393f52a",
+  "prefix": "syn",
+  "case": "adapt_probe",
+  "id": "1393f52a",
+  "base_id": "55c4dfbd",
+  "variant": null,
+  "variant_token": null,
+  "config": {
+    "base": {
+      "seed": 42,
+      "Ts": 1.0,
+      "cd_range": [
+        -0.5,
+        0.5
+      ],
+      "range_w1": [
+        0,
+        5
+      ],
+      "n_changes_w1": 500,
+      "range_w2": [
+        0,
+        10
+      ],
+      "n_changes_w2": 750,
+      "kappa_w_factor": 0.8,
+      "K_act": 1.0,
+      "T_act": [
+        4.0,
+        5.0
+      ],
+      "alpha": [
+        0.4,
+        0.3333333333333333
+      ],
+      "beta": 0.2,
+      "kappa": 0.375,
+      "T_y": 3.0,
+      "n_doe": 128,
+      "hold_s": 600,
+      "noise_u1": [
+        [
+          0.02,
+          0.6
+        ],
+        [
+          0.12,
+          0.35
+        ],
+        [
+          0.5,
+          0.05
+        ]
+      ],
+      "noise_u2": [
+        [
+          0.003,
+          0.9
+        ],
+        [
+          0.02,
+          0.08
+        ],
+        [
+          0.2,
+          0.02
+        ]
+      ],
+      "noise_y": [
+        [
+          0.003,
+          9.0
+        ],
+        [
+          0.02,
+          0.8
+        ],
+        [
+          0.08,
+          0.2
+        ]
+      ],
+      "gamma_tau": 0.2,
+      "K_p": 1.0,
+      "cd_band_div": 4,
+      "segment_duration_h": 1752
+    },
+    "model": {
+      "arch": [
+        32,
+        32,
+        1
+      ],
+      "act": "tanh",
+      "opt": "adam",
+      "epochs": 500,
+      "batch": 32,
+      "val_split": 0.2,
+      "seed": 42,
+      "window_size": 60,
+      "features": [
+        "u1_noise_filt",
+        "u2_noise_filt"
+      ]
+    },
+    "adapt_probe": {
+      "result": "36f0ef4c",
+      "detector": "KSWIN",
+      "step_s": 600,
+      "rescale": 6.0,
+      "reject": true,
+      "chunk": 144,
+      "seeds": [
+        42,
+        92,
+        791,
+        669,
+        449
+      ],
+      "tie_alpha": 0.05,
+      "tie_max_rel": 0.05,
+      "probes": [
+        {
+          "strategy": "blind",
+          "param": "blind_window",
+          "side": "oben",
+          "values": [
+            377,
+            566,
+            754,
+            1508
+          ]
+        },
+        {
+          "strategy": "blind_rec",
+          "param": "blind_window",
+          "side": "oben",
+          "values": [
+            377,
+            566,
+            754,
+            1508
+          ]
+        },
+        {
+          "strategy": "informed_rec",
+          "param": "rec_max",
+          "side": "unten",
+          "values": [
+            21,
+            14,
+            10,
+            5
+          ]
+        },
+        {
+          "strategy": "combined_rec",
+          "param": "err_tol",
+          "side": "oben",
+          "values": [
+            2.6605714456018354,
+            3.990857168402753,
+            5.321142891203671,
+            10.642285782407342
+          ]
+        }
+      ]
+    }
+  },
+  "created": "2026-11-02T04:25:07",
+  "code_version": "ae0cd92",
+  "env": {
+    "venv": "venv",
+    "python": "3.11.16",
+    "numpy": "2.1.3",
+    "pandas": "3.0.5",
+    "scipy": "1.14.1",
+    "matplotlib": "3.9.4",
+    "sklearn": "1.4.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.15.1",
+    "frouros": "0.9.0",
+    "optuna": "4.9.0"
+  },
+  "extra": {}
+}

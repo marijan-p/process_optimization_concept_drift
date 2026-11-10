@@ -1,0 +1,207 @@
+{
+  "stem": "syn_adapt_screening_99281e8b",
+  "prefix": "syn",
+  "case": "adapt_screening",
+  "id": "99281e8b",
+  "base_id": "55c4dfbd",
+  "variant": null,
+  "variant_token": null,
+  "config": {
+    "base": {
+      "seed": 42,
+      "Ts": 1.0,
+      "cd_range": [
+        -0.5,
+        0.5
+      ],
+      "range_w1": [
+        0,
+        5
+      ],
+      "n_changes_w1": 500,
+      "range_w2": [
+        0,
+        10
+      ],
+      "n_changes_w2": 750,
+      "kappa_w_factor": 0.8,
+      "K_act": 1.0,
+      "T_act": [
+        4.0,
+        5.0
+      ],
+      "alpha": [
+        0.4,
+        0.3333333333333333
+      ],
+      "beta": 0.2,
+      "kappa": 0.375,
+      "T_y": 3.0,
+      "n_doe": 128,
+      "hold_s": 600,
+      "noise_u1": [
+        [
+          0.02,
+          0.6
+        ],
+        [
+          0.12,
+          0.35
+        ],
+        [
+          0.5,
+          0.05
+        ]
+      ],
+      "noise_u2": [
+        [
+          0.003,
+          0.9
+        ],
+        [
+          0.02,
+          0.08
+        ],
+        [
+          0.2,
+          0.02
+        ]
+      ],
+      "noise_y": [
+        [
+          0.003,
+          9.0
+        ],
+        [
+          0.02,
+          0.8
+        ],
+        [
+          0.08,
+          0.2
+        ]
+      ],
+      "gamma_tau": 0.2,
+      "K_p": 1.0,
+      "cd_band_div": 4,
+      "segment_duration_h": 1752
+    },
+    "model": {
+      "arch": [
+        32,
+        32,
+        1
+      ],
+      "act": "tanh",
+      "opt": "adam",
+      "epochs": 500,
+      "batch": 32,
+      "val_split": 0.2,
+      "seed": 42,
+      "window_size": 60,
+      "features": [
+        "u1_noise_filt",
+        "u2_noise_filt"
+      ]
+    },
+    "screening": {
+      "detectors": [
+        "ADWIN",
+        "DDM",
+        "EDDM",
+        "KSWIN",
+        "RMSE"
+      ],
+      "step_s": 600,
+      "cooldown_x": 30,
+      "space": "f1f204e2",
+      "rescale": 6.0,
+      "reject": true,
+      "seeds": [
+        42,
+        92,
+        791,
+        669,
+        449
+      ],
+      "params": {
+        "KSWIN": {
+          "lr": 0.0014910919415482117,
+          "epochs": 40,
+          "freeze": "TFF",
+          "reset": false,
+          "window_prev": 2436,
+          "window_post": 45,
+          "cooldown_x": 22.29233596709759,
+          "det_min_num_instances": 322,
+          "det_alpha": 0.0017707921594542007,
+          "det_num_test_instances": 141
+        },
+        "ADWIN": {
+          "lr": 0.0065183192369951595,
+          "epochs": 33,
+          "freeze": "TFF",
+          "reset": false,
+          "window_prev": 2322,
+          "window_post": 8,
+          "cooldown_x": 42.556088359071055,
+          "det_delta": 0.15736557597443576,
+          "det_clock": 2,
+          "det_min_window_size": 21
+        },
+        "DDM": {
+          "lr": 0.003514157556784848,
+          "epochs": 18,
+          "freeze": "TFF",
+          "reset": false,
+          "window_prev": 1696,
+          "window_post": 615,
+          "cooldown_x": 23.04699085909668,
+          "det_drift_level": 2.569980913369725,
+          "det_min_num_instances": 205,
+          "det_err_threshold": 1.9955037213230031
+        },
+        "EDDM": {
+          "lr": 0.0025634445488644975,
+          "epochs": 39,
+          "freeze": "TFF",
+          "reset": false,
+          "window_prev": 140,
+          "window_post": 1914,
+          "cooldown_x": 9.307691981595312,
+          "det_alpha": 0.9619786303894723,
+          "det_beta": 0.9259772944200959,
+          "det_min_num_misclassified_instances": 179,
+          "det_err_threshold": 1.1631989757218435
+        },
+        "RMSE": {
+          "lr": 0.00031889257303087203,
+          "epochs": 57,
+          "freeze": "TFF",
+          "reset": false,
+          "window_prev": 1982,
+          "window_post": 5,
+          "cooldown_x": 53.58023254741311,
+          "det_window": 72,
+          "det_threshold": 1.9500378869479376
+        }
+      }
+    }
+  },
+  "created": "2026-11-03T06:52:52",
+  "code_version": "ae0cd92",
+  "env": {
+    "venv": "venv",
+    "python": "3.11.16",
+    "numpy": "2.1.3",
+    "pandas": "3.0.5",
+    "scipy": "1.14.1",
+    "matplotlib": "3.9.4",
+    "sklearn": "1.4.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.15.1",
+    "frouros": "0.9.0",
+    "optuna": "4.9.0"
+  },
+  "extra": {}
+}

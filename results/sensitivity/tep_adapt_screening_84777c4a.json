@@ -1,0 +1,158 @@
+{
+  "stem": "tep_adapt_screening_84777c4a",
+  "prefix": "tep",
+  "case": "adapt_screening",
+  "id": "84777c4a",
+  "base_id": "818d4690",
+  "variant": null,
+  "variant_token": null,
+  "config": {
+    "base": {
+      "seed": 42,
+      "n": 300,
+      "ramp_h": 48.0,
+      "soak_h": 96.0,
+      "design": "mode_local_lhs",
+      "n_per_mode": 49,
+      "magnitudes": [
+        -0.15,
+        0.15
+      ],
+      "capped": [
+        100.0
+      ],
+      "maximin_tries": 200
+    },
+    "run": {
+      "passes": 4
+    },
+    "model": {
+      "arch": [
+        12,
+        12,
+        1
+      ],
+      "act": "tanh",
+      "opt": "adam",
+      "epochs": 200,
+      "batch": 200,
+      "patience": 20,
+      "val_split": 0.15,
+      "seed": 42,
+      "window_size": 10,
+      "features": [
+        "Stripper Temp",
+        "Purge valve",
+        "Component E to Reactor",
+        "Product Sep Temp",
+        "MolePctGSP"
+      ],
+      "val_mode": "ramp",
+      "sensor_feature": "Stripper Temp",
+      "n_campaign": 60
+    },
+    "error": {
+      "idv": 29,
+      "amp": 0.3
+    },
+    "screening": {
+      "detectors": [
+        "ADWIN",
+        "DDM",
+        "EDDM",
+        "KSWIN",
+        "RMSE"
+      ],
+      "step_s": 1800,
+      "cooldown_x": 30,
+      "space": "f1f204e2",
+      "rescale": 6.0,
+      "reject": true,
+      "seeds": [
+        42,
+        92,
+        791,
+        669,
+        449
+      ],
+      "params": {
+        "KSWIN": {
+          "lr": 0.0011225951535702638,
+          "epochs": 23,
+          "freeze": "TFF",
+          "reset": false,
+          "window_prev": 601,
+          "window_post": 557,
+          "cooldown_x": 3.7787780804772924,
+          "det_min_num_instances": 271,
+          "det_alpha": 8.772320882722385e-05,
+          "det_num_test_instances": 125
+        },
+        "ADWIN": {
+          "lr": 0.00039546125685597215,
+          "epochs": 33,
+          "freeze": "TFF",
+          "reset": false,
+          "window_prev": 900,
+          "window_post": 314,
+          "cooldown_x": 1.4319804882706697,
+          "det_delta": 0.005281596367626127,
+          "det_clock": 19,
+          "det_min_window_size": 10
+        },
+        "DDM": {
+          "lr": 0.0003035203578248196,
+          "epochs": 38,
+          "freeze": "FFF",
+          "reset": false,
+          "window_prev": 9,
+          "window_post": 676,
+          "cooldown_x": 11.241123126064544,
+          "det_drift_level": 1.3067384590781133,
+          "det_min_num_instances": 84,
+          "det_err_threshold": 1.8067349229871783
+        },
+        "EDDM": {
+          "lr": 0.0010094269945811068,
+          "epochs": 53,
+          "freeze": "TFF",
+          "reset": false,
+          "window_prev": 5,
+          "window_post": 331,
+          "cooldown_x": 2.0525875067878765,
+          "det_alpha": 0.9592461392298606,
+          "det_beta": 0.8310788144911275,
+          "det_min_num_misclassified_instances": 141,
+          "det_err_threshold": 1.8859189606840145
+        },
+        "RMSE": {
+          "lr": 0.0004583970127827243,
+          "epochs": 42,
+          "freeze": "FFF",
+          "reset": false,
+          "window_prev": 182,
+          "window_post": 712,
+          "cooldown_x": 2.9329782144259973,
+          "det_window": 68,
+          "det_threshold": 2.4078319636937584
+        }
+      }
+    }
+  },
+  "created": "2026-11-03T20:13:54",
+  "code_version": "ae0cd92",
+  "env": {
+    "venv": "venv",
+    "python": "3.11.16",
+    "numpy": "2.1.3",
+    "pandas": "3.0.5",
+    "scipy": "1.14.1",
+    "matplotlib": "3.9.4",
+    "sklearn": "1.4.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.15.1",
+    "frouros": "0.9.0",
+    "optuna": "4.9.0"
+  },
+  "extra": {}
+}
