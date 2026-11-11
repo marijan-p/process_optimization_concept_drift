@@ -8,7 +8,58 @@
 \counterwithin{table}{section}
 
 %---------------------------------------------------------------------
-% Anhang A: 
+% Anhang A: Sensitivitaetsanalyse der Drift-Adaption
+%---------------------------------------------------------------------
+\section{Sensitivitätsanalyse der Drift-Adaption}\label{app:adapt_sensitivity}
+\input{\resultsdir adaptation_sensitivity.tex}
+\providecommand{\adaptpm}[2]{$#1 \pm #2$}
+%
+Tabelle~\ref{tab:adapt_sensitivity_window} zeigt den \ac{RMSE} der passiven Strategie im synthetischen Fall ohne und mit Recurrence-Selektor für vier Längen des Trainingsfensters, jeweils als Mittelwert und Standardabweichung über \sensSynNSeeds\ Seeds. Sie gehört zum ersten Teil der in Abschnitt~\ref{sec:datensynthese_drift_adaption} eingeführten Sensitivitätsanalyse. Die kürzeste Länge entspricht dem abgestimmten Wert an der Obergrenze des Suchraums, die übrigen liegen jenseits davon, während alle weiteren Parameter unverändert bleiben. Ohne Selektor schwankt der Fehler deutlich mit der Fensterlänge und erreicht erst mit dem längsten Fenster seinen geringsten Wert. Mit Selektor bleibt er über alle Längen nahezu gleich. Für die übrigen Parameter am Rand des Suchraums, im synthetischen Fall wie im \ac{TEP}, führt kein Wert jenseits der Grenze zu einem nach der Gleichstandsregel geringeren Fehler. \par
+%
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{\ac{RMSE} der passiven Strategie im synthetischen Fall in Abhängigkeit von der Länge des Trainingsfensters}
+\label{tab:adapt_sensitivity_window}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Fenster in Tagen} & Passiv & Passiv + Rec \\
+\midrule
+$\sensSynBlindWindowADays$ & \adaptpm{\sensSynBlindWindowARmse}{\sensSynBlindWindowAStd} & \adaptpm{\sensSynBlindRecWindowARmse}{\sensSynBlindRecWindowAStd} \\
+$\sensSynBlindWindowBDays$ & \adaptpm{\sensSynBlindWindowBRmse}{\sensSynBlindWindowBStd} & \adaptpm{\sensSynBlindRecWindowBRmse}{\sensSynBlindRecWindowBStd} \\
+$\sensSynBlindWindowCDays$ & \adaptpm{\sensSynBlindWindowCRmse}{\sensSynBlindWindowCStd} & \adaptpm{\sensSynBlindRecWindowCRmse}{\sensSynBlindRecWindowCStd} \\
+$\sensSynBlindWindowDDays$ & \adaptpm{\sensSynBlindWindowDRmse}{\sensSynBlindWindowDStd} & \adaptpm{\sensSynBlindRecWindowDRmse}{\sensSynBlindRecWindowDStd} \\
+\bottomrule
+\end{tabular}
+\end{table}
+%
+Tabelle~\ref{tab:adapt_sensitivity_screening} stellt für beide Fälle den \ac{RMSE} der aktiven Strategie je Trigger im ursprünglichen und im erweiterten Suchraum gegenüber, jeweils als Mittelwert über die Seeds des Screenings auf dem voll aufgelösten Strom. Im erweiterten Suchraum werden die Trigger mit demselben Budget neu abgestimmt. Im synthetischen Fall schließt der Schwellwert-Detektor zu \ac{KSWIN} auf, und \ac{DDM} rückt vor \ac{ADWIN}. Im \ac{TEP} führen \ac{ADWIN} und der Schwellwert-Detektor, während \ac{KSWIN} zurückfällt. Nach der Gleichstandsregel fiele die Wahl im erweiterten Suchraum damit in beiden Fällen auf den \sensSynScreenDetector. Die Rangfolge der Trigger folgt somit der Abstimmung und lässt sich nicht einem Verfahren zuschreiben. \par
+%
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{\ac{RMSE} der aktiven Strategie je Trigger im ursprünglichen und im erweiterten Suchraum}
+\label{tab:adapt_sensitivity_screening}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{Synthetischer Fall} & \multicolumn{2}{c}{\ac{TEP}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+\textbf{Trigger} & ursprünglich & erweitert & ursprünglich & erweitert \\
+\midrule
+\ac{KSWIN} & $\sensSynScreenKswinFinal$ & $\sensSynScreenKswinRmse$ & $\sensTepScreenKswinFinal$ & $\sensTepScreenKswinRmse$ \\
+\ac{ADWIN} & $\sensSynScreenAdwinFinal$ & $\sensSynScreenAdwinRmse$ & $\sensTepScreenAdwinFinal$ & $\sensTepScreenAdwinRmse$ \\
+\ac{DDM} & $\sensSynScreenDdmFinal$ & $\sensSynScreenDdmRmse$ & $\sensTepScreenDdmFinal$ & $\sensTepScreenDdmRmse$ \\
+\ac{EDDM} & $\sensSynScreenEddmFinal$ & $\sensSynScreenEddmRmse$ & $\sensTepScreenEddmFinal$ & $\sensTepScreenEddmRmse$ \\
+Schwellwert & $\sensSynScreenThresholdFinal$ & $\sensSynScreenThresholdRmse$ & $\sensTepScreenThresholdFinal$ & $\sensTepScreenThresholdRmse$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+\clearpage
+%
+%---------------------------------------------------------------------
+% Anhang B: Tennessee-Eastman-Prozess
 %---------------------------------------------------------------------
 \section{Tennessee-Eastman-Prozess}\label{app:tep}
 %
@@ -85,7 +136,7 @@ Rührerdrehzahl          & \si{\percent}              & 100    & 100    & 100   
 \bottomrule
 \end{tabular}
 \end{table}
-\newpage
+\clearpage
 %
 \section{Vertikalrollenmühle}\label{app:mill_model}
 %
