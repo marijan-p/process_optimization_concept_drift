@@ -4,3 +4,22 @@
 %---------------------------------------------------------------
 
 \chapter{Kapitel 5} \label{cap:Kap_5}
+
+% Struktur
+%
+% \section{Zusammenfassung}
+% - ein Absatz je Kapitel 2 bis 4
+%
+% \section{Beantwortung der Forschungsleitfragen}
+% - je ein Absatz für die drei Fragen aus Abschnitt \ref{sec:zielsetzung}
+%
+% \section{Grenzen der Arbeit}
+% - statisches Modell auf Betriebspunkten
+% - eine Abstimmung je Konfiguration
+% - fehlende Ground Truth an der Mühle
+%
+% \section{Ausblick}
+% - dynamische Modellierung und Drift (Absatz unten)
+% - weitere Punkte
+%
+Die Modellierung in dieser Arbeit beschränkt sich auf statische Modelle, die den Prozess in eingeschwungenen Betriebspunkten beschreiben. Der Modellvergleich in Abschnitt~\ref{sec:modellvergleich} hat gezeigt, dass ein Modell mit Gedächtnis für die Abbildung aus gleichzeitig gemessenen Größen keinen Vorteil bietet. Offen bleibt, ob sich das Übergangsverhalten der Mühle allein aus den Stellgrößen vorhersagen lässt. Ein naheliegender Ansatz dafür sind blockorientierte Strukturen, die eine lineare Dynamik mit einer statischen Nichtlinearität verbinden und mit wenigen Parametern auskommen. Für solche Modelle stellt sich die Frage des \ac{CD} neu, da neben dem stationären Zusammenhang auch die Dynamik selbst driften kann. Ein solcher Drift zeigt sich nur bei Stellgrößenänderungen, und eine Adaption setzt Daten mit ausreichender Anregung voraus. Der synthetische Datensatz dieser Arbeit beruht bereits auf einer blockorientierten Struktur und bietet sich als Testumgebung an, in der Verstärkung und Zeitverhalten getrennt driften können.
