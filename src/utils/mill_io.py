@@ -26,9 +26,10 @@ import pandas as pd
 __all__ = [
     "TAGS", "FEATURES", "TARGET", "CONTEXT", "SETPOINTS", "SOURCES",
     "load_operating_points", "load_production", "load_doe",
+    "load_stream_1min", "stream_1min_info", "block_means",
     "load_calibrations", "calibration_dates",
     "range_report", "gaps", "points_per_day", "days_to_points",
-    "describe_stream", "NOISE_TOL",
+    "points_in_windows", "describe_stream", "NOISE_TOL",
 ]
 
 
@@ -158,6 +159,66 @@ def load_operating_points(data_dir, source="production", **kw) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- #
+# 1-min-Strom
+# --------------------------------------------------------------------------- #
+STREAM_1MIN_STEM = "stream_1min"
+
+
+def load_stream_1min(data_dir) -> pd.DataFrame:
+    """Der 1-min-Strom fuer Detektion und Adaption (``mill_stream.py``).
+
+    Kausale Blockmittel des Produktionsbetriebs, Zeitstempel am Minutenende,
+    ohne Stillstaende und ohne die beiden Feldexperimente. Spalten: Merkmale,
+    Zielgroesse, Sollwerte.
+    """
+    d = pathlib.Path(data_dir)
+    files = sorted(d.glob(f"{STREAM_1MIN_STEM}_*.csv.gz")) or \
+        sorted(d.glob(f"{STREAM_1MIN_STEM}_*.parquet"))
+    if not files:
+        raise FileNotFoundError(
+            f"Kein {STREAM_1MIN_STEM}_<jahr> in {d} -- bitte mill_stream.py ausfuehren.")
+    parts = [pd.read_parquet(f) if f.suffix == ".parquet"
+             else pd.read_csv(f, index_col="time", parse_dates=["time"]) for f in files]
+    out = pd.concat(parts).sort_index()
+    out.index.name = "time"
+    missing = [c for c in FEATURES + [TARGET] if c not in out.columns]
+    if missing:
+        raise KeyError(f"Diese Groessen fehlen im 1-min-Strom: {missing}")
+    return out[FEATURES + [TARGET] + [c for c in SETPOINTS if c in out.columns]]
+
+
+def stream_1min_info(data_dir) -> dict:
+    """Regel, Belegung und Pruefergebnisse des 1-min-Stroms (``stream_1min.json``)."""
+    import json
+    path = pathlib.Path(data_dir) / f"{STREAM_1MIN_STEM}.json"
+    if not path.exists():
+        raise FileNotFoundError(f"{path} nicht gefunden.")
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def block_means(rows: pd.DataFrame, group: str = "bp", freq: str = "1min",
+                min_share: float = 0.95) -> pd.DataFrame:
+    """Kausale Blockmittel von Abtastzeilen je Phase, nur vollstaendige Bloecke.
+
+    Bringt die DOE-Zeilen in die Darstellung des 1-min-Stroms. ``min_share``
+    faengt den Zeitstempel-Jitter der 1-Hz-Segmente ab (59 bis 61 Zeilen je Minute).
+    """
+    cols = FEATURES + [TARGET]
+    step = float(pd.Series(rows.index).diff().dt.total_seconds().median())
+    nominal = pd.Timedelta(freq).total_seconds() / step
+    parts = []
+    for name, g in rows.groupby(group):
+        label = g.index.floor(freq) + pd.Timedelta(freq)
+        n = g[TARGET].groupby(label).count()
+        m = g[cols].groupby(label).mean()[n >= min_share * nominal]
+        m[group] = name
+        parts.append(m)
+    out = pd.concat(parts).sort_index()
+    out.index.name = "time"
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # Kalibrierungen
 # --------------------------------------------------------------------------- #
 def load_calibrations(data_dir, name="calibration_events.csv") -> pd.DataFrame:
@@ -277,6 +338,20 @@ def days_to_points(days: float, index) -> int:
     kommen die Punkte unregelmaessig an.
     """
     return max(1, int(round(days * points_per_day(index))))
+
+
+def points_in_windows(index, days: float, step: str = "1D") -> pd.Series:
+    """Punktzahl in jedem Kalenderfenster der Laenge ``days``.
+
+    Gegenprobe zu :func:`days_to_points`: dessen Wert ist das Mittel dieser
+    Reihe. Die Streuung zeigt, wie stark Stillstaende ein Fenster ausduennen.
+    """
+    idx = pd.DatetimeIndex(index)
+    span = pd.Timedelta(days=days)
+    ends = pd.date_range(idx[0] + span, idx[-1], freq=step)
+    hi = idx.searchsorted(ends, side="right")
+    lo = idx.searchsorted(ends - span, side="right")
+    return pd.Series(hi - lo, index=ends)
 
 
 def describe_stream(df: pd.DataFrame, target=None) -> pd.Series:
